@@ -1,0 +1,39 @@
+{
+    "name": "sciactive/tilmeld",
+    "description": "Nymph user and group management with access controls.",
+    "version": "1.0.0-alpha.1",
+    "type": "library",
+    "keywords": [
+		"user management",
+		"user manager",
+		"group management",
+		"group manager"
+	],
+    "homepage": "http://tilmeld.org/",
+    "time": "2014-12-25",
+    "license": "LGPL",
+    "authors": [
+        {
+            "name": "Hunter Perrin",
+            "email": "hunter@sciactive.com",
+            "homepage": "https://github.com/hperrin",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/sciactive/tilmeld/issues",
+        "wiki": "https://github.com/sciactive/tilmeld/wiki",
+        "source": "https://github.com/sciactive/tilmeld"
+    },
+    "archive": {
+        "exclude": ["**/.*", "node_modules", "bower_components", "bower.json"]
+    },
+	"require": {
+		"sciactive/pform": "~3.2",
+		"sciactive/hookphp": "~1.1",
+		"sciactive/nymph-server": "dev-master",
+		"sciactive/nymph-pubsub": "dev-master",
+		"sciactive/umailphp": "dev-master"
+	},
+	"minimum-stability": "dev"
+}
