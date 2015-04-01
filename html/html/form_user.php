@@ -91,12 +91,10 @@ if (\Tilmeld\Tilmeld::$config->checkUsername['value']) { ?>
 		<li class="active"><a href="#p_muid_tab_general" data-toggle="tab">General</a></li>
 		<?php if ($this->display_groups) { ?>
 		<li><a href="#p_muid_tab_groups" data-toggle="tab">Groups</a></li>
-		<?php } if (in_array('address', \Tilmeld\Tilmeld::$config->user_fields['value']) || in_array('additional_addresses', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+		<?php } if (in_array('address', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
 		<li><a href="#p_muid_tab_location" data-toggle="tab">Address</a></li>
 		<?php } if ($this->display_abilities) { ?>
 		<li><a href="#p_muid_tab_abilities" data-toggle="tab">Abilities</a></li>
-		<?php } if (in_array('attributes', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
-		<li><a href="#p_muid_tab_attributes" data-toggle="tab">Attributes</a></li>
 		<?php } ?>
 	</ul>
 	<div id="p_muid_tabs" class="tab-content">
@@ -216,7 +214,7 @@ if (\Tilmeld\Tilmeld::$config->checkUsername['value']) { ?>
 				<label><span class="pf-label">Repeat Password</span>
 					<input class="pf-field form-control" type="password" name="password2" size="24" /></label>
 			</div>
-			<?php } elseif (isset($this->entity->guid) && $this->entity->is($_SESSION['user'])) { ?>
+			<?php } elseif (isset($this->entity->guid) && $this->entity->is($_SESSION['tilmeld_user'])) { ?>
 			<div class="pf-element">
 				<span class="pf-label">Password</span>
 				<span class="pf-field"><a href="<?php e(pines_url('com_user', 'updatepassword')); ?>" onclick="return confirm('If you have made changes and you don\'t submit them before leaving this page, they will be lost.');">Update your password.</a></span>
@@ -244,7 +242,7 @@ if (\Tilmeld\Tilmeld::$config->checkUsername['value']) { ?>
 							<?php
 							\Tilmeld\Tilmeld::groupSort($this->group_array_primary, 'name');
 							foreach ($this->group_array_primary as $cur_group) {
-								?><option value="<?php e($cur_group->guid); ?>"<?php echo $cur_group->is($this->entity->group) ? ' selected="selected"' : ''; ?>><?php e(str_repeat('->', $cur_group->get_level())." {$cur_group->name} [{$cur_group->groupname}]"); ?></option><?php
+								?><option value="<?php e($cur_group->guid); ?>"<?php echo $cur_group->is($this->entity->group) ? ' selected="selected"' : ''; ?>><?php e(str_repeat('->', $cur_group->getLevel())." {$cur_group->name} [{$cur_group->groupname}]"); ?></option><?php
 							} ?>
 						</select>
 					</label>
@@ -296,7 +294,7 @@ if (\Tilmeld\Tilmeld::$config->checkUsername['value']) { ?>
 								</thead>
 								<tbody>
 								<?php foreach($this->group_array_secondary as $cur_group) { ?>
-									<tr title="<?php e($cur_group->guid); ?>" class="<?php echo $cur_group->get_children() ? 'parent ' : ''; ?><?php echo (isset($cur_group->parent) && $cur_group->parent->inArray($this->group_array_secondary)) ? h("child ch_{$cur_group->parent->guid} ") : ''; ?>">
+									<tr title="<?php e($cur_group->guid); ?>" class="<?php echo $cur_group->getChildren() ? 'parent ' : ''; ?><?php echo (isset($cur_group->parent) && $cur_group->parent->inArray($this->group_array_secondary)) ? h("child ch_{$cur_group->parent->guid} ") : ''; ?>">
 										<td><input type="checkbox" name="groups[]" value="<?php e($cur_group->guid); ?>" <?php echo $cur_group->inArray($this->entity->groups) ? 'checked="checked" ' : ''; ?>/></td>
 										<td><?php e($cur_group->name); ?></td>
 										<td><a data-entity="<?php e($cur_group->guid); ?>" data-entity-context="group"><?php e($cur_group->groupname); ?></a></td>
@@ -310,14 +308,9 @@ if (\Tilmeld\Tilmeld::$config->checkUsername['value']) { ?>
 				<?php } ?>
 			<br class="pf-clearing" />
 		</div>
-		<?php } if (in_array('address', \Tilmeld\Tilmeld::$config->user_fields['value']) || in_array('additional_addresses', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+		<?php } if (in_array('address', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
 		<div class="tab-pane" id="p_muid_tab_location">
-			<?php if (in_array('address', \Tilmeld\Tilmeld::$config->user_fields['value'])) {
-				if (in_array('additional_addresses', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
-			<div class="pf-element pf-heading">
-				<h3>Main Address</h3>
-			</div>
-			<?php } ?>
+			<?php if (in_array('address', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
 			<div class="pf-element">
 				<script type="text/javascript">
 					$_(function(){
@@ -428,141 +421,6 @@ if (\Tilmeld\Tilmeld::$config->checkUsername['value']) { ?>
 						</span></label>
 				</div>
 			</div>
-			<?php } if (in_array('additional_addresses', \Tilmeld\Tilmeld::$config->user_fields['value'])) {
-				if (in_array('address', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
-			<div class="pf-element pf-heading">
-				<h3>Additional Addresses</h3>
-			</div>
-			<?php } ?>
-			<script type="text/javascript">
-				$_(function(){
-					// Addresses
-					var addresses = $("#p_muid_addresses"),
-						addresses_table = $("#p_muid_addresses_table"),
-						address_dialog = $("#p_muid_address_dialog");
-
-					addresses_table.pgrid({
-						pgrid_paginate: false,
-						pgrid_toolbar: true,
-						pgrid_toolbar_contents : [
-							{
-								type: 'button',
-								text: 'Add Address',
-								extra_class: 'picon picon-list-add',
-								selection_optional: true,
-								click: function(){
-									address_dialog.dialog('open');
-								}
-							},
-							{
-								type: 'button',
-								text: 'Remove Address',
-								extra_class: 'picon picon-list-remove',
-								click: function(e, rows){
-									rows.pgrid_delete();
-									update_address();
-								}
-							}
-						],
-						pgrid_view_height: "300px"
-					});
-
-					// Address Dialog
-					address_dialog.dialog({
-						bgiframe: true,
-						autoOpen: false,
-						modal: true,
-						width: 600,
-						buttons: {
-							"Done": function(){
-								var cur_address_type = $("#p_muid_cur_address_type").val(),
-									cur_address_addr1 = $("#p_muid_cur_address_addr1").val(),
-									cur_address_addr2 = $("#p_muid_cur_address_addr2").val(),
-									cur_address_city = $("#p_muid_cur_address_city").val(),
-									cur_address_state = $("#p_muid_cur_address_state").val(),
-									cur_address_zip = $("#p_muid_cur_address_zip").val();
-								if (cur_address_type == "" || cur_address_addr1 == "") {
-									alert("Please provide a name and a street address.");
-									return;
-								}
-								var new_address = [{
-									key: null,
-									values: [
-										$_.safe(cur_address_type),
-										$_.safe(cur_address_addr1),
-										$_.safe(cur_address_addr2),
-										$_.safe(cur_address_city),
-										$_.safe(cur_address_state),
-										$_.safe(cur_address_zip)
-									]
-								}];
-								addresses_table.pgrid_add(new_address);
-								$(this).dialog('close');
-							}
-						},
-						close: function(){
-							update_addresses();
-						}
-					});
-
-					var update_addresses = function(){
-						$("#p_muid_cur_address_type, #p_muid_cur_address_addr1, #p_muid_cur_address_addr2, #p_muid_cur_address_city, #p_muid_cur_address_state, #p_muid_cur_address_zip").val("");
-						addresses.val(JSON.stringify(addresses_table.pgrid_get_all_rows().pgrid_export_rows()));
-					};
-
-					update_addresses();
-				});
-			</script>
-			<div class="pf-element pf-full-width">
-				<table id="p_muid_addresses_table">
-					<thead>
-						<tr>
-							<th>Type</th>
-							<th>Address 1</th>
-							<th>Address 2</th>
-							<th>City</th>
-							<th>State</th>
-							<th>Zip</th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php foreach ($this->entity->addresses as $cur_address) { ?>
-						<tr>
-							<td><?php e($cur_address['type']); ?></td>
-							<td><?php e($cur_address['address_1']); ?></td>
-							<td><?php e($cur_address['address_2']); ?></td>
-							<td><?php e($cur_address['city']); ?></td>
-							<td><?php e($cur_address['state']); ?></td>
-							<td><?php e($cur_address['zip']); ?></td>
-						</tr>
-						<?php } ?>
-					</tbody>
-				</table>
-				<input type="hidden" id="p_muid_addresses" name="addresses" />
-			</div>
-			<div id="p_muid_address_dialog" title="Add an Address" style="display: none;">
-				<div class="pf-form">
-					<div class="pf-element">
-						<label><span class="pf-label">Type</span>
-							<input class="pf-field form-control" type="text" size="24" name="cur_address_type" id="p_muid_cur_address_type" /></label>
-					</div>
-					<div class="pf-element">
-						<label><span class="pf-label">Address 1</span>
-							<input class="pf-field form-control" type="text" size="24" name="cur_address_addr1" id="p_muid_cur_address_addr1" /></label>
-					</div>
-					<div class="pf-element">
-						<label><span class="pf-label">Address 2</span>
-							<input class="pf-field form-control" type="text" size="24" name="cur_address_addr2" id="p_muid_cur_address_addr2" /></label>
-					</div>
-					<div class="pf-element">
-						<span class="pf-label">City, State, Zip</span>
-						<input class="pf-field form-control" type="text" size="8" name="cur_address_city" id="p_muid_cur_address_city" />
-						<input class="pf-field form-control" type="text" size="2" name="cur_address_state" id="p_muid_cur_address_state" />
-						<input class="pf-field form-control" type="text" size="5" name="cur_address_zip" id="p_muid_cur_address_zip" />
-					</div>
-				</div>
-				<br class="pf-clearing" />
-			</div>
 			<?php } ?>
 			<br class="pf-clearing" />
 		</div>
@@ -625,108 +483,6 @@ if (\Tilmeld\Tilmeld::$config->checkUsername['value']) { ?>
 				</div>
 			</div>
 			<?php } ?>
-			<br class="pf-clearing" />
-		</div>
-		<?php } if (in_array('attributes', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
-		<div class="tab-pane" id="p_muid_tab_attributes">
-			<script type="text/javascript">
-				$_(function(){
-					// Attributes
-					var attributes = $("#p_muid_tab_attributes input[name=attributes]"),
-						attributes_table = $("#p_muid_tab_attributes .attributes_table"),
-						attribute_dialog = $("#p_muid_tab_attributes .attribute_dialog");
-
-					attributes_table.pgrid({
-						pgrid_paginate: false,
-						pgrid_toolbar: true,
-						pgrid_toolbar_contents : [
-							{
-								type: 'button',
-								text: 'Add Attribute',
-								extra_class: 'picon picon-list-add',
-								selection_optional: true,
-								click: function(){
-									attribute_dialog.dialog('open');
-								}
-							},
-							{
-								type: 'button',
-								text: 'Remove Attribute',
-								extra_class: 'picon picon-list-remove',
-								click: function(e, rows){
-									rows.pgrid_delete();
-									update_attributes();
-								}
-							}
-						],
-						pgrid_view_height: "300px"
-					});
-
-					// Attribute Dialog
-					attribute_dialog.dialog({
-						bgiframe: true,
-						autoOpen: false,
-						modal: true,
-						width: 500,
-						buttons: {
-							"Done": function(){
-								var cur_attribute_name = $("#p_muid_cur_attribute_name").val();
-								var cur_attribute_value = $("#p_muid_cur_attribute_value").val();
-								if (cur_attribute_name == "" || cur_attribute_value == "") {
-									alert("Please provide both a name and a value for this attribute.");
-									return;
-								}
-								var new_attribute = [{
-									key: null,
-									values: [
-										$_.safe(cur_attribute_name),
-										$_.safe(cur_attribute_value)
-									]
-								}];
-								attributes_table.pgrid_add(new_attribute);
-								$(this).dialog('close');
-							}
-						},
-						close: function(){
-							update_attributes();
-						}
-					});
-
-					var update_attributes = function(){
-						$("#p_muid_cur_attribute_name").val("");
-						$("#p_muid_cur_attribute_value").val("");
-						attributes.val(JSON.stringify(attributes_table.pgrid_get_all_rows().pgrid_export_rows()));
-					};
-
-					update_attributes();
-				});
-			</script>
-			<div class="pf-element pf-full-width">
-				<table class="attributes_table">
-					<thead>
-						<tr><th>Name</th><th>Value</th></tr>
-					</thead>
-					<tbody>
-						<?php foreach ($this->entity->attributes as $cur_attribute) { ?>
-						<tr><td><?php e($cur_attribute['name']); ?></td><td><?php e($cur_attribute['value']); ?></td></tr>
-						<?php } ?>
-					</tbody>
-				</table>
-				<input type="hidden" name="attributes" />
-			</div>
-			<div class="attribute_dialog" style="display: none;" title="Add an Attribute">
-				<div class="pf-form">
-					<div class="pf-element">
-						<label><span class="pf-label">Name</span>
-							<input class="pf-field form-control" type="text" id="p_muid_cur_attribute_name" size="24" /></label>
-					</div>
-					<div class="pf-element">
-						<label><span class="pf-label">Value</span>
-							<input class="pf-field form-control" type="text" id="p_muid_cur_attribute_value" size="24" /></label>
-					</div>
-				</div>
-				<br style="clear: both; height: 1px;" />
-			</div>
 			<br class="pf-clearing" />
 		</div>
 		<?php } ?>

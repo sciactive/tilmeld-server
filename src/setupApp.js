@@ -12,7 +12,7 @@ angular.module('setupApp', ['ngRoute'])
 	$scope.entities = [];
 	$scope.success = null;
 
-	Nymph.getEntities({'class': '\\Tilmeld\\User'}).then(function(entities){
+	Nymph.getEntities({'class': '\Tilmeld\User'}).then(function(entities){
 		$scope.entities = entities;
 		$scope.$apply();
 	});
@@ -68,7 +68,7 @@ angular.module('setupApp', ['ngRoute'])
 	$scope.entities = [];
 	$scope.success = null;
 
-	Nymph.getEntities({'class': '\\Tilmeld\\Group'}).then(function(entities){
+	Nymph.getEntities({'class': '\Tilmeld\Group'}).then(function(entities){
 		$scope.entities = entities;
 	});
 

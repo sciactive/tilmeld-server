@@ -10,6 +10,11 @@
  */
 
 return (object) [
+	'setup_url' => [
+		'cname' => 'Setup URL',
+		'description' => 'The URL where the setup utility is accessible. This is also used for account verification and password recovery.',
+		'value' => 'http://localhost/tilmeld/',
+	],
 	'create_admin' => [
 		'cname' => 'Create Admin',
 		'description' => 'Allow the creation of an admin user. When a user is created, if there are no other users in the system, he will be granted all abilities.',
@@ -26,77 +31,42 @@ return (object) [
 		'value' => true,
 		'peruser' => true,
 	],
-	'one_step_registration' => [
-		'cname' => 'One Step Registration',
-		'description' => 'Allow users to register in one step.',
-		'value' => false,
-		'peruser' => true,
-	],
 	'user_search_limit' => [
 		'cname' => 'User Search Limit',
 		'description' => 'Limit the user search to this many results.',
 		'value' => 20,
 		'peruser' => true,
 	],
-	'checkUsername' => [
-		'cname' => 'Check Usernames',
-		'description' => 'Notify immediately if a requested username is available. (This can technically be used to determine if a user exists on the system.]',
-		'value' => true,
-		'peruser' => true,
-	],
-	'check_email' => [
-		'cname' => 'Check Emails',
-		'description' => 'Notify immediately if a requested email is available. (This can technically be used to determine if a user exists on the system.]',
-		'value' => true,
-		'peruser' => true,
-	],
-	'check_phone' => [
-		'cname' => 'Check Phone Numbers',
-		'description' => 'Notify immediately if a requested phone number is available. (This can technically be used to determine if a user exists on the system.]',
-		'value' => true,
-		'peruser' => true,
-	],
 	'user_fields' => [
 		'cname' => 'User Account Fields',
 		'description' => 'These will be the available fields for users. (Some fields, like username, can\'t be excluded.]',
-		'value' => ['name', 'email', 'phone', 'fax', 'timezone', 'pin', 'address', 'additional_addresses', 'attributes'],
+		'value' => ['name', 'email', 'phone', 'timezone', 'address'],
 		'options' => [
 			'Name' => 'name',
 			'Email' => 'email',
 			'Phone Number' => 'phone',
-			'Fax Number' => 'fax',
 			'Timezone' => 'timezone',
-			'PIN Code' => 'pin',
 			'Address' => 'address',
-			'Additional Addresses' => 'additional_addresses',
-			'Attributes' => 'attributes',
 		],
 		'peruser' => true,
 	],
 	'reg_fields' => [
 		'cname' => 'Visible Registration Fields',
 		'description' => 'These fields will be available for the user to fill in when they register.',
-		'value' => ['name', 'email', 'phone', 'fax', 'timezone', 'address'],
+		'value' => ['name', 'email'],
 		'options' => [
 			'Name' => 'name',
 			'Email' => 'email',
 			'Phone Number' => 'phone',
-			'Fax Number' => 'fax',
 			'Timezone' => 'timezone',
 			'Address' => 'address',
 		],
 		'peruser' => true,
 	],
-	'reg_message_welcome' => [
-		'cname' => 'Registration Welcome Message',
-		'description' => 'This message will be displayed to the user after they register.',
-		'value' => 'You can begin using the system with the menu near the top of the page.',
-		'peruser' => true,
-	],
 	'verify_email' => [
 		'cname' => 'Verify User Email Addresses',
 		'description' => 'Verify users\' email addresses upon registration/email change before allowing them to log in/change it.',
-		'value' => false,
+		'value' => true,
 		'peruser' => true,
 	],
 	'unverified_access' => [
@@ -111,12 +81,6 @@ return (object) [
 		'value' => '3 days',
 		'peruser' => true,
 	],
-	'default_domain' => [
-		'cname' => 'Default Login Domain',
-		'description' => 'When using email address as username, the domain name listed here will be automatically appended to short logins. For example, you could put "sciactive.com" to be able to sign in with "hunter" instead of "hperrin@gmail.com".',
-		'value' => '',
-		'peruser' => true,
-	],
 	'pw_recovery' => [
 		'cname' => 'Allow Account Recovery',
 		'description' => 'Allow users to recover their username and/or password through their registered email.',
@@ -129,14 +93,9 @@ return (object) [
 		'value' => 240,
 		'peruser' => true,
 	],
-	'pw_empty' => [
-		'cname' => 'Allow Empty Passwords',
-		'description' => 'Allow users to have empty passwords.',
-		'value' => false,
-	],
 	'pw_method' => [
 		'cname' => 'Password Storage Method',
-		'description' => "Method used to store passwords. Salt is more secure if the database is compromised, but can't be used with SAWASC.\n\nPlain: store the password in plaintext.\nDigest: store the password's digest using a simple salt.\nSalt: store the password's digest using a complex, unique salt.",
+		'description' => "Method used to store passwords. Salt is more secure if the database is compromised, but can't be used with SAWASC. Plain: store the password in plaintext. Digest: store the password's digest using a simple salt. Salt: store the password's digest using a complex, unique salt.",
 		'value' => 'digest',
 		'options' => [
 			'Plain' => 'plain',
@@ -157,34 +116,6 @@ return (object) [
 			'md5',
 			'whirlpool',
 		],
-	],
-	'login_menu' => [
-		'cname' => 'Show Login in Menu',
-		'description' => 'Show a login button in the menu.',
-		'value' => false,
-		'peruser' => true,
-	],
-	'login_menu_path' => [
-		'cname' => 'Login Menu Path',
-		'description' => 'The path of the login button in the menu.',
-		'value' => 'main_menu/~login',
-		'peruser' => true,
-	],
-	'login_menu_text' => [
-		'cname' => 'Login Menu Text',
-		'description' => 'The text of the login button in the menu.',
-		'value' => 'Log In',
-		'peruser' => true,
-	],
-	'referral_codes' => [
-		'cname' => 'Enable Referral Codes',
-		'description' => 'Enable users to enter referral codes.',
-		'value' => false,
-	],
-	'conditional_groups' => [
-		'cname' => 'Conditional Groups',
-		'description' => 'Allow groups to only provide abilities if conditions are met.',
-		'value' => true,
 	],
 	'highest_primary' => [
 		'cname' => 'Highest Assignable Primary Group Parent',
@@ -230,9 +161,4 @@ return (object) [
 		'description' => 'The maximum length for groupnames. 0 for unlimited.',
 		'value' => 0,
 	],
-	'min_pin_length' => [
-		'cname' => 'User PIN Min Length',
-		'description' => 'The minimum length for user PINs. 0 for no minimum.',
-		'value' => 5,
-	]
 ];

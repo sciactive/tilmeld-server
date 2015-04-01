@@ -135,7 +135,7 @@ if ($this->render == 'body' && gatekeeper('com_user/listgroups')) { ?>
 	<h3 style="margin:10px 0;">Logo <small><?php echo (isset($this->entity->logo)) ? 'Assigned' : 'Inherited'; ?></small></h3>
 	<div style="clear: both; padding-left: .5em;">
 		<span class="thumbnail" style="display: inline-block; max-width: 90%;">
-			<img src="<?php e($this->entity->get_logo()); ?>" alt="Group Logo" style="max-width: 100%;">
+			<img src="<?php e($this->entity->getLogo()); ?>" alt="Group Logo" style="max-width: 100%;">
 		</span>
 	</div>
 </div>
@@ -155,19 +155,4 @@ if ($this->render == 'body' && gatekeeper('com_user/listgroups')) { ?>
 		} ?>
 	</address>
 </div>
-<?php if ($this->entity->attributes) { ?>
-<div style="clear:both;">
-	<hr />
-	<h3 style="margin:10px 0;">Attributes</h3>
-	<table class="table table-bordered" style="clear:both;">
-		<thead>
-			<tr><th>Name</th><th>Value</th></tr>
-		</thead>
-		<tbody>
-			<?php foreach ($this->entity->attributes as $cur_attribute) { ?>
-			<tr><td><?php e($cur_attribute['name']); ?></td><td><?php e($cur_attribute['value']); ?></td></tr>
-			<?php } ?>
-		</tbody>
-	</table>
-</div>
-<?php } }
+<?php }

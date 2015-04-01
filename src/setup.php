@@ -13,10 +13,10 @@
 			};
 			baseURL = <?php echo json_encode($baseURL); ?>;
 		</script>
-		<script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph/src/Nymph.js"></script>
-		<script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph/src/Entity.js"></script>
-		<script src="<?php echo htmlspecialchars($baseURL); ?>/src/Rendition.js"></script>
-		<script src="<?php echo htmlspecialchars($baseURL); ?>/src/Template.js"></script>
+		<script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/Nymph.js"></script>
+		<script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/Entity.js"></script>
+		<script src="<?php echo htmlspecialchars($baseURL); ?>/src/User.js"></script>
+		<script src="<?php echo htmlspecialchars($baseURL); ?>/src/Group.js"></script>
 
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular.min.js"></script>
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.5/angular-route.js"></script>
@@ -27,19 +27,6 @@
 
 		<link rel="stylesheet" href="<?php echo htmlspecialchars($sciactiveBaseURL); ?>pform/css/pform.min.css">
 		<link rel="stylesheet" href="<?php echo htmlspecialchars($sciactiveBaseURL); ?>pform/css/pform-bootstrap.min.css">
-
-		<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.11.0/codemirror.min.js"></script>
-		<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.11.0/codemirror.min.css">
-		<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.11.0/mode/css/css.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.11.0/mode/javascript/javascript.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.11.0/mode/xml/xml.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.11.0/mode/htmlmixed/htmlmixed.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.11.0/addon/fold/xml-fold.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.11.0/addon/edit/matchtags.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.11.0/addon/edit/matchbrackets.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.11.0/addon/edit/closetag.min.js"></script>
-		<script src="//cdnjs.cloudflare.com/ajax/libs/codemirror/4.11.0/addon/edit/closebrackets.min.js"></script>
-		<script src="https://rawgithub.com/angular-ui/ui-codemirror/bower/ui-codemirror.min.js"></script>
 
 		<script src="<?php echo htmlspecialchars($baseURL); ?>/src/setupApp.js"></script>
 
@@ -69,8 +56,8 @@
 				<div class="col-lg-3">
 					<ul class="nav nav-pills nav-stacked">
 						<li role="presentation" ng-class="{active: $location.path() === '/'}"><a href="#">Instructions</a></li>
-						<li role="presentation" ng-class="{active: $location.path().indexOf('/rendition/') === 0}"><a href="#/rendition/">Renditions</a></li>
-						<li role="presentation" ng-class="{active: $location.path().indexOf('/template/') === 0}"><a href="#/template/">Templates</a></li>
+						<li role="presentation" ng-class="{active: $location.path().indexOf('/user/') === 0}"><a href="#/rendition/">Users</a></li>
+						<li role="presentation" ng-class="{active: $location.path().indexOf('/group/') === 0}"><a href="#/template/">Groups</a></li>
 					</ul>
 				</div>
 				<div class="col-lg-9">

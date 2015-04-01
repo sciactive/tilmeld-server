@@ -14,7 +14,7 @@ defined('P_RUN') or die('Direct access prohibited');
 if ( isset($_REQUEST['id']) ) {
 	if ( !gatekeeper('com_user/editgroup') )
 		punt_user(null, pines_url('com_user', 'listgroups'));
-	$group = group::factory((int) $_REQUEST['id']);
+	$group = Group::factory((int) $_REQUEST['id']);
 	if (!isset($group->guid)) {
 		pines_error('Requested group id is not accessible.');
 		return;
@@ -22,7 +22,7 @@ if ( isset($_REQUEST['id']) ) {
 } else {
 	if ( !gatekeeper('com_user/newgroup') )
 		punt_user(null, pines_url('com_user', 'listgroups'));
-	$group = group::factory();
+	$group = Group::factory();
 }
 
 if (gatekeeper('com_user/usernames'))
@@ -60,33 +60,11 @@ $group->state = $_REQUEST['state'];
 $group->zip = $_REQUEST['zip'];
 $group->address_international = $_REQUEST['address_international'];
 
-// Conditions
-if ( gatekeeper('com_user/conditions') ) {
-	$conditions = (array) json_decode($_REQUEST['conditions']);
-	$group->conditions = array();
-	foreach ($conditions as $cur_condition) {
-		if (!isset($cur_condition->values[0], $cur_condition->values[1]))
-			continue;
-		$group->conditions[$cur_condition->values[0]] = $cur_condition->values[1];
-	}
-}
-
-// Attributes
-$group->attributes = (array) json_decode($_REQUEST['attributes']);
-foreach ($group->attributes as &$cur_attribute) {
-	$array = array(
-		'name' => $cur_attribute->values[0],
-		'value' => $cur_attribute->values[1]
-	);
-	$cur_attribute = $array;
-}
-unset($cur_attribute);
-
 //if ( $_REQUEST['no_parent'] == 'ON' ) {
 if ( $_REQUEST['parent'] == 'none' ) {
 	unset($group->parent);
 } else {
-	$parent = group::factory((int) $_REQUEST['parent']);
+	$parent = Group::factory((int) $_REQUEST['parent']);
 	// Check if the selected parent is a descendant of this group.
 	if (!$group->is($parent) && !$parent->is_descendant($group))
 		$group->parent = $parent;
@@ -123,10 +101,9 @@ if (Tilmeld::$config->max_groupname_length['value'] > 0 && strlen($group->groupn
 	pines_notice("Groupnames must not exceed {Tilmeld::$config->max_groupname_length['value']} characters.");
 	return;
 }
-$test = $_->nymph->getEntity(
-		array('class' => group, 'skip_ac' => true),
+$test = \Nymph\Nymph::getEntity(
+		array('class' => '\Tilmeld\Group', 'skip_ac' => true),
 		array('&',
-			'tag' => array('com_user', 'group'),
 			'match' => array('groupname', '/^'.preg_quote($_REQUEST['groupname'], '/').'$/i')
 		)
 	);
@@ -146,10 +123,9 @@ if (!preg_match(Tilmeld::$config->valid_regex['value'], $group->groupname)) {
 	return;
 }
 if (!empty($group->email)) {
-	$test = $_->nymph->getEntity(
-			array('class' => group, 'skip_ac' => true),
+	$test = \Nymph\Nymph::getEntity(
+			array('class' => '\Tilmeld\Group', 'skip_ac' => true),
 			array('&',
-				'tag' => array('com_user', 'group'),
 				'match' => array('email', '/^'.preg_quote($group->email, '/').'$/i')
 			)
 		);
@@ -165,7 +141,7 @@ if (isset($group->parent) && !isset($group->parent->guid)) {
 	return;
 }
 if (gatekeeper('com_user/defaultgroups') && $group->default_primary) {
-	$current_primary = $_->nymph->getEntity(array('class' => group), array('&', 'tag' => array('com_user', 'group'), 'data' => array('default_primary', true)));
+	$current_primary = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\Group'), array('&', 'data' => array('default_primary', true)));
 	if (isset($current_primary) && !$group->is($current_primary)) {
 		unset($current_primary->default_primary);
 		if ($current_primary->save()) {

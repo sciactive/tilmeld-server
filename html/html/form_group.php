@@ -14,78 +14,6 @@ $_->com_pgrid->load();
 //$_->com_jstree->load();
 $_->uploader->load();
 ?>
-<script type="text/javascript">
-	$_(function(){
-		// Attributes
-		var attributes = $("#p_muid_tab_attributes input[name=attributes]");
-		var attributes_table = $("#p_muid_tab_attributes .attributes_table");
-		var attribute_dialog = $("#p_muid_tab_attributes .attribute_dialog");
-
-		attributes_table.pgrid({
-			pgrid_paginate: false,
-			pgrid_toolbar: true,
-			pgrid_toolbar_contents : [
-				{
-					type: 'button',
-					text: 'Add Attribute',
-					extra_class: 'picon picon-list-add',
-					selection_optional: true,
-					click: function(){
-						attribute_dialog.dialog('open');
-					}
-				},
-				{
-					type: 'button',
-					text: 'Remove Attribute',
-					extra_class: 'picon picon-list-remove',
-					click: function(e, rows){
-						rows.pgrid_delete();
-						update_attributes();
-					}
-				}
-			],
-			pgrid_view_height: "300px"
-		});
-
-		// Attribute Dialog
-		attribute_dialog.dialog({
-			bgiframe: true,
-			autoOpen: false,
-			modal: true,
-			width: 500,
-			buttons: {
-				"Done": function(){
-					var cur_attribute_name = $("#p_muid_cur_attribute_name").val();
-					var cur_attribute_value = $("#p_muid_cur_attribute_value").val();
-					if (cur_attribute_name == "" || cur_attribute_value == "") {
-						alert("Please provide both a name and a value for this attribute.");
-						return;
-					}
-					var new_attribute = [{
-						key: null,
-						values: [
-							$_.safe(cur_attribute_name),
-							$_.safe(cur_attribute_value)
-						]
-					}];
-					attributes_table.pgrid_add(new_attribute);
-					$(this).dialog('close');
-				}
-			},
-			close: function(){
-				update_attributes();
-			}
-		});
-
-		var update_attributes = function(){
-			$("#p_muid_cur_attribute_name").val("");
-			$("#p_muid_cur_attribute_value").val("");
-			attributes.val(JSON.stringify(attributes_table.pgrid_get_all_rows().pgrid_export_rows()));
-		};
-
-		update_attributes();
-	});
-</script>
 <form class="pf-form" method="post" id="p_muid_form" action="<?php e(pines_url('com_user', 'savegroup')); ?>">
 	<ul class="nav nav-tabs" style="clear: both;">
 		<li class="active"><a href="#p_muid_tab_general" data-toggle="tab">General</a></li>
@@ -93,10 +21,7 @@ $_->uploader->load();
 		<li><a href="#p_muid_tab_location" data-toggle="tab">Address</a></li>
 		<?php if ($this->display_abilities) { ?>
 		<li><a href="#p_muid_tab_abilities" data-toggle="tab">Abilities</a></li>
-		<?php } if (\Tilmeld\Tilmeld::$config->conditional_groups['value'] && $this->display_conditions) { ?>
-		<li><a href="#p_muid_tab_conditions" data-toggle="tab">Conditions</a></li>
 		<?php } ?>
-		<li><a href="#p_muid_tab_attributes" data-toggle="tab">Attributes</a></li>
 	</ul>
 	<div id="p_muid_tabs" class="tab-content">
 		<div class="tab-pane active" id="p_muid_tab_general">
@@ -167,7 +92,7 @@ $_->uploader->load();
 						<?php
 						\Tilmeld\Tilmeld::groupSort($this->group_array, 'name');
 						foreach ($this->group_array as $cur_group) {
-							?><option value="<?php e($cur_group->guid); ?>"<?php echo $cur_group->is($this->entity->parent) ? ' selected="selected"' : ''; ?>><?php e(str_repeat('->', $cur_group->get_level())." {$cur_group->name} [{$cur_group->groupname}]"); ?></option><?php
+							?><option value="<?php e($cur_group->guid); ?>"<?php echo $cur_group->is($this->entity->parent) ? ' selected="selected"' : ''; ?>><?php e(str_repeat('->', $cur_group->getLevel())." {$cur_group->name} [{$cur_group->groupname}]"); ?></option><?php
 						} ?>
 					</select>
 				</label>
@@ -195,7 +120,7 @@ $_->uploader->load();
 			<div class="pf-element">
 				<span class="pf-label"><?php echo (isset($this->entity->logo)) ? 'Currently Set Logo' : 'Inherited Logo'; ?></span>
 				<div class="pf-group">
-					<span class="pf-field"><img src="<?php e($this->entity->get_logo()); ?>" alt="Group Logo" /></span>
+					<span class="pf-field"><img src="<?php e($this->entity->getLogo()); ?>" alt="Group Logo" /></span>
 					<?php if (isset($this->entity->logo)) { ?>
 					<br />
 					<label><span class="pf-field"><input class="pf-field" type="checkbox" name="remove_logo" value="ON" />Remove this logo.</span></label>
@@ -377,52 +302,7 @@ $_->uploader->load();
 			<?php } ?>
 			<br class="pf-clearing" />
 		</div>
-		<?php } if (\Tilmeld\Tilmeld::$config->conditional_groups['value'] && $this->display_conditions) { ?>
-		<div class="tab-pane" id="p_muid_tab_conditions">
-			<div class="pf-element pf-heading">
-				<h3>Ability Conditions</h3>
-				<p>Users will only inherit abilities from this group if these conditions are met.</p>
-			</div>
-			<div class="pf-element pf-full-width">
-				<?php
-				$module = new module('system', 'conditions');
-				$module->conditions = $this->entity->conditions;
-				echo $module->render();
-				unset($module);
-				?>
-			</div>
-			<br class="pf-clearing" />
-		</div>
 		<?php } ?>
-		<div class="tab-pane" id="p_muid_tab_attributes">
-			<div class="pf-element pf-full-width">
-				<table class="attributes_table">
-					<thead>
-						<tr><th>Name</th><th>Value</th></tr>
-					</thead>
-					<tbody>
-						<?php foreach ($this->entity->attributes as $cur_attribute) { ?>
-						<tr><td><?php e($cur_attribute['name']); ?></td><td><?php e($cur_attribute['value']); ?></td></tr>
-						<?php } ?>
-					</tbody>
-				</table>
-				<input type="hidden" name="attributes" />
-			</div>
-			<div class="attribute_dialog" style="display: none;" title="Add an Attribute">
-				<div class="pf-form">
-					<div class="pf-element">
-						<label><span class="pf-label">Name</span>
-							<input class="pf-field form-control" type="text" id="p_muid_cur_attribute_name" size="24" /></label>
-					</div>
-					<div class="pf-element">
-						<label><span class="pf-label">Value</span>
-							<input class="pf-field form-control" type="text" id="p_muid_cur_attribute_value" size="24" /></label>
-					</div>
-				</div>
-				<br style="clear: both; height: 1px;" />
-			</div>
-			<br class="pf-clearing" />
-		</div>
 	</div>
 
 	<div class="pf-element pf-buttons">

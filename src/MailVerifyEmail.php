@@ -22,7 +22,6 @@ class MailVerifyEmail extends \µMailPHP\Definition {
 	public static $macros = [
 		'verify_link' => 'The URL to verify the email address, to be used in a link.',
 		'to_phone' => 'The recipient\'s phone number.',
-		'to_fax' => 'The recipient\'s fax number.',
 		'to_timezone' => 'The recipient\'s timezone.',
 		'to_address' => 'The recipient\'s address.',
 	];

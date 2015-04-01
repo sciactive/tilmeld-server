@@ -24,7 +24,6 @@ class MailVerifyEmailChange extends \µMailPHP\Definition {
 		'old_email' => 'The old email address.',
 		'new_email' => 'The new email address.',
 		'to_phone' => 'The recipient\'s phone number.',
-		'to_fax' => 'The recipient\'s fax number.',
 		'to_timezone' => 'The recipient\'s timezone.',
 		'to_address' => 'The recipient\'s address.',
 	];

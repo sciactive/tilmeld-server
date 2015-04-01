@@ -47,7 +47,7 @@ $this->padding_right = (int) $this->padding_right;
 if (empty($this->text))
 	$this->text = 'Logged in as #name# [#username#].';
 
-$this->text = h(str_replace(['#name#', '#username#'], [$_SESSION['user']->name, $_SESSION['user']->username], $this->text));
+$this->text = h(str_replace(['#name#', '#username#'], [$_SESSION['tilmeld_user']->name, $_SESSION['tilmeld_user']->username], $this->text));
 
 ?>
 <div style="text-align: <?php echo $this->text_align; ?>; font-style: <?php echo $this->font_style; ?>; margin: <?php echo "{$this->margin_top}px {$this->margin_right}px {$this->margin_bottom}px {$this->margin_left}px"; ?>; padding: <?php echo "{$this->padding_top}px {$this->padding_right}px {$this->padding_bottom}px {$this->padding_left}px"; ?>;">

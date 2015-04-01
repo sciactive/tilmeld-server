@@ -11,8 +11,8 @@
 
 $this->title = ($this->enabled ? '' : 'Disabled ').'Users';
 $_->com_pgrid->load();
-if (isset($_SESSION['user']) && is_array($_SESSION['user']->pgrid_saved_states))
-	$this->pgrid_state = (object) json_decode($_SESSION['user']->pgrid_saved_states['com_user/list_users']);
+if (isset($_SESSION['tilmeld_user']) && is_array($_SESSION['tilmeld_user']->pgrid_saved_states))
+	$this->pgrid_state = (object) json_decode($_SESSION['tilmeld_user']->pgrid_saved_states['com_user/list_users']);
 ?>
 <script type="text/javascript">
 	$_(function(){

@@ -24,16 +24,6 @@ class Tilmeld {
 	 * @access public
 	 */
 	public static $config;
-	/**
-	 * Gatekeeper ability cache.
-	 *
-	 * Gatekeeper will cache users' abilities that it calculates, so it can
-	 * check faster if that user has been checked before.
-	 *
-	 * @var array
-	 * @access public
-	 */
-	public static $gatekeeperCache = [];
 
 	/**
 	 * Activate the SAWASC system.
@@ -64,32 +54,32 @@ class Tilmeld {
 	/**
 	 * Check an entity's permissions for the currently logged in user.
 	 *
-	 * This will check the variable "ac" (Access Control) of the entity. It
-	 * should be an object that contains the following properties:
+	 * This will check the AC (Access Control) properties of the entity. These
+	 * include the following properties:
 	 *
-	 * - user
-	 * - group
-	 * - other
+	 * - ac_user
+	 * - ac_group
+	 * - ac_other
 	 *
-	 * The property "user" refers to the entity's owner, "group" refers to all
-	 * users in the entity's group and all ancestor groups, and "other" refers
-	 * to any user who doesn't fit these descriptions.
+	 * The property "ac_user" refers to the entity's owner, "ac_group" refers to
+	 * all users in the entity's group and all ancestor groups, and "ac_other"
+	 * refers to any user who doesn't fit these descriptions.
 	 *
 	 * Each variable should be either 0, 1, 2, or 3. If it is 0, the user has no
 	 * access to the entity. If it is 1, the user has read access to the entity.
 	 * If it is 2, the user has read and write access to the entity. If it is 3,
 	 * the user has read, write, and delete access to the entity.
 	 *
-	 * "ac" defaults to:
+	 * AC properties defaults to:
 	 *
-	 * - user = 3
-	 * - group = 3
-	 * - other = 0
+	 * - ac_user = 3
+	 * - ac_group = 3
+	 * - ac_other = 0
 	 *
 	 * The following conditions will result in different checks, which determine
 	 * whether the check passes:
 	 *
-	 * - No user is logged in. (Always true, should be managed with abilities.)
+	 * - No user is logged in. (Check other AC.)
 	 * - The entity has no "user" and no "group". (Always true.)
 	 * - The user has the "system/all" ability. (Always true.)
 	 * - The entity is the user. (Always true.)
@@ -110,184 +100,45 @@ class Tilmeld {
 		if ((object) $entity !== $entity) {
 			return false;
 		}
-		if ((object) $_SESSION['user'] !== $_SESSION['user']) {
-			return true;
-		}
-		if (function_exists('gatekeeper') && gatekeeper('system/all')) {
+		if (User::current(true)->gatekeeper('system/all')) {
 			return true;
 		}
 		if (is_a($entity, '\Tilmeld\User') || is_a($entity, '\Tilmeld\Group')) {
 			return true;
 		}
-		if (!isset($entity->user->guid) && !isset($entity->group->guid)) {
+		if (
+				(!isset($entity->user) || !isset($entity->user->guid)) &&
+				(!isset($entity->group) || !isset($entity->group->guid))
+			) {
 			return true;
 		}
 
 		// Load access control, since we need it now...
-		if ((object) $entity->ac === $entity->ac) {
-			$ac = $entity->ac;
-		} else {
-			$ac = (object) ['user' => 3, 'group' => 3, 'other' => 0];
-		}
+		$ac_user = isset($entity->ac_user) ? $entity->ac_user : 3;
+		$ac_group = isset($entity->ac_group) ? $entity->ac_group : 3;
+		$ac_other = isset($entity->ac_other) ? $entity->ac_other : 0;
 
-		if (is_callable([$entity->user, 'is']) && $entity->user->is($_SESSION['user'])) {
-			return ($ac->user >= $type);
+		if (!isset(User::current())) {
+			return ($ac_other >= $type);
 		}
-		if (is_callable([$entity->group, 'is']) && ($entity->group->is($_SESSION['user']->group) || $entity->group->inArray($_SESSION['user']->groups) || $entity->group->inArray($_SESSION['descendants'])) ) {
-			return ($ac->group >= $type);
+		if (is_callable([$entity->user, 'is']) && $entity->user->is(User::current())) {
+			return ($ac_user >= $type);
 		}
-		return ($ac->other >= $type);
+		if (
+				is_callable([$entity->group, 'is']) &&
+				(
+					$entity->group->is(User::current(true)->group) ||
+					$entity->group->inArray(User::current(true)->groups) ||
+					$entity->group->inArray($_SESSION['tilmeld_descendants'])
+				)
+			) {
+			return ($ac_group >= $type);
+		}
+		return ($ac_other >= $type);
 	}
 
 	/**
-	 * Check that a username is valid.
-	 *
-	 * The ID of a user can be given so that user is excluded when checking if
-	 * the name is already in use.
-	 *
-	 * @param string $username The username to check.
-	 * @param int $id The GUID of the user for which the name is being checked.
-	 * @return array An associative array with a boolean 'result' entry and a 'message' entry.
-	 */
-	public static function checkUsername($username, $id = null) {
-		if (!Tilmeld::$config->email_usernames['value']) {
-			if (empty($username)) {
-				return ['result' => false, 'message' => 'Please specify a username.'];
-			}
-			if (Tilmeld::$config->max_username_length['value'] > 0 && strlen($username) > Tilmeld::$config->max_username_length['value']) {
-				return ['result' => false, 'message' => "Usernames must not exceed {Tilmeld::$config->max_username_length['value']} characters."];
-			}
-			if (array_diff(str_split($username), str_split(Tilmeld::$config->valid_chars['value']))) {
-				return ['result' => false, 'message' => Tilmeld::$config->valid_chars_notice['value']];
-			}
-			if (!preg_match(Tilmeld::$config->valid_regex['value'], $username)) {
-				return ['result' => false, 'message' => Tilmeld::$config->valid_regex_notice['value']];
-			}
-			$selector = ['&',
-					'match' => ['username', '/^'.preg_quote($username, '/').'$/i']
-				];
-			if (isset($id) && $id > 0) {
-				$selector['!guid'] = $id;
-			}
-			$test = \Nymph\Nymph::getEntity(
-					['class' => '\Tilmeld\User', 'skip_ac' => true],
-					$selector
-				);
-			if (isset($test->guid)) {
-				return ['result' => false, 'message' => 'That username is taken.'];
-			}
-
-			return ['result' => true, 'message' => (isset($id) ? 'Username is valid.' : 'Username is available!')];
-		} else {
-			if (empty($username)) {
-				return ['result' => false, 'message' => 'Please specify an email.'];
-			}
-			if (Tilmeld::$config->max_username_length['value'] > 0 && strlen($username) > Tilmeld::$config->max_username_length['value']) {
-				return ['result' => false, 'message' => "Emails must not exceed {Tilmeld::$config->max_username_length['value']} characters."];
-			}
-			if (!preg_match('/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i', $username)) {
-				return ['result' => false, 'message' => 'Email must be a correctly formatted address.'];
-			}
-			$selector = ['&',
-					'match' => ['email', '/^'.preg_quote($username, '/').'$/i']
-				];
-			if (isset($id) && $id > 0) {
-				$selector['!guid'] = $id;
-			}
-			$test = \Nymph\Nymph::getEntity(
-					['class' => '\Tilmeld\User', 'skip_ac' => true],
-					$selector
-				);
-			if (isset($test->guid)) {
-				return ['result' => false, 'message' => 'That email address is already registered.'];
-			}
-
-			return ['result' => true, 'message' => (isset($id) ? 'Email is valid.' : 'Email address is valid!')];
-		}
-	}
-
-	/**
-	 * Check that an email is unique.
-	 *
-	 * The ID of a user can be given so that user is excluded when checking if
-	 * the email is already in use.
-	 *
-	 * Wrote this mainly for quick ajax testing of the email for user sign up on
-	 * an application.
-	 *
-	 * @param string $email The email to check.
-	 * @param int $id The GUID of the user for which the email is being checked.
-	 * @return array An associative array with a boolean 'result' entry and a 'message' entry.
-	 */
-	public static function checkEmail($email, $id = null) {
-		if (empty($email)) {
-			return ['result' => false, 'message' => 'Please specify an email.'];
-		}
-		if (!preg_match('/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i', $email)) {
-			return ['result' => false, 'message' => 'Email must be a correctly formatted address.'];
-		}
-		$selector = ['&',
-				'match' => ['email', '/^'.preg_quote($email, '/').'$/i']
-			];
-		if (isset($id) && $id > 0) {
-			$selector['!guid'] = $id;
-		}
-		$test = \Nymph\Nymph::getEntity(
-				['class' => '\Tilmeld\User', 'skip_ac' => true],
-				$selector
-			);
-		if (isset($test->guid)) {
-			return ['result' => false, 'message' => 'That email address is already registered.'];
-		}
-
-		return ['result' => true, 'message' => (isset($id) ? 'Email is valid.' : 'Email address is valid!')];
-	}
-
-	/**
-	 * Check that a phone number is unique.
-	 *
-	 * The ID of a user can be given so that user is excluded when checking if
-	 * the phone is already in use.
-	 *
-	 * Wrote this mainly for quick ajax testing of the phone for user sign up on
-	 * an application.
-	 *
-	 * @param string $phone The phone to check.
-	 * @param int $id The GUID of the user for which the phone is being checked.
-	 * @return array An associative array with a boolean 'result' entry and a 'message' entry.
-	 */
-	public static function checkPhone($phone, $id = null) {
-		if (empty($phone)) {
-			return ['result' => false, 'message' => 'Please specify a phone number.'];
-		}
-
-		$strip_to_digits = preg_replace('/\D/', '', $phone);
-		if (!preg_match('/\d{10}/', $strip_to_digits)) {
-			return ['result' => false, 'message' => 'Phone must contain 10 digits, but formatting does not matter.'];
-		}
-		$selector = [];
-		$or = ['|',
-				'data' => [
-					['phone_cell', $strip_to_digits],
-					['phone', $strip_to_digits]
-				]
-			];
-		if (isset($id) && $id > 0) {
-			$selector = ['&', '!guid' => $id];
-		}
-		$test = \Nymph\Nymph::getEntity(
-				['class' => '\Tilmeld\User', 'skip_ac' => true],
-				$selector, $or
-			);
-		if (isset($test->guid)) {
-			return ['result' => false, 'message' => 'Phone number is in use.'];
-		}
-
-		return ['result' => true, 'message' => (isset($id) ? 'Phone number is valid.' : 'Phone number is valid!')];
-	}
-
-	/**
-	 * Fill the $_SESSION['user'] variable with the logged in user's data.
+	 * Fill the $_SESSION['tilmeld_user'] variable with the logged in user's data.
 	 *
 	 * Also sets the default timezone to the user's timezone.
 	 *
@@ -295,135 +146,46 @@ class Tilmeld {
 	 */
 	public static function fillSession() {
 		self::session('write');
-		if ((object) $_SESSION['user'] === $_SESSION['user']) {
+		if (
+				(object) $_SESSION['tilmeld_user'] === $_SESSION['tilmeld_user'] &&
+				$_SESSION['tilmeld_user']->guid === $_SESSION['tilmeld_user_id']
+			) {
 			$tmp_user = \Nymph\Nymph::getEntity(
 					['class' => '\Tilmeld\User'],
 					['&',
-						'guid' => [$_SESSION['user']->guid],
-						'gt' => ['mdate', $_SESSION['user']->mdate]
+						'guid' => [$_SESSION['tilmeld_user']->guid],
+						'gt' => ['mdate', $_SESSION['tilmeld_user']->mdate]
 					]
 				);
 			if (!isset($tmp_user)) {
-				$_SESSION['user']->clearCache();
-				date_default_timezone_set($_SESSION['user_timezone']);
+				$_SESSION['tilmeld_user']->clearCache();
+				date_default_timezone_set($_SESSION['tilmeld_user_timezone']);
 				self::session('close');
 				return;
 			}
-			unset($_SESSION['user']);
+			unset($_SESSION['tilmeld_user']);
 		} else {
-			$tmp_user = user::factory($_SESSION['user_id']);
+			$tmp_user = User::factory($_SESSION['tilmeld_user_id']);
 		}
-		$_SESSION['user_timezone'] = $tmp_user->getTimezone();
-		date_default_timezone_set($_SESSION['user_timezone']);
+		$_SESSION['tilmeld_user_timezone'] = $tmp_user->getTimezone();
+		date_default_timezone_set($_SESSION['tilmeld_user_timezone']);
 		if (isset($tmp_user->group)) {
-			$_SESSION['descendants'] = (array) $tmp_user->group->get_descendants();
+			$_SESSION['tilmeld_descendants'] = (array) $tmp_user->group->getDescendants();
 		}
 		foreach ($tmp_user->groups as $cur_group) {
-			$_SESSION['descendants'] = array_merge((array) $_SESSION['descendants'], (array) $cur_group->get_descendants());
+			$_SESSION['tilmeld_descendants'] = array_merge((array) $_SESSION['tilmeld_descendants'], (array) $cur_group->getDescendants());
 		}
 		if ($tmp_user->inherit_abilities) {
-			$_SESSION['inherited_abilities'] = $tmp_user->abilities;
+			$_SESSION['tilmeld_inherited_abilities'] = $tmp_user->abilities;
 			foreach ($tmp_user->groups as $cur_group) {
-				// Check that any group conditions are met before adding the abilities.
-				if ($cur_group->conditions && Tilmeld::$config->conditional_groups['value']) {
-					$pass = true;
-					foreach ($cur_group->conditions as $cur_type => $cur_value) {
-						if (!$_->depend->check($cur_type, $cur_value)) {
-							$pass = false;
-							break;
-						}
-					}
-					if (!$pass) {
-						continue;
-					}
-				}
-				// Any conditions are met, so add this group's abilities.
-				$_SESSION['inherited_abilities'] = array_merge($_SESSION['inherited_abilities'], $cur_group->abilities);
+				$_SESSION['tilmeld_inherited_abilities'] = array_merge($_SESSION['tilmeld_inherited_abilities'], $cur_group->abilities);
 			}
 			if (isset($tmp_user->group)) {
-				// Check that any group conditions are met before adding the abilities.
-				$pass = true;
-				if ($tmp_user->group->conditions && Tilmeld::$config->conditional_groups['value']) {
-					foreach ($tmp_user->group->conditions as $cur_type => $cur_value) {
-						if (!$_->depend->check($cur_type, $cur_value)) {
-							$pass = false;
-							break;
-						}
-					}
-				}
-				// If all conditions are met, add this group's abilities.
-				if ($pass) {
-					$_SESSION['inherited_abilities'] = array_merge($_SESSION['inherited_abilities'], $tmp_user->group->abilities);
-				}
+				$_SESSION['tilmeld_inherited_abilities'] = array_merge($_SESSION['tilmeld_inherited_abilities'], $tmp_user->group->abilities);
 			}
 		}
-		$_SESSION['user'] = $tmp_user;
+		$_SESSION['tilmeld_user'] = $tmp_user;
 		self::session('close');
-	}
-
-	/**
-	 * Check to see if a user has an ability.
-	 *
-	 */
-	/**
-	 * Check to see if a user has an ability.
-	 *
-	 * This function will check both user and group abilities, if the user is
-	 * marked to inherit the abilities of its group.
-	 *
-	 * If $ability and $user are null, it will check to see if a user is
-	 * currently logged in.
-	 *
-	 * If the user has the "system/all" ability, this function will return true.
-	 *
-	 * @param string $ability The ability.
-	 * @param user $user The user to check. If none is given, the current user is used.
-	 * @return bool True or false.
-	 */
-	public static function gatekeeper($ability = null, $user = null) {
-		if (!isset($user)) {
-			// If the user is logged in, their abilities are already set up. We
-			// just need to add them to the user's.
-			if ((object) $_SESSION['user'] === $_SESSION['user']) {
-				if ( !isset($ability) || empty($ability) ) {
-					return true;
-				}
-				$user =& $_SESSION['user'];
-				// Check the cache to see if we've already checked this user.
-				if (isset(self::$gatekeeperCache[$_SESSION['user_id']])) {
-					$abilities =& self::$gatekeeperCache[$_SESSION['user_id']];
-				} else {
-					$abilities = $user->abilities;
-					if (isset($_SESSION['inherited_abilities'])) {
-						$abilities = array_merge($abilities, $_SESSION['inherited_abilities']);
-					}
-					self::$gatekeeperCache[$_SESSION['user_id']] = $abilities;
-				}
-			}
-		} else {
-			// If the user isn't logged in, their abilities need to be set up.
-			// Check the cache to see if we've already checked this user.
-			if (isset(self::$gatekeeperCache[$user->guid])) {
-				$abilities =& self::$gatekeeperCache[$user->guid];
-			} else {
-				$abilities = $user->abilities;
-				// TODO: Decide if group conditions should be checked if the user is not logged in.
-				if ($user->inherit_abilities) {
-					foreach ($user->groups as &$cur_group) {
-						$abilities = array_merge($abilities, $cur_group->abilities);
-					}
-					unset($cur_group);
-					if (isset($user->group)) {
-						$abilities = array_merge($abilities, $user->group->abilities);
-					}
-				}
-				self::$gatekeeperCache[$user->guid] = $abilities;
-			}
-		}
-		if (!isset($user) || ((array) $abilities !== $abilities)) {
-			return false;
-		}
-		return (in_array($ability, $abilities) || in_array('system/all', $abilities));
 	}
 
 	/**
@@ -490,15 +252,15 @@ class Tilmeld {
 	/**
 	 * Logs the given user into the system.
 	 *
-	 * @param user $user The user.
+	 * @param \Tilmeld\User $user The user.
 	 * @return bool True on success, false on failure.
 	 */
 	public static function login($user) {
-		if ( isset($user->guid) && $user->hasTag('enabled') && self::gatekeeper('com_user/login', $user) ) {
+		if (isset($user->guid) && $user->hasTag('enabled')) {
 			// Destroy session data.
 			self::logout();
 			self::session('write');
-			$_SESSION['user_id'] = $user->guid;
+			$_SESSION['tilmeld_user_id'] = $user->guid;
 			self::fillSession();
 			self::session('close');
 			return true;
@@ -511,8 +273,8 @@ class Tilmeld {
 	 */
 	public static function logout() {
 		self::session('write');
-		unset($_SESSION['user_id']);
-		unset($_SESSION['user']);
+		unset($_SESSION['tilmeld_user_id']);
+		unset($_SESSION['tilmeld_user']);
 		// We're changing users, so clear the gatekeeper cache.
 		self::$gatekeeperCache = [];
 		self::session('destroy');
@@ -559,21 +321,21 @@ class Tilmeld {
 	 *
 	 * @param string $option The type of access or action requested.
 	 */
-	public function session($option = 'read') {
+	public static function session($option = 'read') {
 		switch ($option) {
 			case 'read':
 			default:
-				if (isset($_SESSION['p_session_access'])) {
+				if (isset($_SESSION['tilmeld_session_access'])) {
 					return;
 				}
-				if ( session_start() ) {
-					$_SESSION['p_session_access'] = true;
+				if (session_start()) {
+					$_SESSION['tilmeld_session_access'] = true;
 					@session_write_close();
 				}
 				break;
 			case 'write':
 				session_start();
-				$_SESSION['p_session_access'] = true;
+				$_SESSION['tilmeld_session_access'] = true;
 				break;
 			case 'close':
 				@session_write_close();

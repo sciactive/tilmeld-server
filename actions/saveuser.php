@@ -12,9 +12,9 @@
 defined('P_RUN') or die('Direct access prohibited');
 
 if ( isset($_REQUEST['id']) ) {
-	if ( !gatekeeper('com_user/edituser') && (!gatekeeper('com_user/self') || ($_REQUEST['id'] != $_SESSION['user_id'])) )
+	if ( !gatekeeper('com_user/edituser') && (!gatekeeper('com_user/self') || ($_REQUEST['id'] != $_SESSION['tilmeld_user_id'])) )
 		punt_user(null, pines_url('com_user', 'listusers'));
-	$user = user::factory((int) $_REQUEST['id']);
+	$user = User::factory((int) $_REQUEST['id']);
 	if (!isset($user->guid)) {
 		pines_error('Requested user id is not accessible.');
 		return;
@@ -24,7 +24,7 @@ if ( isset($_REQUEST['id']) ) {
 } else {
 	if ( !gatekeeper('com_user/newuser') )
 		punt_user(null, pines_url('com_user', 'listusers'));
-	$user = user::factory();
+	$user = User::factory();
 	$user->password($_REQUEST['password']);
 }
 
@@ -71,7 +71,7 @@ if (Tilmeld::$config->email_usernames['value'] || in_array('email', Tilmeld::$co
 		$user->email = $_REQUEST['email'];
 	if (isset($user->secret) && gatekeeper('com_user/edituser') && $_REQUEST['email_verified'] == 'ON') {
 		if (Tilmeld::$config->unverified_access['value'])
-			$user->groups = (array) $_->nymph->getEntities(array('class' => group, 'skip_ac' => true), array('&', 'tag' => array('com_user', 'group'), 'data' => array('default_secondary', true)));
+			$user->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('default_secondary', true)));
 		$user->enable();
 		unset($user->secret);
 	}
@@ -102,37 +102,6 @@ if (in_array('address', Tilmeld::$config->user_fields['value'])) {
 	$user->zip = $_REQUEST['zip'];
 	$user->address_international = $_REQUEST['address_international'];
 }
-if (in_array('additional_addresses', Tilmeld::$config->user_fields['value'])) {
-	$user->addresses = (array) json_decode($_REQUEST['addresses']);
-	foreach ($user->addresses as &$cur_address) {
-		$array = array(
-			'type' => $cur_address->values[0],
-			'address_1' => $cur_address->values[1],
-			'address_2' => $cur_address->values[2],
-			'city' => $cur_address->values[3],
-			'state' => $cur_address->values[4],
-			'zip' => $cur_address->values[5]
-		);
-		$cur_address = $array;
-	}
-	unset($cur_address);
-}
-
-if (in_array('pin', Tilmeld::$config->user_fields['value']) && gatekeeper('com_user/assignpin'))
-	$user->pin = $_REQUEST['pin'];
-
-// Attributes
-if (in_array('attributes', Tilmeld::$config->user_fields['value'])) {
-	$user->attributes = (array) json_decode($_REQUEST['attributes']);
-	foreach ($user->attributes as &$cur_attribute) {
-		$array = array(
-			'name' => $cur_attribute->values[0],
-			'value' => $cur_attribute->values[1]
-		);
-		$cur_attribute = $array;
-	}
-	unset($cur_attribute);
-}
 
 // Go through a list of all groups, and assign them if they're selected.
 // Groups that the user does not have access to will not be received from the
@@ -142,15 +111,15 @@ if ( gatekeeper('com_user/assigngroup') ) {
 	$highest_primary_parent = Tilmeld::$config->highest_primary['value'];
 	$primary_groups = array();
 	if ($highest_primary_parent == 0) {
-		$primary_groups = $_->nymph->getEntities(array('class' => group), array('&', 'tag' => array('com_user', 'group')));
+		$primary_groups = \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group'));
 	} else {
 		if ($highest_primary_parent > 0) {
-			$highest_primary_parent = group::factory($highest_primary_parent);
+			$highest_primary_parent = Group::factory($highest_primary_parent);
 			if (isset($highest_primary_parent->guid))
-				$primary_groups = $highest_primary_parent->get_descendants();
+				$primary_groups = $highest_primary_parent->getDescendants();
 		}
 	}
-	$group = group::factory((int) $_REQUEST['group']);
+	$group = Group::factory((int) $_REQUEST['group']);
 	foreach ($primary_groups as $cur_group) {
 		if ($cur_group->is($group)) {
 			$user->group = $group;
@@ -166,12 +135,12 @@ if ( gatekeeper('com_user/assigngroup') ) {
 		$highest_secondary_parent = Tilmeld::$config->highest_secondary['value'];
 		$secondary_groups = array();
 		if ($highest_secondary_parent == 0) {
-			$secondary_groups = $_->nymph->getEntities(array('class' => group), array('&', 'tag' => array('com_user', 'group')));
+			$secondary_groups = \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group'));
 		} else {
 			if ($highest_secondary_parent > 0) {
-				$highest_secondary_parent = group::factory($highest_secondary_parent);
+				$highest_secondary_parent = Group::factory($highest_secondary_parent);
 				if (isset($highest_secondary_parent->guid))
-					$secondary_groups = $highest_secondary_parent->get_descendants();
+					$secondary_groups = $highest_secondary_parent->getDescendants();
 			}
 		}
 		$groups = array_map('intval', (array) $_REQUEST['groups']);
@@ -211,10 +180,9 @@ if (!$un_check['result']) {
 	return;
 }
 if (in_array('email', Tilmeld::$config->user_fields['value'])) {
-	$test = $_->nymph->getEntity(
-			array('class' => user, 'skip_ac' => true),
+	$test = \Nymph\Nymph::getEntity(
+			array('class' => '\Tilmeld\User', 'skip_ac' => true),
 			array('&',
-				'tag' => array('com_user', 'user'),
 				'match' => array('email', '/^'.preg_quote($user->email, '/').'$/i'),
 				'!guid' => $user->guid
 			)
@@ -231,7 +199,7 @@ if (empty($user->password) && !Tilmeld::$config->pw_empty['value']) {
 	return;
 }
 if (in_array('pin', Tilmeld::$config->user_fields['value']) && gatekeeper('com_user/assignpin') && !empty($user->pin)) {
-	$test = $_->nymph->getEntity(array('class' => user), array('&', 'tag' => array('com_user', 'user'), 'data' => array('pin', $user->pin)));
+	$test = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\User'), array('&', 'data' => array('pin', $user->pin)));
 	if (isset($test) && !$user->is($test)) {
 		$user->print_form();
 		pines_notice('This PIN is already in use.');

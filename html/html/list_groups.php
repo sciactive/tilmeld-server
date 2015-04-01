@@ -11,8 +11,8 @@
 
 $this->title = ($this->enabled ? '' : 'Disabled ').'Groups';
 $_->com_pgrid->load();
-if (isset($_SESSION['user']) && is_array($_SESSION['user']->pgrid_saved_states))
-	$this->pgrid_state = (object) json_decode($_SESSION['user']->pgrid_saved_states['com_user/list_groups']);
+if (isset($_SESSION['tilmeld_user']) && is_array($_SESSION['tilmeld_user']->pgrid_saved_states))
+	$this->pgrid_state = (object) json_decode($_SESSION['tilmeld_user']->pgrid_saved_states['com_user/list_groups']);
 
 // Build an array of parents, so we can include the parent class on their rows.
 $parents = [];

@@ -26,7 +26,6 @@ class MailUserRegistered extends \µMailPHP\Definition {
 		'user_last_name' => 'The user\'s last name.',
 		'user_email' => 'The user\'s email.',
 		'user_phone' => 'The user\'s phone number.',
-		'user_fax' => 'The user\'s fax number.',
 		'user_timezone' => 'The user\'s timezone.',
 		'user_address' => 'The user\'s address.',
 	];

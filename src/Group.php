@@ -32,7 +32,27 @@
  */
 class Group extends AbleObject {
 	const etype = 'group';
-	protected $tags = ['enabled'];
+	protected $tags = [];
+	public $clientEnabledMethods = [
+		'getChildren',
+		'getDescendants',
+		'getLevel',
+		'isDescendant',
+	];
+	protected $privateData = [
+		'email',
+		'phone',
+		'address_type',
+		'address_1',
+		'address_2',
+		'city',
+		'state',
+		'zip',
+		'address_international',
+		'abilities',
+	];
+	protected $whitelistData = [];
+	protected $whitelistTags = [];
 
 	/**
 	 * Load a group.
@@ -55,23 +75,87 @@ class Group extends AbleObject {
 		}
 		// Defaults.
 		$this->abilities = [];
-		$this->conditions = [];
 		$this->address_type = 'us';
-		$this->attributes = [];
 	}
 
 	public function info($type) {
 		switch ($type) {
 			case 'name':
-				return "$this->name [$this->groupname]";
+				return $this->name;
 			case 'type':
 				return 'group';
 			case 'types':
 				return 'groups';
+			case 'avatar':
+				$proto = $_SERVER['HTTPS'] ? 'https' : 'http';
+				if (!isset($this->email) || empty($this->email)) {
+					return $proto.'://secure.gravatar.com/avatar/?d=mm&s=40';
+				}
+				return $proto.'://secure.gravatar.com/avatar/'.md5(strtolower(trim($this->email))).'?d=identicon&s=40';
 			default:
 				return parent::info($type);
 		}
 		return null;
+	}
+
+	public function jsonSerialize($clientClassName = true) {
+		$object = parent::jsonSerialize($clientClassName);
+		$object->info['avatar'] = $this->info('avatar');
+		return $object;
+	}
+
+	public function putData($data, $sdata = []) {
+		$return = parent::putData($data, $sdata);
+		$this->updateDataProtection();
+		return $return;
+	}
+
+	public function updateDataProtection() {
+		if (Tilmeld::$config->email_usernames['value']) {
+			$this->privateData[] = 'groupname';
+		}
+		if (User::current(true)->gatekeeper('tilmeld/editgroups')) {
+			// Users who can edit groups can see their data.
+			$this->privateData = [];
+			$this->whitelistData = false;
+			$this->whitelistTags = ['enabled'];
+			return;
+		}
+		if ($this->is(User::current())) {
+			// Users can see their own data, and edit some of it.
+			$this->whitelistData[] = 'username';
+			if (in_array('name', Tilmeld::$config->user_fields['value'])) {
+				$this->whitelistData[] = 'name_first';
+				$this->whitelistData[] = 'name_middle';
+				$this->whitelistData[] = 'name_last';
+				$this->whitelistData[] = 'name';
+			}
+			if (in_array('email', Tilmeld::$config->user_fields['value'])) {
+				$this->whitelistData[] = 'email';
+			}
+			if (in_array('phone', Tilmeld::$config->user_fields['value'])) {
+				$this->whitelistData[] = 'phone';
+			}
+			if (in_array('timezone', Tilmeld::$config->user_fields['value'])) {
+				$this->whitelistData[] = 'timezone';
+			}
+			if (in_array('address', Tilmeld::$config->user_fields['value'])) {
+				$this->whitelistData[] = 'address_type';
+				$this->whitelistData[] = 'address_1';
+				$this->whitelistData[] = 'address_2';
+				$this->whitelistData[] = 'city';
+				$this->whitelistData[] = 'state';
+				$this->whitelistData[] = 'zip';
+				$this->whitelistData[] = 'address_international';
+			}
+			$this->privateData = [
+				'verify_email',
+				'secret',
+				'secret_time',
+				'password',
+				'salt'
+			];
+		}
 	}
 
 	/**
@@ -101,6 +185,9 @@ class Group extends AbleObject {
 	}
 
 	public function delete() {
+		if (!User::current(true)->gatekeeper('tilmeld/editgroups')) {
+			return false;
+		}
 		$entities = \Nymph\Nymph::getEntities(
 				['class' => '\Tilmeld\Group'],
 				['&',
@@ -108,14 +195,11 @@ class Group extends AbleObject {
 				]
 			);
 		foreach ($entities as $cur_group) {
-			if ( !$cur_group->delete() ) {
+			if (!$cur_group->delete()) {
 				return false;
 			}
 		}
-		if (!parent::delete()) {
-			return false;
-		}
-		return true;
+		return parent::delete();
 	}
 
 	/**
@@ -144,7 +228,7 @@ class Group extends AbleObject {
 	 *
 	 * @return array An array of groups.
 	 */
-	public function get_children() {
+	public function getChildren() {
 		$return = (array) \Nymph\Nymph::getEntities(
 				['class' => '\Tilmeld\Group'],
 				['&',
@@ -158,10 +242,10 @@ class Group extends AbleObject {
 	/**
 	 * Gets an array of the group's descendant groups.
 	 *
-	 * @param bool $and_self Include this group in the returned array.
+	 * @param bool $andSelf Include this group in the returned array.
 	 * @return array An array of groups.
 	 */
-	public function get_descendants($and_self = false) {
+	public function getDescendants($andSelf = false) {
 		$return = [];
 		$entities = \Nymph\Nymph::getEntities(
 				['class' => '\Tilmeld\Group'],
@@ -171,13 +255,15 @@ class Group extends AbleObject {
 				]
 			);
 		foreach ($entities as $entity) {
-			$child_array = $entity->get_descendants(true);
+			$child_array = $entity->getDescendants(true);
 			$return = array_merge($return, $child_array);
 		}
 		$hooked = $this;
-		$class = get_class();
-		\SciActive\Hook::hookObject($hooked, $class.'->', false);
-		if ($and_self) {
+		if (class_exists('\SciActive\Hook')) {
+			$class = get_class();
+			\SciActive\Hook::hookObject($hooked, $class.'->', false);
+		}
+		if ($andSelf) {
 			$return[] = $hooked;
 		}
 		return $return;
@@ -192,7 +278,7 @@ class Group extends AbleObject {
 	 *
 	 * @return int The level of the group.
 	 */
-	public function get_level() {
+	public function getLevel() {
 		$group = $this;
 		$level = 0;
 		while (isset($group->parent) && $group->parent->hasTag('enabled')) {
@@ -203,47 +289,30 @@ class Group extends AbleObject {
 	}
 
 	/**
-	 * Find the location of the group's current logo image.
-	 *
-	 * @param bool $full Return a full URL, instead of a relative one.
-	 * @return string The URL of the logo image.
-	 */
-	public function get_logo($full = false) {
-		if (isset($this->logo)) {
-			return $full ? $_->uploader->url($_->uploader->real($this->logo), true) : $this->logo;
-		}
-		if (isset($this->parent) && $this->parent->hasTag('enabled')) {
-			return $this->parent->get_logo($full);
-		}
-		return ($full ? $_->config->full_location : $_->config->location)."{$_->config->upload_location}logos/default_logo.png";
-	}
-
-	/**
 	 * Gets an array of users in the group.
-	 *
-	 * Some user managers may return only enabled users.
 	 *
 	 * @param bool $descendants Include users in all descendant groups too.
 	 * @return array An array of users.
 	 */
-	public function get_users($descendants = false) {
+	public function getUsers($descendants = false) {
 		if ($descendants) {
-			$groups = $this->get_descendants();
+			$groups = $this->getDescendants();
+			$or = ['|',
+					'ref' => [
+						['group', $groups],
+						['groups', $groups]
+					]
+				];
 		} else {
-			$groups = [];
+			$or = null;
 		}
 		$groups[] = $this;
 		$return = \Nymph\Nymph::getEntities(
 				['class' => '\Tilmeld\User'],
 				['&',
-					'tag' => ['enabled']
+					'tag' => 'enabled'
 				],
-				['|',
-					'ref' => [
-						['group', $groups],
-						['groups', $groups]
-					]
-				]
+				$or
 			);
 		return $return;
 	}
@@ -260,7 +329,6 @@ class Group extends AbleObject {
 		$module->display_enable = gatekeeper('com_user/enabling');
 		$module->display_default = gatekeeper('com_user/defaultgroups');
 		$module->display_abilities = gatekeeper('com_user/abilities');
-		$module->display_conditions = gatekeeper('com_user/conditions');
 		$module->sections = ['system'];
 		$module->group_array = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['&', 'tag' => 'enabled']);
 		foreach ($_->components as $cur_component) {

@@ -11,7 +11,7 @@
 /* @var $_ core */
 defined('P_RUN') or die('Direct access prohibited');
 
-$user = user::factory((int) $_REQUEST['id']);
+$user = User::factory((int) $_REQUEST['id']);
 
 if (!isset($user->guid)) {
 	pines_notice('The specified user id is not available.');
@@ -29,7 +29,7 @@ switch ($_REQUEST['type']) {
 		}
 
 		if (Tilmeld::$config->unverified_access['value'])
-			$user->groups = (array) $_->nymph->getEntities(array('class' => group, 'skip_ac' => true), array('&', 'tag' => array('com_user', 'group'), 'data' => array('default_secondary', true)));
+			$user->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('default_secondary', true)));
 		$user->enable();
 		unset($user->secret);
 		break;
@@ -46,10 +46,9 @@ switch ($_REQUEST['type']) {
 				return;
 			}
 		}
-		$test = $_->nymph->getEntity(
-				array('class' => user, 'skip_ac' => true),
+		$test = \Nymph\Nymph::getEntity(
+				array('class' => '\Tilmeld\User', 'skip_ac' => true),
 				array('&',
-					'tag' => array('com_user', 'user'),
 					'match' => array('email', '/^'.preg_quote($user->new_email_address, '/').'$/i'),
 					'!guid' => $user->guid
 				)

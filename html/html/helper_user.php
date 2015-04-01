@@ -114,47 +114,5 @@ if ($this->render == 'body' && gatekeeper('com_user/listusers')) { ?>
 			echo '<pre>'.h($this->entity->address_international).'</pre>';
 		} ?>
 	</address>
-	<?php if (in_array('additional_addresses', \Tilmeld\Tilmeld::$config->user_fields['value']) && $this->entity->addresses) { ?>
-	<h3 style="margin:10px 0;">Additional Addresses</h3>
-	<table class="table table-bordered" style="clear:both;">
-		<thead>
-			<tr>
-				<th>Type</th>
-				<th>Address 1</th>
-				<th>Address 2</th>
-				<th>City</th>
-				<th>State</th>
-				<th>Zip</th>
-			</tr>
-		</thead>
-		<tbody>
-			<?php foreach ($this->entity->addresses as $cur_address) { ?>
-			<tr>
-				<td><?php e($cur_address['type']); ?></td>
-				<td><?php e($cur_address['address_1']); ?></td>
-				<td><?php e($cur_address['address_2']); ?></td>
-				<td><?php e($cur_address['city']); ?></td>
-				<td><?php e($cur_address['state']); ?></td>
-				<td><?php e($cur_address['zip']); ?></td>
-			</tr>
-			<?php } ?>
-		</tbody>
-	</table>
-	<?php } ?>
-</div>
-<?php } if (in_array('attributes', \Tilmeld\Tilmeld::$config->user_fields['value']) && $this->entity->attributes) { ?>
-<div style="clear:both;">
-	<hr />
-	<h3 style="margin:10px 0;">Attributes</h3>
-	<table class="table table-bordered" style="clear:both;">
-		<thead>
-			<tr><th>Name</th><th>Value</th></tr>
-		</thead>
-		<tbody>
-			<?php foreach ($this->entity->attributes as $cur_attribute) { ?>
-			<tr><td><?php e($cur_attribute['name']); ?></td><td><?php e($cur_attribute['value']); ?></td></tr>
-			<?php } ?>
-		</tbody>
-	</table>
 </div>
 <?php } }

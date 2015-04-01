@@ -11,10 +11,11 @@
 /* @var $_ core */
 defined('P_RUN') or die('Direct access prohibited');
 
-if (!Tilmeld::$config->pw_recovery['value'])
+if (!Tilmeld::$config->pw_recovery['value']) {
 	throw new HttpClientException(null, 404);
+}
 
-$user = user::factory((int) $_REQUEST['id']);
+$user = User::factory((int) $_REQUEST['id']);
 
 if (!isset($user->guid)) {
 	pines_notice('The specified user id is not available.');
@@ -22,7 +23,7 @@ if (!isset($user->guid)) {
 	return;
 }
 
-if (!isset($user->secret) || $_REQUEST['secret'] != $user->secret || strtotime("+{Tilmeld::$config->pw_recovery_minutes['value']} minutes", $user->secret_time) < time() ) {
+if (!isset($user->secret) || $_REQUEST['secret'] != $user->secret || strtotime('+'.Tilmeld::$config->pw_recovery_minutes['value'].' minutes', $user->secret_time) < time() ) {
 	pines_notice('The secret code given does not match this user.');
 	Tilmeld::print_login();
 	return;
@@ -35,7 +36,7 @@ if ($_REQUEST['form'] != 'true') {
 	return;
 }
 
-if (empty($_REQUEST['password']) && !Tilmeld::$config->pw_empty['value']) {
+if (empty($_REQUEST['password'])) {
 	pines_notice('Password cannot be empty');
 	Tilmeld::print_login();
 	return;
