@@ -1,6 +1,6 @@
-<?php namespace Tilmeld;
+<?php namespace Tilmeld\Mail;
 /**
- * MailUserRegistered class.
+ * UserRegistered class.
  *
  * @package Tilmeld
  * @license http://www.gnu.org/licenses/agpl-3.0.html
@@ -14,7 +14,7 @@
  *
  * @package Tilmeld
  */
-class MailUserRegistered extends \µMailPHP\Definition {
+class UserRegistered extends \µMailPHP\Definition {
 	public static $cname = 'New User Registered';
 	public static $description = 'This email is sent when a new user registers himself on the site.';
 	public static $expectsRecipient = false;
@@ -37,6 +37,6 @@ class MailUserRegistered extends \µMailPHP\Definition {
 	}
 
 	public static function getHTML() {
-		return file_get_contents(__DIR__.'/../html/mails/user_registered.html');
+		return file_get_contents(__DIR__.'/../../html/Mail/UserRegistered.html');
 	}
 }

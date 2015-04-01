@@ -1,6 +1,6 @@
-<?php namespace Tilmeld;
+<?php namespace Tilmeld\Mail;
 /**
- * MailCancelEmailChange class.
+ * CancelEmailChange class.
  *
  * @package Tilmeld
  * @license http://www.gnu.org/licenses/agpl-3.0.html
@@ -14,7 +14,7 @@
  *
  * @package Tilmeld
  */
-class MailCancelEmailChange extends \µMailPHP\Definition {
+class CancelEmailChange extends \µMailPHP\Definition {
 	public static $cname = 'Cancel Email Change';
 	public static $description = 'This email is sent to a user\'s old email when they change their email to let them cancel their change.';
 	public static $expectsRecipient = true;
@@ -35,6 +35,6 @@ class MailCancelEmailChange extends \µMailPHP\Definition {
 	}
 
 	public static function getHTML() {
-		return file_get_contents(__DIR__.'/../html/mails/cancel_email_change.html');
+		return file_get_contents(__DIR__.'/../../html/Mail/CancelEmailChange.html');
 	}
 }

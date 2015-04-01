@@ -1,6 +1,6 @@
-<?php namespace Tilmeld;
+<?php namespace Tilmeld\Mail;
 /**
- * MailRecoverAccount class.
+ * RecoverAccount class.
  *
  * @package Tilmeld
  * @license http://www.gnu.org/licenses/agpl-3.0.html
@@ -14,7 +14,7 @@
  *
  * @package Tilmeld
  */
-class MailRecoverAccount extends \µMailPHP\Definition {
+class RecoverAccount extends \µMailPHP\Definition {
 	public static $cname = 'Recover Account';
 	public static $description = 'This email is sent when a user can\'t access their account so they can recover their username and/or password.';
 	public static $expectsRecipient = true;
@@ -35,6 +35,6 @@ class MailRecoverAccount extends \µMailPHP\Definition {
 	}
 
 	public static function getHTML() {
-		return file_get_contents(__DIR__.'/../html/mails/recover_account.html');
+		return file_get_contents(__DIR__.'/../../html/Mail/RecoverAccount.html');
 	}
 }

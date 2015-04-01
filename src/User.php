@@ -367,7 +367,7 @@ class User extends AbleObject {
 			'to_timezone' => htmlspecialchars($this->timezone),
 			'to_address' => $this->address_type == 'us' ? htmlspecialchars("{$this->address_1} {$this->address_2}").'<br />'.htmlspecialchars("{$this->city}, {$this->state} {$this->zip}") : '<pre>'.htmlspecialchars($this->address_international).'</pre>'
 		];
-		$mail = new \µMailPHP\Mail('\Tilmeld\MailVerifyEmail', $this, $macros);
+		$mail = new \µMailPHP\Mail('\Tilmeld\Mail\VerifyEmail', $this, $macros);
 		return $mail->send();
 	}
 
@@ -817,7 +817,7 @@ class User extends AbleObject {
 				'user_timezone' => htmlspecialchars($this->timezone),
 				'user_address' => $this->address_type == 'us' ? htmlspecialchars("{$this->address_1} {$this->address_2}").'<br />'.htmlspecialchars("{$this->city}, {$this->state} {$this->zip}") : '<pre>'.htmlspecialchars($this->address_international).'</pre>'
 			);
-			$mail = new \µMailPHP\Mail('\Tilmeld\MailUserRegistered', null, $macros);
+			$mail = new \µMailPHP\Mail('\Tilmeld\Mail\UserRegistered', null, $macros);
 			$mail->send();
 			if (Tilmeld::$config->verify_email['value']) {
 				// Send the verification email.
@@ -918,7 +918,7 @@ class User extends AbleObject {
 			'to_timezone' => htmlspecialchars($this->timezone),
 			'to_address' => $this->address_type == 'us' ? htmlspecialchars("{$this->address_1} {$this->address_2}").'<br />'.htmlspecialchars("{$this->city}, {$this->state} {$this->zip}") : '<pre>'.htmlspecialchars($this->address_international).'</pre>'
 		);
-		$mail = new \µMailPHP\Mail('\Tilmeld\MailRecoverAccount', $this, $macros);
+		$mail = new \µMailPHP\Mail('\Tilmeld\Mail\RecoverAccount', $this, $macros);
 		if ($mail->send()) {
 			return ['result' => true, 'message' => 'We\'ve sent an email to your registered address. Please check your email to continue with account recovery.'];
 		} else {

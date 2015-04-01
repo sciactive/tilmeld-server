@@ -1,6 +1,6 @@
-<?php namespace Tilmeld;
+<?php namespace Tilmeld\Mail;
 /**
- * MailVerifyEmailChange class.
+ * VerifyEmail class.
  *
  * @package Tilmeld
  * @license http://www.gnu.org/licenses/agpl-3.0.html
@@ -10,19 +10,17 @@
  */
 
 /**
- * Verify Email Change
+ * Verify Email
  *
  * @package Tilmeld
  */
-class MailVerifyEmailChange extends \µMailPHP\Definition {
-	public static $cname = 'Verify Email Change';
-	public static $description = 'This email is sent to a user\'s new email when they change their email to let them verify their new address.';
+class VerifyEmail extends \µMailPHP\Definition {
+	public static $cname = 'Verify Email';
+	public static $description = 'This email is sent to a new user to let them verify their address.';
 	public static $expectsRecipient = true;
 	public static $unsubscribe = false;
 	public static $macros = [
 		'verify_link' => 'The URL to verify the email address, to be used in a link.',
-		'old_email' => 'The old email address.',
-		'new_email' => 'The new email address.',
 		'to_phone' => 'The recipient\'s phone number.',
 		'to_timezone' => 'The recipient\'s timezone.',
 		'to_address' => 'The recipient\'s address.',
@@ -31,10 +29,10 @@ class MailVerifyEmailChange extends \µMailPHP\Definition {
 	public static function getMacro($name) {}
 
 	public static function getSubject() {
-		return 'Hey #to_first_name#, please verify your new email address for #site_name#.';
+		return 'Hi #to_first_name#, please verify your email at #site_name#.';
 	}
 
 	public static function getHTML() {
-		return file_get_contents(__DIR__.'/../html/mails/verify_email_change.html');
+		return file_get_contents(__DIR__.'/../../html/Mail/VerifyEmail.html');
 	}
 }
