@@ -34,7 +34,7 @@
  * @property bool $inherit_abilities Whether the user should inherit the abilities of his groups.
  */
 class User extends AbleObject {
-	const etype = 'user';
+	const ETYPE = 'user';
 	protected $tags = [];
 	public $clientEnabledMethods = [
 		'checkUsername',
@@ -105,6 +105,7 @@ class User extends AbleObject {
 			}
 		}
 		// Defaults.
+		$this->enabled = true;
 		$this->abilities = [];
 		$this->groups = [];
 		$this->inherit_abilities = true;
@@ -140,7 +141,6 @@ class User extends AbleObject {
 				'salt'
 			];
 			$this->whitelistData = false;
-			$this->whitelistTags = ['enabled'];
 			return;
 		}
 		if ($this->is(User::current())) {
@@ -270,20 +270,6 @@ class User extends AbleObject {
 		return parent::delete();
 	}
 
-	/**
-	 * Disable the user.
-	 */
-	public function disable() {
-		$this->removeTag('enabled');
-	}
-
-	/**
-	 * Enable the user.
-	 */
-	public function enable() {
-		$this->addTag('enabled');
-	}
-
 	public function save() {
 		if (!isset($this->username)) {
 			return false;
@@ -389,7 +375,7 @@ class User extends AbleObject {
 		$module->sections = ['system'];
 		$highest_parent = Tilmeld::$config->highest_primary['value'];
 		if ($highest_parent == 0) {
-			$module->group_array_primary = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['&', 'tag' => 'enabled']);
+			$module->group_array_primary = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['&', 'data' => ['enabled', true]]);
 		} elseif ($highest_parent < 0) {
 			$module->group_array_primary = [];
 		} else {
@@ -402,7 +388,7 @@ class User extends AbleObject {
 		}
 		$highest_parent = Tilmeld::$config->highest_secondary['value'];
 		if ($highest_parent == 0) {
-			$module->group_array_secondary = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['&', 'tag' => 'enabled']);
+			$module->group_array_secondary = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['&', 'data' => ['enabled', true]]);
 		} elseif ($highest_parent < 0) {
 			$module->group_array_secondary = [];
 		} else {
@@ -788,7 +774,7 @@ class User extends AbleObject {
 		if (Tilmeld::$config->verify_email['value']) {
 			// The user will be enabled after verifying their e-mail address.
 			if (!Tilmeld::$config->unverified_access['value']) {
-				$this->disable();
+				$this->enabled = false;
 			}
 			$this->secret = uniqid('', true);
 		} else {
@@ -851,7 +837,7 @@ class User extends AbleObject {
 		if (!isset($this->guid)) {
 			return ['result' => false, 'message' => 'This is not a registered user.'];
 		}
-		if (!$this->hasTag('enabled')) {
+		if (!$this->enabled) {
 			return ['result' => false, 'message' => 'This user is disabled.'];
 		}
 		if ($this->gatekeeper()) {
@@ -898,7 +884,7 @@ class User extends AbleObject {
 			return ['result' => false, 'message' => 'Account recovery is not allowed.'];
 		}
 
-		if (!isset($this->guid) || !$this->hasTag('enabled')) {
+		if (!isset($this->guid) || !$this->enabled) {
 			return ['result' => false, 'message' => 'Requested account is not accessible.'];
 		}
 

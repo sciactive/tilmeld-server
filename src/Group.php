@@ -31,7 +31,7 @@
  * @property Group $parent The group's parent.
  */
 class Group extends AbleObject {
-	const etype = 'group';
+	const ETYPE = 'group';
 	protected $tags = [];
 	public $clientEnabledMethods = [
 		'getChildren',
@@ -74,6 +74,7 @@ class Group extends AbleObject {
 			}
 		}
 		// Defaults.
+		$this->enabled = true;
 		$this->abilities = [];
 		$this->address_type = 'us';
 	}
@@ -118,7 +119,6 @@ class Group extends AbleObject {
 			// Users who can edit groups can see their data.
 			$this->privateData = [];
 			$this->whitelistData = false;
-			$this->whitelistTags = ['enabled'];
 			return;
 		}
 		if ($this->is(User::current())) {
@@ -202,20 +202,6 @@ class Group extends AbleObject {
 		return parent::delete();
 	}
 
-	/**
-	 * Disable the group.
-	 */
-	public function disable() {
-		$this->removeTag('enabled');
-	}
-
-	/**
-	 * Enable the group.
-	 */
-	public function enable() {
-		$this->addTag('enabled');
-	}
-
 	public function save() {
 		if (!isset($this->groupname)) {
 			return false;
@@ -232,7 +218,7 @@ class Group extends AbleObject {
 		$return = (array) \Nymph\Nymph::getEntities(
 				['class' => '\Tilmeld\Group'],
 				['&',
-					'tag' => 'enabled',
+					'data' => ['enabled', true],
 					'ref' => ['parent', $this]
 				]
 			);
@@ -250,7 +236,7 @@ class Group extends AbleObject {
 		$entities = \Nymph\Nymph::getEntities(
 				['class' => '\Tilmeld\Group'],
 				['&',
-					'tag' => 'enabled',
+					'data' => ['enabled', true],
 					'ref' => ['parent', $this]
 				]
 			);
@@ -281,7 +267,7 @@ class Group extends AbleObject {
 	public function getLevel() {
 		$group = $this;
 		$level = 0;
-		while (isset($group->parent) && $group->parent->hasTag('enabled')) {
+		while (isset($group->parent) && $group->parent->enabled) {
 			$level++;
 			$group = $group->parent;
 		}
@@ -310,7 +296,7 @@ class Group extends AbleObject {
 		$return = \Nymph\Nymph::getEntities(
 				['class' => '\Tilmeld\User'],
 				['&',
-					'tag' => 'enabled'
+					'data' => ['enabled', true]
 				],
 				$or
 			);
@@ -330,7 +316,7 @@ class Group extends AbleObject {
 		$module->display_default = gatekeeper('com_user/defaultgroups');
 		$module->display_abilities = gatekeeper('com_user/abilities');
 		$module->sections = ['system'];
-		$module->group_array = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['&', 'tag' => 'enabled']);
+		$module->group_array = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['&', 'data' => ['enabled', true]]);
 		foreach ($_->components as $cur_component) {
 			$module->sections[] = $cur_component;
 		}

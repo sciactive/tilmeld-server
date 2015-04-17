@@ -11,10 +11,12 @@
 	User = function(id){
 		this.constructor.call(this, id);
 		// Defaults.
+		this.data.enabled = true;
 		this.data.abilities = [];
 		this.data.groups = [];
 		this.data.inherit_abilities = true;
 		this.data.address_type = 'us';
+		this.info.avatar = '//secure.gravatar.com/avatar/?d=mm&s=40';
 	};
 	User.prototype = new Entity();
 

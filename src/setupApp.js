@@ -7,41 +7,24 @@ angular.module('setupApp', ['ngRoute'])
 
 .controller('UserController', ['$scope', '$routeParams', '$timeout', function ($scope, $routeParams, $timeout) {
 	$scope.params = $routeParams;
-	$scope.definitions = Definitions;
-	$scope.examples = Examples;
-	$scope.entities = [];
-	$scope.success = null;
+	$scope.uiState = {
+		loading: false,
+		sort: 'first_name',
+		entities: [],
+		timezones: timezones,
+		success: null
+	};
+	$scope.entity = new User();
 
-	Nymph.getEntities({'class': '\Tilmeld\User'}).then(function(entities){
-		$scope.entities = entities;
+	Nymph.getEntities({"class": '\\Tilmeld\\User'}).subscribe(function(entities){
+		Nymph.updateArray($scope.uiState.entities, entities);
+		Nymph.sort($scope.uiState.entities, $scope.uiState.sort);
 		$scope.$apply();
 	});
-
-	$scope.askDefaultContent = function(){
-		if (Definitions[$scope.entity.data.definition].html && Definitions[$scope.entity.data.definition].subject) {
-			if (confirm("Would you like to start with this definition's default content and subject?")) {
-				$scope.entity.data.subject = Definitions[$scope.entity.data.definition].subject;
-				$scope.entity.data.content = Definitions[$scope.entity.data.definition].html;
-			}
-		} else if (Definitions[$scope.entity.data.definition].html) {
-			if (confirm("Would you like to start with this definition's default content?")) {
-				$scope.entity.data.content = Definitions[$scope.entity.data.definition].html;
-			}
-		} else if (Definitions[$scope.entity.data.definition].subject) {
-			if (confirm("Would you like to start with this definition's default subject?")) {
-				$scope.entity.data.subject = Definitions[$scope.entity.data.definition].subject;
-			}
-		}
-	};
-
-	$scope.entity = new User();
 
 	$scope.saveEntity = function(){
 		$scope.entity.save().then(function(success){
 			if (success) {
-				if (!$scope.entity.inArray($scope.entities)) {
-					$scope.entities.push($scope.entity);
-				}
 				$scope.success = true;
 				$timeout(function(){
 					$scope.success = null;
@@ -64,25 +47,23 @@ angular.module('setupApp', ['ngRoute'])
 
 .controller('GroupController', ['$scope', '$routeParams', '$timeout', function ($scope, $routeParams, $timeout) {
 	$scope.params = $routeParams;
-	$scope.examples = Examples;
-	$scope.entities = [];
-	$scope.success = null;
-
-	Nymph.getEntities({'class': '\Tilmeld\Group'}).then(function(entities){
-		$scope.entities = entities;
-	});
-
+	$scope.uiState = {
+		loading: false,
+		sort: 'first_name',
+		entities: [],
+		success: null
+	};
 	$scope.entity = new Group();
-	$scope.entity.defaultContent().then(function(){
+
+	Nymph.getEntities({"class": '\\Tilmeld\\Group'}).subscribe(function(entities){
+		Nymph.updateArray($scope.uiState.entities, entities);
+		Nymph.sort($scope.uiState.entities, $scope.uiState.sort);
 		$scope.$apply();
 	});
 
 	$scope.saveEntity = function(){
 		$scope.entity.save().then(function(success){
 			if (success) {
-				if (!$scope.entity.inArray($scope.entities)) {
-					$scope.entities.push($scope.entity);
-				}
 				$scope.success = true;
 				$timeout(function(){
 					$scope.success = null;
@@ -99,9 +80,6 @@ angular.module('setupApp', ['ngRoute'])
 	$scope.checkNewEntity = function(){
 		if (!$scope.entity) {
 			$scope.entity = new Group();
-			$scope.entity.defaultContent().then(function(){
-				$scope.$apply();
-			});
 		}
 	};
 }])
@@ -109,14 +87,14 @@ angular.module('setupApp', ['ngRoute'])
 .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
 	$routeProvider
 		.when('/', {
-			groupUrl: baseURL+'html/instructions.html'
+			templateUrl: baseURL+'html/instructions.html'
 		})
 		.when('/user/:entityId?', {
-			groupUrl: baseURL+'html/user.html',
+			templateUrl: baseURL+'html/user.html',
 			controller: 'UserController'
 		})
 		.when('/group/:entityId?', {
-			groupUrl: baseURL+'html/group.html',
+			templateUrl: baseURL+'html/group.html',
 			controller: 'GroupController'
 		});
 

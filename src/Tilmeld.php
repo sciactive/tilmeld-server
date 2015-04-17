@@ -196,57 +196,11 @@ class Tilmeld {
 	 *
 	 * @param array &$array The array of groups.
 	 * @param string|null $property The name of the property to sort groups by. Null for no additional sorting.
-	 * @param bool $case_sensitive Sort case sensitively.
+	 * @param bool $caseSensitive Sort case sensitively.
 	 * @param bool $reverse Reverse the sort order.
 	 */
-	public static function groupSort(&$array, $property = null, $case_sensitive = false, $reverse = false) {
-		\Nymph\Nymph::hsort($array, $property, 'parent', $case_sensitive, $reverse);
-	}
-
-	/**
-	 * Creates and attaches a module which lists groups.
-	 *
-	 * @param bool $enabled Show enabled groups if true, disabled if false.
-	 * @return module The module.
-	 */
-	public static function listGroups($enabled = true) {
-		$module = new module('com_user', 'list_groups', 'content');
-
-		$module->enabled = $enabled;
-		if ($enabled) {
-			$module->groups = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['&', 'tag' => 'enabled']);
-		} else {
-			$module->groups = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['!&', 'tag' => 'enabled']);
-		}
-
-		if (empty($module->groups)) {
-			pines_notice('There are no'.($enabled ? ' enabled' : ' disabled').' groups.');
-		}
-
-		return $module;
-	}
-
-	/**
-	 * Creates and attaches a module which lists users.
-	 *
-	 * @param bool $enabled Show enabled users if true, disabled if false.
-	 * @return module The module.
-	 */
-	public static function listUsers($enabled = true) {
-		$module = new module('com_user', 'list_users', 'content');
-
-		$module->enabled = $enabled;
-		if ($enabled) {
-			$module->users = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\User'], ['&', 'tag' => 'enabled']);
-		} else {
-			$module->users = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\User'], ['!&', 'tag' => 'enabled']);
-		}
-
-		if (empty($module->users)) {
-			pines_notice('There are no'.($enabled ? ' enabled' : ' disabled').' users.');
-		}
-
-		return $module;
+	public static function groupSort(&$array, $property = null, $caseSensitive = false, $reverse = false) {
+		\Nymph\Nymph::hsort($array, $property, 'parent', $caseSensitive, $reverse);
 	}
 
 	/**
@@ -256,7 +210,7 @@ class Tilmeld {
 	 * @return bool True on success, false on failure.
 	 */
 	public static function login($user) {
-		if (isset($user->guid) && $user->hasTag('enabled')) {
+		if (isset($user->guid) && $user->enabled) {
 			// Destroy session data.
 			self::logout();
 			self::session('write');
