@@ -52,13 +52,13 @@ if (gatekeeper('com_user/defaultgroups')) {
 	$group->unverified_secondary = $_REQUEST['unverified_secondary'] == 'ON';
 }
 // Location
-$group->address_type = $_REQUEST['address_type'];
-$group->address_1 = $_REQUEST['address_1'];
-$group->address_2 = $_REQUEST['address_2'];
-$group->city = $_REQUEST['city'];
-$group->state = $_REQUEST['state'];
-$group->zip = $_REQUEST['zip'];
-$group->address_international = $_REQUEST['address_international'];
+$group->addressType = $_REQUEST['addressType'];
+$group->addressStreet = $_REQUEST['addressStreet'];
+$group->addressStreet2 = $_REQUEST['addressStreet2'];
+$group->addressCity = $_REQUEST['addressCity'];
+$group->addressState = $_REQUEST['addressState'];
+$group->addressZip = $_REQUEST['addressZip'];
+$group->addressInternational = $_REQUEST['addressInternational'];
 
 //if ( $_REQUEST['no_parent'] == 'ON' ) {
 if ( $_REQUEST['parent'] == 'none' ) {
@@ -96,9 +96,9 @@ if (empty($group->groupname)) {
 	pines_notice('Please specify a groupname.');
 	return;
 }
-if (Tilmeld::$config->max_groupname_length['value'] > 0 && strlen($group->groupname) > Tilmeld::$config->max_groupname_length['value']) {
+if (Tilmeld::$config['max_groupname_length'] > 0 && strlen($group->groupname) > Tilmeld::$config['max_groupname_length']) {
 	$group->print_form();
-	pines_notice("Groupnames must not exceed {Tilmeld::$config->max_groupname_length['value']} characters.");
+	pines_notice('Groupnames must not exceed '.Tilmeld::$config['max_groupname_length'].' characters.');
 	return;
 }
 $test = \Nymph\Nymph::getEntity(
@@ -112,14 +112,14 @@ if (isset($test->guid) && !$group->is($test)) {
 	pines_notice('There is already a group with that groupname. Please choose a different groupname.');
 	return;
 }
-if (array_diff(str_split($group->groupname), str_split(Tilmeld::$config->valid_chars['value']))) {
+if (array_diff(str_split($group->groupname), str_split(Tilmeld::$config['valid_chars']))) {
 	$group->print_form();
-	pines_notice(Tilmeld::$config->valid_chars_notice['value']);
+	pines_notice(Tilmeld::$config['valid_chars_notice']);
 	return;
 }
-if (!preg_match(Tilmeld::$config->valid_regex['value'], $group->groupname)) {
+if (!preg_match(Tilmeld::$config['valid_regex'], $group->groupname)) {
 	$group->print_form();
-	pines_notice(Tilmeld::$config->valid_regex_notice['value']);
+	pines_notice(Tilmeld::$config['valid_regex_notice']);
 	return;
 }
 if (!empty($group->email)) {
@@ -161,14 +161,14 @@ if ($_REQUEST['remove_logo'] == 'ON' && isset($group->logo))
 if (!empty($_REQUEST['image']) && $_->uploader->check($_REQUEST['image'])) {
 	$group->logo = $_REQUEST['image'];
 	/* How to resize images without overwriting them?
-	if (Tilmeld::$config->resize_logos['value']) {
+	if (Tilmeld::$config['resize_logos']) {
 		// if jpeg
 		case 'image/jpeg':
 			$img_raw = imagecreatefromjpeg($group->logo);
 			$currwidth = imagesx($img_raw);
 			$currheight = imagesy($img_raw);
-			$img_resized = imagecreate(Tilmeld::$config->logo_width['value'], Tilmeld::$config->logo_height['value']);
-			imagecopyresized($img_resized, $img_raw, 0, 0, 0, 0, Tilmeld::$config->logo_width['value'], Tilmeld::$config->logo_height['value'], $currwidth, $currheight);
+			$img_resized = imagecreate(Tilmeld::$config['logo_width'], Tilmeld::$config['logo_height']);
+			imagecopyresized($img_resized, $img_raw, 0, 0, 0, 0, Tilmeld::$config['logo_width'], Tilmeld::$config['logo_height'], $currwidth, $currheight);
 			imagejpeg($img_resized, $group->logo);
 			imagedestroy($img_raw);
 			imagedestroy($img_resized);
@@ -178,8 +178,8 @@ if (!empty($_REQUEST['image']) && $_->uploader->check($_REQUEST['image'])) {
 			$img_raw = imagecreatefrompng($group->logo);
 			$currwidth = imagesx($img_raw);
 			$currheight = imagesy($img_raw);
-			$img_resized = imagecreate(Tilmeld::$config->logo_width['value'], Tilmeld::$config->logo_height['value']);
-			imagecopyresized($img_resized, $img_raw, 0, 0, 0, 0, Tilmeld::$config->logo_width['value'], Tilmeld::$config->logo_height['value'], $currwidth, $currheight);
+			$img_resized = imagecreate(Tilmeld::$config['logo_width'], Tilmeld::$config['logo_height']);
+			imagecopyresized($img_resized, $img_raw, 0, 0, 0, 0, Tilmeld::$config['logo_width'], Tilmeld::$config['logo_height'], $currwidth, $currheight);
 			imagepng($img_resized, $group->logo);
 			imagedestroy($img_raw);
 			imagedestroy($img_resized);
@@ -189,7 +189,7 @@ if (!empty($_REQUEST['image']) && $_->uploader->check($_REQUEST['image'])) {
 			$img_raw = imagecreatefromgif($group->logo);
 			$currwidth = imagesx($img_raw);
 			$currheight = imagesy($img_raw);
-			$img_resized = imagecreatetruecolor(Tilmeld::$config->logo_width['value'], Tilmeld::$config->logo_height['value']);
+			$img_resized = imagecreatetruecolor(Tilmeld::$config['logo_width'], Tilmeld::$config['logo_height']);
 			$blank = imagecolortransparent($img_raw);
 			// If the image has alpha values (transparency) fill our resized image with blank space.
 			if( $blank >= 0 && $blank < imagecolorstotal($img_raw) ) {
@@ -198,7 +198,7 @@ if (!empty($_REQUEST['image']) && $_->uploader->check($_REQUEST['image'])) {
 				imagefill( $img_resized, 0, 0, $trans_color );
 				imagecolortransparent( $img_resized, $trans_color );
 			}
-			imagecopyresized($img_resized, $img_raw, 0, 0, 0, 0, Tilmeld::$config->logo_width['value'], Tilmeld::$config->logo_height['value'], $currwidth, $currheight);
+			imagecopyresized($img_resized, $img_raw, 0, 0, 0, 0, Tilmeld::$config['logo_width'], Tilmeld::$config['logo_height'], $currwidth, $currheight);
 			imagegif($img_resized, $group->logo);
 			imagedestroy($img_raw);
 			imagedestroy($img_resized);

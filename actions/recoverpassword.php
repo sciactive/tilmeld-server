@@ -11,7 +11,7 @@
 /* @var $_ core */
 defined('P_RUN') or die('Direct access prohibited');
 
-if (!Tilmeld::$config->pw_recovery['value']) {
+if (!Tilmeld::$config['pw_recovery']) {
 	throw new HttpClientException(null, 404);
 }
 
@@ -23,7 +23,7 @@ if (!isset($user->guid)) {
 	return;
 }
 
-if (!isset($user->secret) || $_REQUEST['secret'] != $user->secret || strtotime('+'.Tilmeld::$config->pw_recovery_minutes['value'].' minutes', $user->secret_time) < time() ) {
+if (!isset($user->secret) || $_REQUEST['secret'] != $user->secret || strtotime('+'.Tilmeld::$config['pw_recovery_minutes'].' minutes', $user->secret_time) < time() ) {
 	pines_notice('The secret code given does not match this user.');
 	Tilmeld::print_login();
 	return;

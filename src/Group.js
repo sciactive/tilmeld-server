@@ -13,13 +13,13 @@
 		// Defaults.
 		this.data.enabled = true;
 		this.data.abilities = [];
-		this.data.address_type = 'us';
+		this.data.addressType = 'us';
 		this.info.avatar = '//secure.gravatar.com/avatar/?d=mm&s=40';
 	};
 	Group.prototype = new Entity();
 
 	var thisClass = {
-		// === The Name of the Class ===
+		// === The Name of the Server Class ===
 		class: '\\Tilmeld\\Group',
 
 		// === Class Variables ===
@@ -48,6 +48,12 @@
 			Group.prototype[p] = thisClass[p];
 		}
 	}
+	Group.getPrimaryGroups = function(){
+		return this.prototype.serverCallStatic('getPrimaryGroups', arguments);
+	};
+	Group.getSecondaryGroups = function(){
+		return this.prototype.serverCallStatic('getSecondaryGroups', arguments);
+	};
 
 	return Group;
 }));

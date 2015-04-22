@@ -1,5 +1,10 @@
 <?php
 
+//if (!\Tilmeld\User::current(true)->gatekeeper('tilmeld/admin')) {
+//	header('HTTP/1.1 403 Forbidden');
+//	die('You are not authorized to access this page.');
+//}
+
 $timezones = DateTimeZone::listIdentifiers();
 sort($timezones);
 
@@ -20,7 +25,7 @@ sort($timezones);
 				rateLimit: 100
 			};
 			baseURL = <?php echo json_encode($baseURL); ?>;
-			timezones = <?php echo json_encode($timezones); ?>;
+			tilmeldTimezones = <?php echo json_encode($timezones); ?>;
 		</script>
 		<script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/Nymph.js"></script>
 		<script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/Entity.js"></script>

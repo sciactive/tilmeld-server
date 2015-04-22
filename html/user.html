@@ -9,7 +9,7 @@
 	</div>
 </div>
 <div class="page-header" style="margin-top: 0;">
-	<h2 style="margin-top: 0;">Editing {{entity.data.guid ? entity.data.name : 'New User'}}</h2>
+	<h2 style="margin-top: 0;">Editing {{entity.data.guid ? (entity.is(currentUser) ? 'Yourself' : entity.data.name) : 'New User'}}</h2>
 </div>
 <form class="pf-form" method="post" name="userform" ng-submit="saveEntity()" style="position: relative;" autocomplete="off">
 	<ul class="nav nav-tabs" style="clear: both; margin-bottom: 15px;">
@@ -21,152 +21,118 @@
 	<div id="p_muid_tabs" class="tab-content">
 		<div class="tab-pane tab-pane-general active">
 			<div style="float: right; text-align: right;">
-				<div class="thumbnail pull-right">
-					<img ng-src="{{entity.info.avatar}}" alt="Avatar" title="Avatar by Gravatar" />
-				</div>
+				<a href="https://en.gravatar.com/" target="_blank">
+					<span class="thumbnail pull-right">
+						<img ng-src="{{entity.info.avatar}}" alt="Avatar" title="Avatar by Gravatar" />
+					</span>
+				</a>
 			</div>
 			<div class="pf-element">
-				<label><span class="pf-label">Username</span>
-					<input class="pf-field form-control" type="text" name="username" size="24" required ng-model="entity.data.username" /></label>
+				<label>
+					<span class="pf-label">Username</span>
+					<span class="pf-group pf-full-width">
+						<span class="form-group" ng-class="{'has-success': uiState.usernameVerified === true, 'has-error': uiState.usernameVerified === false}">
+							<input class="pf-field form-control" type="text" name="username" size="24" ng-model="entity.data.username" />
+						</span>
+						<span class="pf-field" ng-if="uiState.usernameVerifiedMessage">{{uiState.usernameVerifiedMessage}}</span>
+					</span>
+				</label>
+			</div>
+			<div class="pf-element">
+				<label>
+					<span class="pf-label">Email</span>
+					<span class="pf-group pf-full-width">
+						<span class="form-group" ng-class="{'has-success': uiState.emailVerified === true, 'has-error': uiState.emailVerified === false}">
+							<input class="pf-field form-control" type="email" name="email" size="24" ng-model="entity.data.email" />
+						</span>
+						<span class="pf-field" ng-if="uiState.emailVerifiedMessage">{{uiState.emailVerifiedMessage}}</span>
+					</span>
+				</label>
 			</div>
 			<div class="pf-element">
 				<label><span class="pf-label">First Name</span>
-					<input class="pf-field form-control" type="text" name="name_first" size="24" required ng-model="entity.data.name_first" /></label>
+					<input class="pf-field form-control" type="text" name="nameFirst" size="24" ng-model="entity.data.nameFirst" /></label>
 			</div>
 			<div class="pf-element">
 				<label><span class="pf-label">Middle Name</span>
-					<input class="pf-field form-control" type="text" name="name_middle" size="24" ng-model="entity.data.name_middle" /></label>
+					<input class="pf-field form-control" type="text" name="nameMiddle" size="24" ng-model="entity.data.nameMiddle" /></label>
 			</div>
 			<div class="pf-element">
 				<label><span class="pf-label">Last Name</span>
-					<input class="pf-field form-control" type="text" name="name_last" size="24" ng-model="entity.data.name_last" /></label>
+					<input class="pf-field form-control" type="text" name="nameLast" size="24" ng-model="entity.data.nameLast" /></label>
 			</div>
 			<div class="pf-element">
 				<label><span class="pf-label">Enabled</span>
 					<input class="pf-field" type="checkbox" name="enabled" ng-model="entity.data.enabled" /></label>
 			</div>
 			<div class="pf-element">
-				<?php if ($this->display_email_verified && isset($this->entity->secret)) { ?>
-				<label for="p_muid_email"><span class="pf-label">Email</span></label>
-				<div class="pf-group">
-					<input class="pf-field form-control" type="email" name="email" id="p_muid_email" size="24" value="<?php e($this->entity->email); ?>" />
-					<?php if (\Tilmeld\Tilmeld::$config->email_usernames['value'] && \Tilmeld\Tilmeld::$config->checkUsername['value']) { ?>
-					<span class="pf-field picon picon-throbber loader" id="p_muid_username_loading" style="display: none;">&nbsp;</span>
-					<span class="pf-field picon" id="p_muid_username_message"></span>
-					<?php } ?>
-					<label title="{{config.unverified_access ? 'Disregards changes to the user\'s secondary groups, and defaults will be used.' : ''}}"><input class="pf-field" type="checkbox" name="email_verified" value="ON" /> Mark this address as verified.</label>
-				</div>
-				<?php } else { ?>
+				<label><span class="pf-label">Phone</span>
+					<input class="pf-field form-control" type="tel" name="phone" size="24" ng-model="entity.data.phone" /></label>
+			</div>
+			<div class="pf-element">
 				<label>
-					<span class="pf-label">Email</span>
-					<input class="pf-field form-control" type="email" name="email" size="24" value="<?php e($this->entity->email); ?>" />
-					<?php if (\Tilmeld\Tilmeld::$config->email_usernames['value'] && \Tilmeld\Tilmeld::$config->checkUsername['value']) { ?>
-					<span class="pf-field picon picon-throbber loader" id="p_muid_username_loading" style="display: none;">&nbsp;</span>
-					<span class="pf-field picon" id="p_muid_username_message"></span>
-					<?php } ?>
+					<span class="pf-label">Timezone</span>
+					<span class="pf-note">This overrides the primary group's timezone.</span>
+					<select class="pf-field form-control" ng-options="timezone for timezone in uiState.timezones" name="timezone" ng-model="entity.data.timezone">
+						<option value="">--Inherit From Group--</option>
+					</select>
 				</label>
-				<?php } ?>
 			</div>
 			<div class="pf-element">
 				<label><span class="pf-label">Mailing List</span>
 					<input class="pf-field" type="checkbox" name="mailing_list" ng-model="entity.data.mailing_list" /> Subscribe to the mailing list.</label>
 			</div>
 			<div class="pf-element">
-				<label><span class="pf-label">Phone</span>
-					<input class="pf-field form-control" type="tel" name="phone" size="24" value="<?php e(format_phone($this->entity->phone)); ?>" onkeyup="this.value=this.value.replace(/\D*0?1?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d*)\D*/, '($1$2$3) $4$5$6-$7$8$9$10 x$11').replace(/\D*$/, '');" /></label>
+				<label><span class="pf-label"><span ng-if="entity.guid">Update </span>Password</span>
+					<input class="pf-field form-control" type="password" name="password" size="24" ng-model="entity.data.passwordTemp" /></label>
 			</div>
 			<div class="pf-element">
 				<label>
-					<span class="pf-label">Timezone</span>
-					<span class="pf-note">This overrides the primary group's timezone.</span>
-					<select class="pf-field form-control" ng-options="timezone in uiState.timezones" name="timezone" ng-model="entity.data.timezone">
-						<option value="">--Inherit From Group--</option>
-					</select>
+					<span class="pf-label">Repeat Password</span>
+					<span class="form-group" ng-class="{'has-success': uiState.passwordVerified === true, 'has-error': uiState.passwordVerified === false}">
+						<input class="pf-field form-control" type="password" name="password2" size="24" ng-model="uiState.verifyPassword" ng-keyup="verifyPassword()" />
+					</span>
 				</label>
-			</div>
-			<?php } if ($this->display_password) { ?>
-			<div class="pf-element">
-				<label><span class="pf-label"><?php if (isset($this->entity->guid)) echo 'Update '; ?>Password</span>
-					<?php
-					if (!isset($this->entity->guid))
-						echo (\Tilmeld\Tilmeld::$config->pw_empty['value'] ? '<span class="pf-note">May be blank.</span>' : '');
-					else
-						echo '<span class="pf-note">Leave blank, if not changing.</span>';
-					?>
-					<input class="pf-field form-control" type="password" name="password" size="24" /></label>
-			</div>
-			<div class="pf-element">
-				<label><span class="pf-label">Repeat Password</span>
-					<input class="pf-field form-control" type="password" name="password2" size="24" /></label>
-			</div>
-			<?php } elseif (isset($this->entity->guid) && $this->entity->is($_SESSION['tilmeld_user'])) { ?>
-			<div class="pf-element">
-				<span class="pf-label">Password</span>
-				<span class="pf-field"><a href="<?php e(pines_url('com_user', 'updatepassword')); ?>" onclick="return confirm('If you have made changes and you don\'t submit them before leaving this page, they will be lost.');">Update your password.</a></span>
 			</div>
 			<br class="pf-clearing" />
 		</div>
 		<div class="tab-pane tab-pane-groups">
-				<div class="pf-element">
-					<label>
-						<span class="pf-label">Primary Group</span>
-						<select class="pf-field form-control" name="group">
-							<option value="null">-- No Primary Group --</option>
-							<?php
-							\Tilmeld\Tilmeld::groupSort($this->group_array_primary, 'name');
-							foreach ($this->group_array_primary as $cur_group) {
-								?><option value="<?php e($cur_group->guid); ?>"<?php echo $cur_group->is($this->entity->group) ? ' selected="selected"' : ''; ?>><?php e(str_repeat('->', $cur_group->getLevel())." {$cur_group->name} [{$cur_group->groupname}]"); ?></option><?php
-							} ?>
-						</select>
-					</label>
-				</div>
-				<div class="pf-element pf-full-width">
-					<span class="pf-label">Groups</span>
-					<div class="pf-group">
-						<div class="pf-field">
-							<table id="p_muid_group_grid">
-								<thead>
-									<tr>
-										<th>In</th>
-										<th>Name</th>
-										<th>Groupname</th>
-									</tr>
-								</thead>
-								<tbody>
-								<?php foreach($this->group_array_secondary as $cur_group) { ?>
-									<tr title="<?php e($cur_group->guid); ?>" class="<?php echo $cur_group->getChildren() ? 'parent ' : ''; ?><?php echo (isset($cur_group->parent) && $cur_group->parent->inArray($this->group_array_secondary)) ? h("child ch_{$cur_group->parent->guid} ") : ''; ?>">
-										<td><input type="checkbox" name="groups[]" value="<?php e($cur_group->guid); ?>" <?php echo $cur_group->inArray($this->entity->groups) ? 'checked="checked" ' : ''; ?>/></td>
-										<td><?php e($cur_group->name); ?></td>
-										<td><a data-entity="<?php e($cur_group->guid); ?>" data-entity-context="group"><?php e($cur_group->groupname); ?></a></td>
-									</tr>
-								<?php } ?>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</div>
-				<?php } ?>
+			<div class="pf-element">
+				<label>
+					<span class="pf-label">Primary Group</span>
+					<select class="pf-field form-control" name="group" ng-options="group as group.name+' ('+group.groupname+')' for group in primaryGroups track by group.guid" ng-model="entity.data.group">
+						<option value="">-- No Primary Group --</option>
+					</select>
+				</label>
+			</div>
+			<div class="pf-element">
+				<label>
+					<span class="pf-label">Groups
+						<span class="pf-note">Use CTRL (CMD on Mac) to select multiple.</span></span>
+					<select class="pf-field form-control" name="groups" multiple="true" size="12" ng-options="group as group.name+' ('+group.groupname+')' for group in secondaryGroups track by group.guid" ng-model="entity.data.groups" style="min-width: 200px;"></select>
+				</label>
+			</div>
 			<br class="pf-clearing" />
 		</div>
 		<div class="tab-pane tab-pane-location">
 			<div class="pf-element">
 				<span class="pf-label">Address Type</span>
-				<label><input class="pf-field" type="radio" name="address_type" value="us"<?php echo ($this->entity->address_type == 'us') ? ' checked="checked"' : ''; ?> /> US</label>
-				<label><input class="pf-field" type="radio" name="address_type" value="international"<?php echo $this->entity->address_type == 'international' ? ' checked="checked"' : ''; ?> /> International</label>
+				<label><input class="pf-field" type="radio" name="addressType" value="us" ng-model="entity.data.addressType" /> US</label>
+				<label><input class="pf-field" type="radio" name="addressType" value="international" ng-model="entity.data.addressType" /> International</label>
 			</div>
-			<div id="p_muid_address_us" style="display: none;">
+			<div ng-if="entity.data.addressType === 'us'">
 				<div class="pf-element">
 					<label><span class="pf-label">Address 1</span>
-						<input class="pf-field form-control" type="text" name="address_1" size="24" value="<?php e($this->entity->address_1); ?>" /></label>
+						<input class="pf-field form-control" type="text" name="addressStreet" size="24" ng-model="entity.data.addressStreet" /></label>
 				</div>
 				<div class="pf-element">
 					<label><span class="pf-label">Address 2</span>
-						<input class="pf-field form-control" type="text" name="address_2" size="24" value="<?php e($this->entity->address_2); ?>" /></label>
+						<input class="pf-field form-control" type="text" name="addressStreet2" size="24" ng-model="entity.data.addressStreet2" /></label>
 				</div>
 				<div class="pf-element">
 					<span class="pf-label">City, State</span>
-					<input class="pf-field form-control" type="text" name="city" size="15" value="<?php e($this->entity->city); ?>" />
-					<select class="pf-field form-control" name="state">
+					<input class="pf-field form-control" type="text" name="addressCity" size="15" ng-model="entity.data.addressCity" />
+					<select class="pf-field form-control" name="addressState" ng-model="entity.data.addressState">
 						<option value="">None</option>
 						<option value="AL">Alabama</option>
 						<option value="AK">Alaska</option>
@@ -226,15 +192,15 @@
 				</div>
 				<div class="pf-element">
 					<label><span class="pf-label">Zip</span>
-						<input class="pf-field form-control" type="text" name="zip" size="24" value="<?php e($this->entity->zip); ?>" /></label>
+						<input class="pf-field form-control" type="text" name="addressZip" size="24" ng-model="entity.data.addressZip" /></label>
 				</div>
 			</div>
-			<div id="p_muid_address_international" style="display: none;">
+			<div ng-if="entity.data.addressType === 'international'">
 				<div class="pf-element pf-full-width">
 					<label><span class="pf-label">Address</span>
 						<span class="pf-group pf-full-width">
 							<span class="pf-field" style="display: block;">
-								<textarea style="width: 100%;" rows="3" cols="35" name="address_international"><?php e($this->entity->address_international); ?></textarea>
+								<textarea class="form-control" style="width: 100%;" rows="3" cols="35" name="addressInternational" ng-model="entity.data.addressInternational"></textarea>
 							</span>
 						</span></label>
 				</div>
@@ -242,65 +208,30 @@
 			<br class="pf-clearing" />
 		</div>
 		<div class="tab-pane tab-pane-abilities">
-			<style type="text/css" scoped="scoped">
-				#p_muid_tab-pane-abilities .abilities_accordion {
-					margin-bottom: .2em;
-				}
-				#p_muid_tab-pane-abilities .abilities_accordion .panel-heading .component {
-					float: right;
-				}
-			</style>
-			<script type="text/javascript">
-				$_(function(){
-					var sections = $("#p_muid_tab-pane-abilities .abilities_accordion .panel-collapse");
-					$("#p_muid_tab-pane-abilities").on("click", "button.expand_all", function(){
-						sections.collapse("show");
-					}).on("click", "button.collapse_all", function(){
-						sections.collapse("hide");
-					});
-				});
-			</script>
-			<div class="pf-element pf-full-width ui-helper-clearfix">
-				<div class="btn-group" style="float: right; clear: both;">
-					<button type="button" class="expand_all btn btn-default">Expand All</button>
-					<button type="button" class="collapse_all btn btn-default">Collapse All</button>
-				</div>
-				<span class="pf-label">Inherit</span>
-				<label>
-					<input class="pf-field" type="checkbox" name="inherit_abilities" value="ON" <?php echo ($this->entity->inherit_abilities ? 'checked="checked" ' : ''); ?>/>
-					&nbsp;Inherit additional abilities from groups.
-				</label>
-			</div>
-			<br class="pf-clearing" />
-			<?php foreach ($this->sections as $cur_section) {
-				if ($cur_section == 'system')
-					$section_abilities = (array) $_->info->abilities;
-				else
-					$section_abilities = (array) $_->info->$cur_section->abilities;
-				if (!$section_abilities) continue; ?>
-			<div class="abilities_accordion panel-group">
-				<div class="panel panel-default">
-					<a class="panel-heading ui-helper-clearfix" href="javascript:void(0);" data-toggle="collapse" data-target=":focus + .panel-collapse" tabindex="0">
-						<big class="panel-title"><?php ($cur_section == 'system') ? e($_->info->name) : e($_->info->$cur_section->name); ?> <span class="component"><?php e($cur_section); ?></span></big>
-					</a>
-					<div class="panel-collapse collapse">
-						<div class="panel-body clearfix">
-							<div class="pf-element">
-								<?php foreach ($section_abilities as $cur_ability) { ?>
-								<label>
-									<input type="checkbox" name="<?php e($cur_section); ?>[]" value="<?php e($cur_ability[0]); ?>" <?php echo (array_search("{$cur_section}/{$cur_ability[0]}", $this->entity->abilities) !== false) ? 'checked="checked" ' : ''; ?>/>
-									<span title="<?php e("{$cur_section}/{$cur_ability[0]}"); ?>" class="label label-info"><?php e($cur_ability[1]); ?></span>&nbsp;<small><?php e($cur_ability[2]); ?></small>
-								</label>
-								<br class="pf-clearing" />
-								<?php } ?>
-							</div>
-						</div>
+			<div class="pf-element pf-full-width">
+				<span class="pf-label">Abilities</span>
+				<div class="pf-group pf-full-width">
+					<div class="text-right">
+						Add an ability: <input class="form-control" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" ng-click="addAbility()"><i class="glyphicon glyphicon-plus"></i></button>
 					</div>
+					<br />
+					<table class="table table-striped">
+						<tbody>
+							<tr ng-repeat="(key, ability) in entity.data.abilities">
+								<td style="vertical-align: middle;">{{ability}}</td>
+								<td class="text-right"><button class="btn btn-danger btn-xs" ng-click="entity.data.abilities.splice(key, 1)"><i class="glyphicon glyphicon-remove"></i></button></td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
-			<?php } ?>
 			<br class="pf-clearing" />
 		</div>
-		<?php } ?>
+	</div>
+	<div class="pf-element panel panel-default button-panel">
+		<div class="panel-body">
+			<input class="pf-button btn btn-primary" type="submit" value="Save" />
+			<span ng-if="success" class="label label-success">Successfully saved!</span>
+		</div>
 	</div>
 </form>

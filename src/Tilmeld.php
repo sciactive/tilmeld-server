@@ -26,14 +26,69 @@ class Tilmeld {
 	public static $config;
 
 	/**
+	 * Check to see if the current user has an ability.
+	 *
+	 * If $ability is null, it will check to see if a user is currently logged
+	 * in.
+	 *
+	 * @param string $ability The ability.
+	 * @return bool True or false.
+	 */
+	public static function gatekeeper($ability = null) {
+		/*******
+		 * TODO: REMOVE THIS DEV CODE!!!
+		 */
+		return true;
+		/*******
+		 * YOU BETTER REMOVE IT!
+		 */
+		if (User::current() === null) {
+			return false;
+		}
+		return User::current(true)->gatekeeper($ability);
+	}
+
+	/**
+	 * Apply configuration to Tilmeld.
+	 *
+	 * $config should be an associative array of Tilmeld configuration. Use the
+	 * following form:
+	 *
+	 * [
+	 *     'setup_url' => 'http://example.com/tilmeld/',
+	 *     'create_admin' => false
+	 * ]
+	 *
+	 * @param array $config An associative array of Tilmeld's configuration.
+	 */
+	public static function configure($config = []) {
+		\SciActive\RequirePHP::_('TilmeldConfig', [], function() use ($config){
+			$defaults = include dirname(__DIR__).'/conf/defaults.php';
+			$tilmeldConfig = [];
+			foreach ($defaults as $curName => $curOption) {
+				if ((array) $curOption === $curOption && isset($curOption['value'])) {
+					$tilmeldConfig[$curName] = $curOption['value'];
+				} else {
+					$tilmeldConfig[$curName] = [];
+					foreach ($curOption as $curSubName => $curSubOption) {
+						$tilmeldConfig[$curName][$curSubName] = $curSubOption['value'];
+					}
+				}
+			}
+			return array_replace_recursive($tilmeldConfig, $config);
+		});
+		self::$config = \SciActive\RequirePHP::_('TilmeldConfig');
+	}
+
+	/**
 	 * Activate the SAWASC system.
 	 * @return bool True if SAWASC could be activated, false otherwise.
 	 */
 	public static function activateSawasc() {
-		if (!Tilmeld::$config->sawasc['value']) {
+		if (!self::$config['sawasc']) {
 			return false;
 		}
-		if (Tilmeld::$config->pw_method['value'] == 'salt') {
+		if (self::$config['pw_method'] == 'salt') {
 			pines_notice('SAWASC is not compatible with the Salt password storage method.');
 			return false;
 		}
@@ -44,7 +99,7 @@ class Tilmeld {
 			$_SESSION['sawasc'] = [
 				'ServerCB' => uniqid('', true),
 				'timestamp' => time(),
-				'algo' => Tilmeld::$config->sawasc_hash['value']
+				'algo' => self::$config['sawasc_hash']
 			];
 			self::session('close');
 		}
@@ -118,7 +173,7 @@ class Tilmeld {
 		$ac_group = isset($entity->ac_group) ? $entity->ac_group : 3;
 		$ac_other = isset($entity->ac_other) ? $entity->ac_other : 0;
 
-		if (!isset(User::current())) {
+		if (User::current() !== null) {
 			return ($ac_other >= $type);
 		}
 		if (is_callable([$entity->user, 'is']) && $entity->user->is(User::current())) {
@@ -175,7 +230,7 @@ class Tilmeld {
 		foreach ($tmp_user->groups as $cur_group) {
 			$_SESSION['tilmeld_descendants'] = array_merge((array) $_SESSION['tilmeld_descendants'], (array) $cur_group->getDescendants());
 		}
-		if ($tmp_user->inherit_abilities) {
+		if ($tmp_user->inheritAbilities) {
 			$_SESSION['tilmeld_inherited_abilities'] = $tmp_user->abilities;
 			foreach ($tmp_user->groups as $cur_group) {
 				$_SESSION['tilmeld_inherited_abilities'] = array_merge($_SESSION['tilmeld_inherited_abilities'], $cur_group->abilities);
@@ -301,5 +356,3 @@ class Tilmeld {
 		}
 	}
 }
-
-Tilmeld::$config = \SciActive\RequirePHP::_('TilmeldConfig');

@@ -78,7 +78,7 @@ return (object) [
 	'email_rate_limit' => [
 		'cname' => 'Rate Limit User Email Changes',
 		'description' => 'Don\'t let users change their email address more often than this. You can enter one value and one unit of time, such as "2 weeks". Leave blank to disable rate limiting.',
-		'value' => '3 days',
+		'value' => '1 day',
 		'peruser' => true,
 	],
 	'pw_recovery' => [

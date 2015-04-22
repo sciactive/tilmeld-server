@@ -11,7 +11,7 @@
 
 if (empty($this->title))
 	$this->title = 'Log in to '.h($_->config->system_name);
-$this->checkUsername = (\Tilmeld\Tilmeld::$config->allow_registration['value'] && \Tilmeld\Tilmeld::$config->checkUsername['value']);
+$this->checkUsername = (\Tilmeld\Tilmeld::$config['allow_registration'] && \Tilmeld\Tilmeld::$config['checkUsername']);
 if ($this->checkUsername)
 	$_->icons->load();
 
@@ -64,7 +64,7 @@ $this->sawasc = $_->com_user->activateSawasc();
 <?php } ?>
 <div id="p_muid_form" class="clearfix"<?php echo ($this->style == 'compact') ? ' style="display: none; max-height: 500px; overflow-y: auto; overflow-x: hidden;"' : ''; ?>>
 	<form class="pf-form" method="post" action="<?php e(pines_url()); ?>">
-		<?php if (\Tilmeld\Tilmeld::$config->allow_registration['value']) { ?>
+		<?php if (\Tilmeld\Tilmeld::$config['allow_registration']) { ?>
 		<div class="pf-element">
 			<script type="text/javascript">
 				$_(function(){
@@ -162,11 +162,11 @@ $this->sawasc = $_->com_user->activateSawasc();
 		</div>
 		<?php } ?>
 		<div class="pf-element">
-			<label><span class="pf-label"><?php echo \Tilmeld\Tilmeld::$config->email_usernames['value'] ? 'Email' : 'Username'; ?></span>
+			<label><span class="pf-label"><?php echo \Tilmeld\Tilmeld::$config['email_usernames'] ? 'Email' : 'Username'; ?></span>
 				<?php if ($this->style != 'small') { ?>
 				<span class="pf-group" style="display: block;">
 				<?php } ?>
-					<input class="pf-field form-control" type="<?php echo \Tilmeld\Tilmeld::$config->email_usernames['value'] ? 'email' : 'text'; ?>" name="username" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" />
+					<input class="pf-field form-control" type="<?php echo \Tilmeld\Tilmeld::$config['email_usernames'] ? 'email' : 'text'; ?>" name="username" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" />
 					<?php if ($this->checkUsername) { echo ($this->style == 'compact') ? '<br class="pf-clearing" />' : ''; ?>
 					<span class="pf-field picon picon-throbber loader" id="p_muid_username_loading" style="display: none;">&nbsp;</span>
 					<span class="pf-field picon" id="p_muid_username_message" style="display: none;"></span>
@@ -178,54 +178,54 @@ $this->sawasc = $_->com_user->activateSawasc();
 		</div>
 		<div class="pf-element">
 			<label><span class="pf-label">Password</span>
-				<?php echo (\Tilmeld\Tilmeld::$config->pw_empty['value'] ? '<span class="pf-note">May be blank.</span>' : ''); ?>
+				<?php echo (\Tilmeld\Tilmeld::$config['pw_empty'] ? '<span class="pf-note">May be blank.</span>' : ''); ?>
 				<input class="pf-field form-control" type="password" name="password" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 		</div>
-		<?php if (\Tilmeld\Tilmeld::$config->allow_registration['value']) { ?>
+		<?php if (\Tilmeld\Tilmeld::$config['allow_registration']) { ?>
 		<div id="p_muid_register_form" style="display: none;">
 			<div class="pf-element">
 				<label><span class="pf-label">Re-enter Password</span>
 					<input class="pf-field form-control" type="password" name="password2" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 			</div>
-			<?php if (\Tilmeld\Tilmeld::$config->referral_codes['value']) { ?>
+			<?php if (\Tilmeld\Tilmeld::$config['referral_codes']) { ?>
 			<div class="pf-element">
 				<label><span class="pf-label">Referral Code</span>
 					<span class="pf-note">Optional</span>
 					<input class="pf-field form-control" type="text" name="referral_code" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 			</div>
-			<?php } if (\Tilmeld\Tilmeld::$config->one_step_registration['value']) { ?>
+			<?php } if (\Tilmeld\Tilmeld::$config['one_step_registration']) { ?>
 			<div class="pf-element">
 				<span class="pf-required">*</span> Required field.
 			</div>
-			<?php if (in_array('name', \Tilmeld\Tilmeld::$config->reg_fields['value'])) { ?>
+			<?php if (in_array('name', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
 			<div class="pf-element">
 				<label><span class="pf-label">First Name <span class="pf-required">*</span></span>
-					<input class="pf-field form-control" type="text" name="name_first" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
+					<input class="pf-field form-control" type="text" name="nameFirst" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 			</div>
 			<div class="pf-element">
 				<label><span class="pf-label">Middle Name</span>
-					<input class="pf-field form-control" type="text" name="name_middle" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
+					<input class="pf-field form-control" type="text" name="nameMiddle" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 			</div>
 			<div class="pf-element">
 				<label><span class="pf-label">Last Name</span>
-					<input class="pf-field form-control" type="text" name="name_last" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
+					<input class="pf-field form-control" type="text" name="nameLast" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 			</div>
-			<?php } if (!\Tilmeld\Tilmeld::$config->email_usernames['value'] && in_array('email', \Tilmeld\Tilmeld::$config->reg_fields['value'])) { ?>
+			<?php } if (!\Tilmeld\Tilmeld::$config['email_usernames'] && in_array('email', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
 			<div class="pf-element">
 				<label><span class="pf-label">Email <span class="pf-required">*</span></span>
 					<input class="pf-field form-control" type="email" name="email" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 			</div>
-			<?php } if (in_array('phone', \Tilmeld\Tilmeld::$config->reg_fields['value'])) { ?>
+			<?php } if (in_array('phone', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
 			<div class="pf-element">
 				<label><span class="pf-label">Phone Number</span>
 					<input class="pf-field form-control" type="tel" name="phone" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 			</div>
-			<?php } if (in_array('fax', \Tilmeld\Tilmeld::$config->reg_fields['value'])) { ?>
+			<?php } if (in_array('fax', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
 			<div class="pf-element">
 				<label><span class="pf-label">Fax Number</span>
 					<input class="pf-field form-control" type="tel" name="fax" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 			</div>
-			<?php } if (in_array('timezone', \Tilmeld\Tilmeld::$config->reg_fields['value'])) { ?>
+			<?php } if (in_array('timezone', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
 			<div class="pf-element<?php echo ($this->style == 'small') ? ' pf-full-width' : ''; ?>">
 				<label><span class="pf-label">Timezone</span>
 					<span class="pf-note">This overrides the primary group's timezone.</span>
@@ -241,42 +241,42 @@ $this->sawasc = $_->com_user->activateSawasc();
 					<?php echo ($this->style == 'compact') ? '</div>' : ''; ?>
 				</label>
 			</div>
-			<?php } if (in_array('address', \Tilmeld\Tilmeld::$config->reg_fields['value'])) { ?>
+			<?php } if (in_array('address', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
 			<div class="pf-element">
 				<script type="text/javascript">
 					$_(function(){
 						var address_us = $("#p_muid_address_us");
-						var address_international = $("#p_muid_address_international");
-						$("#p_muid_form [name=address_type]").change(function(){
-							var address_type = $(this);
-							if (address_type.is(":checked") && address_type.val() == "us") {
+						var addressInternational = $("#p_muid_addressInternational");
+						$("#p_muid_form [name=addressType]").change(function(){
+							var addressType = $(this);
+							if (addressType.is(":checked") && addressType.val() == "us") {
 								address_us.show();
-								address_international.hide();
-							} else if (address_type.is(":checked") && address_type.val() == "international") {
-								address_international.show();
+								addressInternational.hide();
+							} else if (addressType.is(":checked") && addressType.val() == "international") {
+								addressInternational.show();
 								address_us.hide();
 							}
 						}).change();
 					});
 				</script>
 				<span class="pf-label">Address Type</span>
-				<label><input class="pf-field" type="radio" name="address_type" value="us" checked="checked" /> US</label>
-				<label><input class="pf-field" type="radio" name="address_type" value="international" /> International</label>
+				<label><input class="pf-field" type="radio" name="addressType" value="us" checked="checked" /> US</label>
+				<label><input class="pf-field" type="radio" name="addressType" value="international" /> International</label>
 			</div>
 			<div id="p_muid_address_us" style="display: none;">
 				<div class="pf-element">
 					<label><span class="pf-label">Address 1</span>
-						<input class="pf-field form-control" type="text" name="address_1" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
+						<input class="pf-field form-control" type="text" name="addressStreet" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 				</div>
 				<div class="pf-element">
 					<label><span class="pf-label">Address 2</span>
-						<input class="pf-field form-control" type="text" name="address_2" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
+						<input class="pf-field form-control" type="text" name="addressStreet2" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 				</div>
 				<div class="pf-element<?php echo ($this->style == 'small') ? ' pf-full-width' : ''; ?>">
-					<label for="p_muid_city"><span class="pf-label">City, State</span></label>
+					<label for="p_muid_addressCity"><span class="pf-label">City, State</span></label>
 					<?php echo ($this->style == 'compact') ? '<div class="pf-group" style="white-space: nowrap; margin-right: 16px;">' : ''; ?>
-					<input class="pf-field form-control" type="text" name="city" id="p_muid_city" size="<?php echo ($this->style == 'small') ? '10' : '15'; ?>" />
-					<select class="pf-field form-control" name="state"<?php echo ($this->style == 'small') ? ' style="max-width: 95%;"' : ''; ?>>
+					<input class="pf-field form-control" type="text" name="addressCity" id="p_muid_addressCity" size="<?php echo ($this->style == 'small') ? '10' : '15'; ?>" />
+					<select class="pf-field form-control" name="addressState"<?php echo ($this->style == 'small') ? ' style="max-width: 95%;"' : ''; ?>>
 						<option value="">None</option>
 						<?php foreach ([
 								'AL' => 'Alabama',
@@ -341,15 +341,15 @@ $this->sawasc = $_->com_user->activateSawasc();
 				</div>
 				<div class="pf-element">
 					<label><span class="pf-label">Zip</span>
-						<input class="pf-field form-control" type="text" name="zip" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
+						<input class="pf-field form-control" type="text" name="addressZip" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
 				</div>
 			</div>
-			<div id="p_muid_address_international" style="display: none;">
+			<div id="p_muid_addressInternational" style="display: none;">
 				<div class="pf-element pf-full-width">
 					<label><span class="pf-label">Address</span>
 						<span class="pf-group pf-full-width">
 							<span class="pf-field" style="display: block;">
-								<textarea style="width: 100%;" rows="3" cols="35" name="address_international"></textarea>
+								<textarea style="width: 100%;" rows="3" cols="35" name="addressInternational"></textarea>
 							</span>
 						</span></label>
 				</div>
@@ -371,7 +371,7 @@ $this->sawasc = $_->com_user->activateSawasc();
 			<input class="pf-button btn btn-default" type="reset" name="reset" value="Reset" />
 			<?php } ?>
 		</div>
-		<?php if (!$this->hide_recovery && \Tilmeld\Tilmeld::$config->pw_recovery['value']) { ?>
+		<?php if (!$this->hide_recovery && \Tilmeld\Tilmeld::$config['pw_recovery']) { ?>
 		<div class="pf-element" id="p_muid_recovery">
 			<?php if ($this->style != 'small') { ?>
 			<span class="pf-label" style="height: 1px;">&nbsp;</span>

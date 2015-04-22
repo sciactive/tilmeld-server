@@ -21,13 +21,13 @@
  * @property string $name The group's name.
  * @property string $email The group's email address.
  * @property string $phone The group's telephone number.
- * @property string $address_type The group's address type. "us" or "international".
- * @property string $address_1 The group's address line 1 for US addresses.
- * @property string $address_2 The group's address line 2 for US addresses.
- * @property string $city The group's city for US addresses.
- * @property string $state The group's state abbreviation for US addresses.
- * @property string $zip The group's ZIP code for US addresses.
- * @property string $address_international The group's full address for international addresses.
+ * @property string $addressType The group's address type. "us" or "international".
+ * @property string $addressStreet The group's address line 1 for US addresses.
+ * @property string $addressStreet2 The group's address line 2 for US addresses.
+ * @property string $addressCity The group's city for US addresses.
+ * @property string $addressState The group's state abbreviation for US addresses.
+ * @property string $addressZip The group's ZIP code for US addresses.
+ * @property string $addressInternational The group's full address for international addresses.
  * @property Group $parent The group's parent.
  */
 class Group extends AbleObject {
@@ -39,16 +39,20 @@ class Group extends AbleObject {
 		'getLevel',
 		'isDescendant',
 	];
+	public static $clientEnabledStaticMethods = [
+		'getPrimaryGroups',
+		'getSecondaryGroups',
+	];
 	protected $privateData = [
 		'email',
 		'phone',
-		'address_type',
-		'address_1',
-		'address_2',
-		'city',
-		'state',
-		'zip',
-		'address_international',
+		'addressType',
+		'addressStreet',
+		'addressStreet2',
+		'addressCity',
+		'addressState',
+		'addressZip',
+		'addressInternational',
 		'abilities',
 	];
 	protected $whitelistData = [];
@@ -76,7 +80,8 @@ class Group extends AbleObject {
 		// Defaults.
 		$this->enabled = true;
 		$this->abilities = [];
-		$this->address_type = 'us';
+		$this->addressType = 'us';
+		$this->updateDataProtection();
 	}
 
 	public function info($type) {
@@ -112,7 +117,7 @@ class Group extends AbleObject {
 	}
 
 	public function updateDataProtection() {
-		if (Tilmeld::$config->email_usernames['value']) {
+		if (Tilmeld::$config['email_usernames']) {
 			$this->privateData[] = 'groupname';
 		}
 		if (User::current(true)->gatekeeper('tilmeld/editgroups')) {
@@ -124,32 +129,32 @@ class Group extends AbleObject {
 		if ($this->is(User::current())) {
 			// Users can see their own data, and edit some of it.
 			$this->whitelistData[] = 'username';
-			if (in_array('name', Tilmeld::$config->user_fields['value'])) {
-				$this->whitelistData[] = 'name_first';
-				$this->whitelistData[] = 'name_middle';
-				$this->whitelistData[] = 'name_last';
+			if (in_array('name', Tilmeld::$config['user_fields'])) {
+				$this->whitelistData[] = 'nameFirst';
+				$this->whitelistData[] = 'nameMiddle';
+				$this->whitelistData[] = 'nameLast';
 				$this->whitelistData[] = 'name';
 			}
-			if (in_array('email', Tilmeld::$config->user_fields['value'])) {
+			if (in_array('email', Tilmeld::$config['user_fields'])) {
 				$this->whitelistData[] = 'email';
 			}
-			if (in_array('phone', Tilmeld::$config->user_fields['value'])) {
+			if (in_array('phone', Tilmeld::$config['user_fields'])) {
 				$this->whitelistData[] = 'phone';
 			}
-			if (in_array('timezone', Tilmeld::$config->user_fields['value'])) {
+			if (in_array('timezone', Tilmeld::$config['user_fields'])) {
 				$this->whitelistData[] = 'timezone';
 			}
-			if (in_array('address', Tilmeld::$config->user_fields['value'])) {
-				$this->whitelistData[] = 'address_type';
-				$this->whitelistData[] = 'address_1';
-				$this->whitelistData[] = 'address_2';
-				$this->whitelistData[] = 'city';
-				$this->whitelistData[] = 'state';
-				$this->whitelistData[] = 'zip';
-				$this->whitelistData[] = 'address_international';
+			if (in_array('address', Tilmeld::$config['user_fields'])) {
+				$this->whitelistData[] = 'addressType';
+				$this->whitelistData[] = 'addressStreet';
+				$this->whitelistData[] = 'addressStreet2';
+				$this->whitelistData[] = 'addressCity';
+				$this->whitelistData[] = 'addressState';
+				$this->whitelistData[] = 'addressZip';
+				$this->whitelistData[] = 'addressInternational';
 			}
 			$this->privateData = [
-				'verify_email',
+				'verifyEmail',
 				'secret',
 				'secret_time',
 				'password',
@@ -272,6 +277,45 @@ class Group extends AbleObject {
 			$group = $group->parent;
 		}
 		return $level;
+	}
+
+	/**
+	 * Get all the groups that can be assigned as primary groups.
+	 * @return array An array of the assignable primary groups.
+	 */
+	public static function getPrimaryGroups() {
+		$highestPrimaryParent = Tilmeld::$config['highest_primary'];
+		$primaryGroups = [];
+		if ($highestPrimaryParent == 0) {
+			$primaryGroups = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group']);
+		} else {
+			if ($highestPrimaryParent > 0) {
+				$highestPrimaryParent = Group::factory($highestPrimaryParent);
+				if (isset($highestPrimaryParent->guid)) {
+					$primaryGroups = $highestPrimaryParent->getDescendants();
+				}
+			}
+		}
+		return $primaryGroups;
+	}
+
+	/**
+	 * Get all the groups that can be assigned as secondary groups.
+	 * @return array An array of the assignable secondary groups.
+	 */
+	public static function getSecondaryGroups() {
+		$highestSecondaryParent = Tilmeld::$config['highest_secondary'];
+		$secondaryGroups = [];
+		if ($highestSecondaryParent == 0) {
+			$secondaryGroups = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group']);
+		} else {
+			if ($highestSecondaryParent > 0) {
+				$highestSecondaryParent = Group::factory($highestSecondaryParent);
+				if (isset($highestSecondaryParent->guid)) {
+					$secondaryGroups = $highestSecondaryParent->getDescendants();
+				}
+			}
+		}
 	}
 
 	/**

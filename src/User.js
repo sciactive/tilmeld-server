@@ -14,14 +14,14 @@
 		this.data.enabled = true;
 		this.data.abilities = [];
 		this.data.groups = [];
-		this.data.inherit_abilities = true;
-		this.data.address_type = 'us';
+		this.data.inheritAbilities = true;
+		this.data.addressType = 'us';
 		this.info.avatar = '//secure.gravatar.com/avatar/?d=mm&s=40';
 	};
 	User.prototype = new Entity();
 
 	var thisClass = {
-		// === The Name of the Class ===
+		// === The Name of the Server Class ===
 		class: '\\Tilmeld\\User',
 
 		// === Class Variables ===
@@ -66,6 +66,9 @@
 			User.prototype[p] = thisClass[p];
 		}
 	}
+	User.current = function(returnObjectIfNotExist){
+		return this.prototype.serverCallStatic('current', arguments);
+	};
 
 	return User;
 }));

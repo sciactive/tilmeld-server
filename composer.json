@@ -30,8 +30,8 @@
     },
 	"require": {
 		"sciactive/hookphp": "~1.1",
-		"sciactive/nymph-server": "~1.4",
-		"sciactive/nymph-pubsub": "~1.4",
+		"sciactive/nymph-server": "dev-master",
+		"sciactive/nymph-pubsub": "dev-master",
 		"sciactive/umailphp": "dev-master"
 	},
 	"minimum-stability": "dev"

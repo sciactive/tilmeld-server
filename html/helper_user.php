@@ -27,12 +27,12 @@ if ($this->render == 'body' && gatekeeper('com_user/listusers')) { ?>
 				<td style="font-weight:bold;">GUID</td>
 				<td><?php e($this->entity->guid); ?></td>
 			</tr>
-			<?php if (!\Tilmeld\Tilmeld::$config->email_usernames['value']) { ?>
+			<?php if (!\Tilmeld\Tilmeld::$config['email_usernames']) { ?>
 			<tr>
 				<td style="font-weight:bold;">Username</td>
 				<td><?php e($this->entity->username); ?></td>
 			</tr>
-			<?php } if (in_array('name', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+			<?php } if (in_array('name', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 			<tr>
 				<td style="font-weight:bold;">Real Name</td>
 				<td><?php e($this->entity->name); ?></td>
@@ -42,22 +42,22 @@ if ($this->render == 'body' && gatekeeper('com_user/listusers')) { ?>
 				<td style="font-weight:bold;">Enabled</td>
 				<td><?php echo $this->entity->hasTag('enabled') ? 'Yes' : 'No'; ?></td>
 			</tr>
-			<?php if (\Tilmeld\Tilmeld::$config->email_usernames['value'] || (!empty($this->entity->email) && in_array('email', \Tilmeld\Tilmeld::$config->user_fields['value']))) { ?>
+			<?php if (\Tilmeld\Tilmeld::$config['email_usernames'] || (!empty($this->entity->email) && in_array('email', \Tilmeld\Tilmeld::$config['user_fields']))) { ?>
 			<tr>
 				<td style="font-weight:bold;">Email</td>
 				<td><a href="mailto:<?php e($this->entity->email); ?>"><?php e($this->entity->email); ?></a><?php echo isset($this->entity->secret) ? ' (Unverified)' : ''; ?></td>
 			</tr>
-			<?php } if (!empty($this->entity->phone) && in_array('phone', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+			<?php } if (!empty($this->entity->phone) && in_array('phone', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 			<tr>
 				<td style="font-weight:bold;">Phone</td>
 				<td><a href="tel:<?php e($this->entity->phone); ?>"><?php e(format_phone($this->entity->phone)); ?></a></td>
 			</tr>
-			<?php } if (!empty($this->entity->fax) && in_array('fax', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+			<?php } if (!empty($this->entity->fax) && in_array('fax', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 			<tr>
 				<td style="font-weight:bold;">Fax</td>
 				<td><a href="tel:<?php e($this->entity->fax); ?>"><?php e(format_phone($this->entity->fax)); ?></a></td>
 			</tr>
-			<?php } if (in_array('timezone', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+			<?php } if (in_array('timezone', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 			<tr>
 				<td style="font-weight:bold;">Timezone</td>
 				<td><?php e($this->entity->getTimezone()).(empty($this->entity->timezone) ? ' (Inherited)' : ' (Assigned)'); ?></td>
@@ -87,9 +87,9 @@ if ($this->render == 'body' && gatekeeper('com_user/listusers')) { ?>
 			<?php } ?>
 			<tr>
 				<td style="font-weight:bold;">Inherit Abilities</td>
-				<td><?php echo $this->entity->inherit_abilities ? 'Yes' : 'No'; ?></td>
+				<td><?php echo $this->entity->inheritAbilities ? 'Yes' : 'No'; ?></td>
 			</tr>
-			<?php if (!empty($this->entity->referral_code) && \Tilmeld\Tilmeld::$config->referral_codes['value']) { ?>
+			<?php if (!empty($this->entity->referral_code) && \Tilmeld\Tilmeld::$config['referral_codes']) { ?>
 			<tr>
 				<td style="font-weight:bold;">Referral Code</td>
 				<td><?php e($this->entity->referral_code); ?></td>
@@ -98,20 +98,20 @@ if ($this->render == 'body' && gatekeeper('com_user/listusers')) { ?>
 		</tbody>
 	</table>
 </div>
-<?php if (in_array('address', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+<?php if (in_array('address', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 <div style="clear:both;">
 	<hr />
 	<h3 style="margin:10px 0;">Address</h3>
 	<address>
-		<?php if ($this->entity->address_type == 'us') {
-			e($this->entity->address_1).'<br />';
-			if (!empty($this->entity->address_2))
-				e($this->entity->address_2).'<br />';
-			e($this->entity->city).', ';
-			e($this->entity->state).' ';
-			e($this->entity->zip);
+		<?php if ($this->entity->addressType == 'us') {
+			e($this->entity->addressStreet).'<br />';
+			if (!empty($this->entity->addressStreet2))
+				e($this->entity->addressStreet2).'<br />';
+			e($this->entity->addressCity).', ';
+			e($this->entity->addressState).' ';
+			e($this->entity->addressZip);
 		} else {
-			echo '<pre>'.h($this->entity->address_international).'</pre>';
+			echo '<pre>'.h($this->entity->addressInternational).'</pre>';
 		} ?>
 	</address>
 </div>

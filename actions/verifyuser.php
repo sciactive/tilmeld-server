@@ -28,18 +28,18 @@ switch ($_REQUEST['type']) {
 			return;
 		}
 
-		if (Tilmeld::$config->unverified_access['value'])
+		if (Tilmeld::$config['unverified_access'])
 			$user->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('default_secondary', true)));
 		$user->enable();
 		unset($user->secret);
 		break;
 	case 'change':
 		// Email address change.
-		if (!isset($user->new_email_secret) || $_REQUEST['secret'] != $user->new_email_secret)
+		if (!isset($user->newEmailSecret) || $_REQUEST['secret'] != $user->newEmailSecret)
 			punt_user('The secret code given does not match this user.');
 
-		if (Tilmeld::$config->email_usernames['value']) {
-			$un_check = Tilmeld::check_username($user->new_email_address, $user->guid);
+		if (Tilmeld::$config['email_usernames']) {
+			$un_check = Tilmeld::check_username($user->newEmailAddress, $user->guid);
 			if (!$un_check['result']) {
 				$user->print_form();
 				pines_notice($un_check['message']);
@@ -49,7 +49,7 @@ switch ($_REQUEST['type']) {
 		$test = \Nymph\Nymph::getEntity(
 				array('class' => '\Tilmeld\User', 'skip_ac' => true),
 				array('&',
-					'match' => array('email', '/^'.preg_quote($user->new_email_address, '/').'$/i'),
+					'match' => array('email', '/^'.preg_quote($user->newEmailAddress, '/').'$/i'),
 					'!guid' => $user->guid
 				)
 			);
@@ -59,16 +59,16 @@ switch ($_REQUEST['type']) {
 			return;
 		}
 
-		$user->email = $user->new_email_address;
-		unset($user->new_email_address, $user->new_email_secret);
+		$user->email = $user->newEmailAddress;
+		unset($user->newEmailAddress, $user->newEmailSecret);
 		break;
 	case 'cancelchange':
 		// Cancel an email address change.
-		if (!isset($user->cancel_email_secret) || $_REQUEST['secret'] != $user->cancel_email_secret)
+		if (!isset($user->cancelEmailSecret) || $_REQUEST['secret'] != $user->cancelEmailSecret)
 			punt_user('The secret code given does not match this user.');
 
-		$user->email = $user->cancel_email_address;
-		unset($user->new_email_address, $user->new_email_secret, $user->cancel_email_address, $user->cancel_email_secret);
+		$user->email = $user->cancelEmailAddress;
+		unset($user->newEmailAddress, $user->newEmailSecret, $user->cancelEmailAddress, $user->cancelEmailSecret);
 		break;
 }
 

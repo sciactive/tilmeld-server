@@ -16,7 +16,7 @@
   ],
   "dependencies": {
     "pform": "~3.2",
-    "nymph-client": "https://github.com/sciactive/nymph-client.git#master",
+    "nymph-client": "1.4.2",
     "umailphp": "https://github.com/sciactive/umailphp.git#master"
   }
 }

@@ -11,43 +11,13 @@
 /* @var $_ core */
 defined('P_RUN') or die('Direct access prohibited');
 
-if ( isset($_REQUEST['id']) ) {
-	if ( !gatekeeper('com_user/edituser') && (!gatekeeper('com_user/self') || ($_REQUEST['id'] != $_SESSION['tilmeld_user_id'])) )
-		punt_user(null, pines_url('com_user', 'listusers'));
-	$user = User::factory((int) $_REQUEST['id']);
-	if (!isset($user->guid)) {
-		pines_error('Requested user id is not accessible.');
-		return;
-	}
-	if ( !empty($_REQUEST['password']) )
-		$user->password($_REQUEST['password']);
-} else {
-	if ( !gatekeeper('com_user/newuser') )
-		punt_user(null, pines_url('com_user', 'listusers'));
-	$user = User::factory();
-	$user->password($_REQUEST['password']);
-}
 
-if (!Tilmeld::$config->email_usernames['value'] && gatekeeper('com_user/usernames'))
-	$user->username = $_REQUEST['username'];
-if (in_array('name', Tilmeld::$config->user_fields['value'])) {
-	$user->name_first = $_REQUEST['name_first'];
-	$user->name_middle = $_REQUEST['name_middle'];
-	$user->name_last = $_REQUEST['name_last'];
-	$user->name = $user->name_first.(!empty($user->name_middle) ? ' '.$user->name_middle : '').(!empty($user->name_last) ? ' '.$user->name_last : '');
-}
-if (gatekeeper('com_user/enabling')) {
-	if ($_REQUEST['enabled'] == 'ON')
-		$user->addTag('enabled');
-	else
-		$user->removeTag('enabled');
-}
-if (Tilmeld::$config->email_usernames['value'] || in_array('email', Tilmeld::$config->user_fields['value'])) {
+if (Tilmeld::$config['email_usernames'] || in_array('email', Tilmeld::$config['user_fields'])) {
 	// Only send an email if they don't have the ability to edit all users.
-	if (Tilmeld::$config->verify_email['value'] && !gatekeeper('com_user/edituser')) {
+	if (Tilmeld::$config['verifyEmail'] && !gatekeeper('com_user/edituser')) {
 		if (isset($user->guid) && $user->email != $_REQUEST['email']) {
-			if (Tilmeld::$config->email_rate_limit['value'] !== '' && isset($user->email_change_date) && $user->email_change_date > strtotime('-'.Tilmeld::$config->email_rate_limit['value']))
-				pines_notice('You already changed your email address recently. Please wait until '.format_date(strtotime('+'.Tilmeld::$config->email_rate_limit['value'], $user->email_change_date), 'full_short').' to change your email address again.');
+			if (Tilmeld::$config['email_rate_limit'] !== '' && isset($user->emailChangeDate) && $user->emailChangeDate > strtotime('-'.Tilmeld::$config['email_rate_limit']))
+				pines_notice('You already changed your email address recently. Please wait until '.format_date(strtotime('+'.Tilmeld::$config['email_rate_limit'], $user->emailChangeDate), 'full_short').' to change your email address again.');
 			else {
 				if (isset($user->secret)) {
 					// The user hasn't verified their previous email, so just update it.
@@ -57,20 +27,20 @@ if (Tilmeld::$config->email_usernames['value'] || in_array('email', Tilmeld::$co
 					// old link doesn't verify the new address.
 					$user->secret = uniqid('', true);
 				} else {
-					$user->new_email_address = $_REQUEST['email'];
-					$user->new_email_secret = uniqid('', true);
+					$user->newEmailAddress = $_REQUEST['email'];
+					$user->newEmailSecret = uniqid('', true);
 					// Save the old email in case the verification link is clicked.
-					$user->cancel_email_address = $user->email;
-					$user->cancel_email_secret = uniqid('', true);
-					$user->email_change_date = time();
-					$verify_email = true;
+					$user->cancelEmailAddress = $user->email;
+					$user->cancelEmailSecret = uniqid('', true);
+					$user->emailChangeDate = time();
+					$verifyEmail = true;
 				}
 			}
 		}
 	} else
 		$user->email = $_REQUEST['email'];
 	if (isset($user->secret) && gatekeeper('com_user/edituser') && $_REQUEST['email_verified'] == 'ON') {
-		if (Tilmeld::$config->unverified_access['value'])
+		if (Tilmeld::$config['unverified_access'])
 			$user->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('default_secondary', true)));
 		$user->enable();
 		unset($user->secret);
@@ -83,24 +53,24 @@ if (Tilmeld::$config->email_usernames['value'] || in_array('email', Tilmeld::$co
 			pines_error('Your email could not be added to the mailing list. Please try again, and if the problem persists, contact an administrator.');
 	}
 }
-if (in_array('phone', Tilmeld::$config->user_fields['value']))
+if (in_array('phone', Tilmeld::$config['user_fields']))
 	$user->phone = preg_replace('/\D/', '', $_REQUEST['phone']);
-if (in_array('fax', Tilmeld::$config->user_fields['value']))
+if (in_array('fax', Tilmeld::$config['user_fields']))
 	$user->fax = preg_replace('/\D/', '', $_REQUEST['fax']);
-if (Tilmeld::$config->referral_codes['value'])
+if (Tilmeld::$config['referral_codes'])
 	$user->referral_code = $_REQUEST['referral_code'];
-if (in_array('timezone', Tilmeld::$config->user_fields['value']))
+if (in_array('timezone', Tilmeld::$config['user_fields']))
 	$user->timezone = $_REQUEST['timezone'];
 
 // Location
-if (in_array('address', Tilmeld::$config->user_fields['value'])) {
-	$user->address_type = $_REQUEST['address_type'];
-	$user->address_1 = $_REQUEST['address_1'];
-	$user->address_2 = $_REQUEST['address_2'];
-	$user->city = $_REQUEST['city'];
-	$user->state = $_REQUEST['state'];
-	$user->zip = $_REQUEST['zip'];
-	$user->address_international = $_REQUEST['address_international'];
+if (in_array('address', Tilmeld::$config['user_fields'])) {
+	$user->addressType = $_REQUEST['addressType'];
+	$user->addressStreet = $_REQUEST['addressStreet'];
+	$user->addressStreet2 = $_REQUEST['addressStreet2'];
+	$user->addressCity = $_REQUEST['addressCity'];
+	$user->addressState = $_REQUEST['addressState'];
+	$user->addressZip = $_REQUEST['addressZip'];
+	$user->addressInternational = $_REQUEST['addressInternational'];
 }
 
 // Go through a list of all groups, and assign them if they're selected.
@@ -108,7 +78,7 @@ if (in_array('address', Tilmeld::$config->user_fields['value'])) {
 // entity manager after com_user filters the result, and thus will not be
 // assigned.
 if ( gatekeeper('com_user/assigngroup') ) {
-	$highest_primary_parent = Tilmeld::$config->highest_primary['value'];
+	$highest_primary_parent = Tilmeld::$config['highest_primary'];
 	$primary_groups = array();
 	if ($highest_primary_parent == 0) {
 		$primary_groups = \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group'));
@@ -131,8 +101,8 @@ if ( gatekeeper('com_user/assigngroup') ) {
 	if ($_REQUEST['group'] == 'null')
 		unset($user->group);
 
-	if (!(gatekeeper('com_user/edituser') && $_REQUEST['email_verified'] == 'ON' && Tilmeld::$config->unverified_access['value'])) {
-		$highest_secondary_parent = Tilmeld::$config->highest_secondary['value'];
+	if (!(gatekeeper('com_user/edituser') && $_REQUEST['email_verified'] == 'ON' && Tilmeld::$config['unverified_access'])) {
+		$highest_secondary_parent = Tilmeld::$config['highest_secondary'];
 		$secondary_groups = array();
 		if ($highest_secondary_parent == 0) {
 			$secondary_groups = \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group'));
@@ -154,7 +124,7 @@ if ( gatekeeper('com_user/assigngroup') ) {
 }
 
 if ( gatekeeper('com_user/abilities') ) {
-	$user->inherit_abilities = ($_REQUEST['inherit_abilities'] == 'ON');
+	$user->inheritAbilities = ($_REQUEST['inheritAbilities'] == 'ON');
 	$sections = array('system');
 	foreach ($_->components as $cur_component)
 		$sections[] = $cur_component;
@@ -179,7 +149,7 @@ if (!$un_check['result']) {
 	pines_notice($un_check['message']);
 	return;
 }
-if (in_array('email', Tilmeld::$config->user_fields['value'])) {
+if (in_array('email', Tilmeld::$config['user_fields'])) {
 	$test = \Nymph\Nymph::getEntity(
 			array('class' => '\Tilmeld\User', 'skip_ac' => true),
 			array('&',
@@ -193,39 +163,25 @@ if (in_array('email', Tilmeld::$config->user_fields['value'])) {
 		return;
 	}
 }
-if (empty($user->password) && !Tilmeld::$config->pw_empty['value']) {
+if (empty($user->password) && !Tilmeld::$config['pw_empty']) {
 	$user->print_form();
 	pines_notice('Please specify a password.');
 	return;
 }
-if (in_array('pin', Tilmeld::$config->user_fields['value']) && gatekeeper('com_user/assignpin') && !empty($user->pin)) {
-	$test = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\User'), array('&', 'data' => array('pin', $user->pin)));
-	if (isset($test) && !$user->is($test)) {
-		$user->print_form();
-		pines_notice('This PIN is already in use.');
-		return;
-	}
-
-	if (Tilmeld::$config->min_pin_length['value'] > 0 && strlen($user->pin) < Tilmeld::$config->min_pin_length['value']) {
-		$user->print_form();
-		pines_notice("User PINs must be at least {Tilmeld::$config->min_pin_length['value']} characters.");
-		return;
-	}
-}
 if ($user->save()) {
 	pines_notice('Saved user ['.$user->username.']');
 	pines_log('Saved user ['.$user->username.']');
-	if (Tilmeld::$config->verify_email['value'] && $verify_email) {
+	if (Tilmeld::$config['verifyEmail'] && $verifyEmail) {
 		// Send the verification email.
-		$link = h(pines_url('com_user', 'verifyuser', array('id' => $user->guid, 'type' => 'change', 'secret' => $user->new_email_secret), true));
-		$link2 = h(pines_url('com_user', 'verifyuser', array('id' => $user->guid, 'type' => 'cancelchange', 'secret' => $user->cancel_email_secret), true));
+		$link = h(pines_url('com_user', 'verifyuser', array('id' => $user->guid, 'type' => 'change', 'secret' => $user->newEmailSecret), true));
+		$link2 = h(pines_url('com_user', 'verifyuser', array('id' => $user->guid, 'type' => 'cancelchange', 'secret' => $user->cancelEmailSecret), true));
 		$macros = array(
 			'old_email' => h($user->email),
-			'new_email' => h($user->new_email_address),
+			'new_email' => h($user->newEmailAddress),
 			'to_phone' => h(format_phone($user->phone)),
 			'to_fax' => h(format_phone($user->fax)),
 			'to_timezone' => h($user->timezone),
-			'to_address' => $user->address_type == 'us' ? h("{$user->address_1} {$user->address_2}").'<br />'.h("{$user->city}, {$user->state} {$user->zip}") : '<pre>'.h($user->address_international).'</pre>'
+			'to_address' => $user->addressType == 'us' ? h("{$user->addressStreet} {$user->addressStreet2}").'<br />'.h("{$user->addressCity}, {$user->addressState} {$user->addressZip}") : '<pre>'.h($user->addressInternational).'</pre>'
 		);
 		$macros2 = $macros;
 		$macros['verify_link'] = $link;
@@ -233,13 +189,13 @@ if ($user->save()) {
 		// Two emails, first goes to the new address for verification.
 		// Second goes to the old email address to cancel the change.
 		$recipient = (object) array(
-			'email' => $user->new_email_address,
+			'email' => $user->newEmailAddress,
 			'username' => $user->username,
 			'name' => $user->name,
-			'name_first' => $user->name_first,
-			'name_last' => $user->name_last,
+			'nameFirst' => $user->nameFirst,
+			'nameLast' => $user->nameLast,
 		);
-		if ($_->com_mailer->send_mail('com_user/verify_email_change', $macros, $recipient) && $_->com_mailer->send_mail('com_user/cancel_email_change', $macros2, $user))
+		if ($_->com_mailer->send_mail('com_user/verifyEmail_change', $macros, $recipient) && $_->com_mailer->send_mail('com_user/cancel_email_change', $macros2, $user))
 			pines_notice('A verification link has been sent to your new email address. Please click the link provided to verify your new address.');
 		else
 			pines_error('Couldn\'t send verification email.');

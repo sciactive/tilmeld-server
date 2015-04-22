@@ -143,15 +143,15 @@ if ($this->render == 'body' && gatekeeper('com_user/listgroups')) { ?>
 	<hr />
 	<h3 style="margin:10px 0;">Address</h3>
 	<address>
-		<?php if ($this->entity->address_type == 'us') {
-			e($this->entity->address_1).'<br />';
-			if (!empty($this->entity->address_2))
-				e($this->entity->address_2).'<br />';
-			e($this->entity->city).', ';
-			e($this->entity->state).' ';
-			e($this->entity->zip);
+		<?php if ($this->entity->addressType == 'us') {
+			e($this->entity->addressStreet).'<br />';
+			if (!empty($this->entity->addressStreet2))
+				e($this->entity->addressStreet2).'<br />';
+			e($this->entity->addressCity).', ';
+			e($this->entity->addressState).' ';
+			e($this->entity->addressZip);
 		} else {
-			echo '<pre>'.h($this->entity->address_international).'</pre>';
+			echo '<pre>'.h($this->entity->addressInternational).'</pre>';
 		} ?>
 	</address>
 </div>

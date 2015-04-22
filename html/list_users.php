@@ -63,18 +63,18 @@ if (isset($_SESSION['tilmeld_user']) && is_array($_SESSION['tilmeld_user']->pgri
 	<thead>
 		<tr>
 			<th>GUID</th>
-			<th><?php echo \Tilmeld\Tilmeld::$config->email_usernames['value'] ? 'Email' : 'Username'; ?></th>
-			<?php if (in_array('name', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+			<th><?php echo \Tilmeld\Tilmeld::$config['email_usernames'] ? 'Email' : 'Username'; ?></th>
+			<?php if (in_array('name', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 			<th>Real Name</th>
-			<?php } if (!\Tilmeld\Tilmeld::$config->email_usernames['value'] && in_array('email', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+			<?php } if (!\Tilmeld\Tilmeld::$config['email_usernames'] && in_array('email', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 			<th>Email</th>
-			<?php } if (in_array('timezone', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+			<?php } if (in_array('timezone', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 			<th>Timezone</th>
 			<?php } ?>
 			<th>Primary Group</th>
 			<th>Groups</th>
 			<th>Inherit Abilities</th>
-			<?php if (\Tilmeld\Tilmeld::$config->referral_codes['value']) { ?>
+			<?php if (\Tilmeld\Tilmeld::$config['referral_codes']) { ?>
 			<th>Referral Code</th>
 			<?php } ?>
 		</tr>
@@ -84,11 +84,11 @@ if (isset($_SESSION['tilmeld_user']) && is_array($_SESSION['tilmeld_user']->pgri
 		<tr title="<?php e($user->guid); ?>">
 			<td><?php e($user->guid); ?></td>
 			<td><a data-entity="<?php e($user->guid); ?>" data-entity-context="user"><?php e($user->username); ?></a></td>
-			<?php if (in_array('name', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+			<?php if (in_array('name', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 			<td><?php e($user->name); ?></td>
-			<?php } if (!\Tilmeld\Tilmeld::$config->email_usernames['value'] && in_array('email', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+			<?php } if (!\Tilmeld\Tilmeld::$config['email_usernames'] && in_array('email', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 			<td><a href="mailto:<?php e($user->email); ?>"><?php e($user->email); ?></a></td>
-			<?php } if (in_array('timezone', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+			<?php } if (in_array('timezone', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 			<td><?php e($user->getTimezone()).(empty($user->timezone) ? ' (I)' : ' (A)'); ?></td>
 			<?php } ?>
 			<td><a data-entity="<?php e($user->group->guid); ?>" data-entity-context="group"><?php e($user->group->groupname); ?></a></td>
@@ -103,14 +103,14 @@ if (isset($_SESSION['tilmeld_user']) && is_array($_SESSION['tilmeld_user']->pgri
 				echo count($user->groups).' groups';
 			}
 			?></td>
-			<td><?php echo $user->inherit_abilities ? 'Yes' : 'No'; ?></td>
-			<?php if (\Tilmeld\Tilmeld::$config->referral_codes['value']) { ?>
+			<td><?php echo $user->inheritAbilities ? 'Yes' : 'No'; ?></td>
+			<?php if (\Tilmeld\Tilmeld::$config['referral_codes']) { ?>
 			<td><?php e($user->referral_code); ?></td>
 			<?php } ?>
 		</tr>
 	<?php } ?>
 	</tbody>
 </table>
-<?php if (in_array('timezone', \Tilmeld\Tilmeld::$config->user_fields['value'])) { ?>
+<?php if (in_array('timezone', \Tilmeld\Tilmeld::$config['user_fields'])) { ?>
 <small>Note: Under timezones (I) means inherited and (A) means assigned.</small>
 <?php }
