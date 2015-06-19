@@ -35,10 +35,10 @@ if (gatekeeper('com_user/enabling')) {
 		$group->removeTag('enabled');
 }
 $group->email = $_REQUEST['email'];
-if ($group->email && $_REQUEST['mailing_list'] != 'ON' && !$_->com_mailer->unsubscribe_query($group->email)) {
+if ($group->email && $_REQUEST['mailingList'] != 'ON' && !$_->com_mailer->unsubscribe_query($group->email)) {
 	if (!$_->com_mailer->unsubscribe_add($group->email))
 		pines_error('Your email could not be removed from the mailing list. Please try again, and if the problem persists, contact an administrator.');
-} elseif ($group->email && $_REQUEST['mailing_list'] == 'ON' && $_->com_mailer->unsubscribe_query($group->email)) {
+} elseif ($group->email && $_REQUEST['mailingList'] == 'ON' && $_->com_mailer->unsubscribe_query($group->email)) {
 	if (!$_->com_mailer->unsubscribe_remove($group->email))
 		pines_error('Your email could not be added to the mailing list. Please try again, and if the problem persists, contact an administrator.');
 }
@@ -47,9 +47,9 @@ $group->phone2 = preg_replace('/\D/', '', $_REQUEST['phone2']);
 $group->fax = preg_replace('/\D/', '', $_REQUEST['fax']);
 $group->timezone = $_REQUEST['timezone'];
 if (gatekeeper('com_user/defaultgroups')) {
-	$group->default_primary = $_REQUEST['default_primary'] == 'ON';
-	$group->default_secondary = $_REQUEST['default_secondary'] == 'ON';
-	$group->unverified_secondary = $_REQUEST['unverified_secondary'] == 'ON';
+	$group->defaultPrimary = $_REQUEST['defaultPrimary'] == 'ON';
+	$group->defaultSecondary = $_REQUEST['defaultSecondary'] == 'ON';
+	$group->unverifiedSecondary = $_REQUEST['unverifiedSecondary'] == 'ON';
 }
 // Location
 $group->addressType = $_REQUEST['addressType'];
@@ -140,10 +140,10 @@ if (isset($group->parent) && !isset($group->parent->guid)) {
 	pines_notice('Parent group is not valid.');
 	return;
 }
-if (gatekeeper('com_user/defaultgroups') && $group->default_primary) {
-	$current_primary = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\Group'), array('&', 'data' => array('default_primary', true)));
+if (gatekeeper('com_user/defaultgroups') && $group->defaultPrimary) {
+	$current_primary = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\Group'), array('&', 'data' => array('defaultPrimary', true)));
 	if (isset($current_primary) && !$group->is($current_primary)) {
-		unset($current_primary->default_primary);
+		unset($current_primary->defaultPrimary);
 		if ($current_primary->save()) {
 			pines_notice("New user primary group changed from {$current_primary->groupname} to {$group->groupname}");
 		} else {

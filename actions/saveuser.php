@@ -41,14 +41,14 @@ if (Tilmeld::$config['email_usernames'] || in_array('email', Tilmeld::$config['u
 		$user->email = $_REQUEST['email'];
 	if (isset($user->secret) && gatekeeper('com_user/edituser') && $_REQUEST['email_verified'] == 'ON') {
 		if (Tilmeld::$config['unverified_access'])
-			$user->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('default_secondary', true)));
+			$user->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('defaultSecondary', true)));
 		$user->enable();
 		unset($user->secret);
 	}
-	if ($user->email && $_REQUEST['mailing_list'] != 'ON' && !$_->com_mailer->unsubscribe_query($user->email)) {
+	if ($user->email && $_REQUEST['mailingList'] != 'ON' && !$_->com_mailer->unsubscribe_query($user->email)) {
 		if (!$_->com_mailer->unsubscribe_add($user->email))
 			pines_error('Your email could not be removed from the mailing list. Please try again, and if the problem persists, contact an administrator.');
-	} elseif ($user->email && $_REQUEST['mailing_list'] == 'ON' && $_->com_mailer->unsubscribe_query($user->email)) {
+	} elseif ($user->email && $_REQUEST['mailingList'] == 'ON' && $_->com_mailer->unsubscribe_query($user->email)) {
 		if (!$_->com_mailer->unsubscribe_remove($user->email))
 			pines_error('Your email could not be added to the mailing list. Please try again, and if the problem persists, contact an administrator.');
 	}

@@ -27,6 +27,14 @@
 
 		// === Class Methods ===
 
+		checkGroupname: function(){
+			return this.serverCall('checkGroupname', arguments);
+		},
+
+		checkEmail: function(){
+			return this.serverCall('checkEmail', arguments);
+		},
+
 		getChildren: function(){
 			return this.serverCall('getChildren', arguments);
 		},

@@ -797,14 +797,14 @@ class User extends AbleObject {
 			$this->email = $this->username;
 		}
 
-		$this->group = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('default_primary', true)));
+		$this->group = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('defaultPrimary', true)));
 		if (!isset($this->group->guid)) {
 			unset($this->group);
 		}
 		if (Tilmeld::$config['verify_email'] && Tilmeld::$config['unverified_access']) {
-			$this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('unverified_secondary', true)));
+			$this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('unverifiedSecondary', true)));
 		} else {
-			$this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('default_secondary', true)));
+			$this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('defaultSecondary', true)));
 		}
 
 		if (Tilmeld::$config['verify_email']) {

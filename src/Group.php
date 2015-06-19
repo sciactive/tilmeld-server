@@ -34,6 +34,8 @@ class Group extends AbleObject {
 	const ETYPE = 'group';
 	protected $tags = [];
 	public $clientEnabledMethods = [
+		'checkGroupname',
+		'checkEmail',
 		'getChildren',
 		'getDescendants',
 		'getLevel',
@@ -345,6 +347,81 @@ class Group extends AbleObject {
 				$or
 			);
 		return $return;
+	}
+
+	/**
+	 * Check that a groupname is valid.
+	 *
+	 * @return array An associative array with a boolean 'result' entry and a 'message' entry.
+	 */
+	public function checkGroupname() {
+		if (!Tilmeld::$config['email_usernames']) {
+			if (empty($this->groupname)) {
+				return ['result' => false, 'message' => 'Please specify a groupname.'];
+			}
+			if (Tilmeld::$config['max_username_length'] > 0 && strlen($this->groupname) > Tilmeld::$config['max_username_length']) {
+				return ['result' => false, 'message' => 'Groupnames must not exceed '.Tilmeld::$config['max_username_length'].' characters.'];
+			}
+			if (array_diff(str_split($this->groupname), str_split(Tilmeld::$config['valid_chars']))) {
+				return ['result' => false, 'message' => Tilmeld::$config['valid_chars_notice']];
+			}
+			if (!preg_match(Tilmeld::$config['valid_regex'], $this->groupname)) {
+				return ['result' => false, 'message' => Tilmeld::$config['valid_regex_notice']];
+			}
+			$selector = ['&',
+					'ilike' => ['groupname', str_replace(['%', '_'], ['\%', '\_'], $this->groupname)]
+				];
+			if (isset($this->guid)) {
+				$selector['!guid'] = $this->guid;
+			}
+			$test = \Nymph\Nymph::getEntity(
+					['class' => '\Tilmeld\Group', 'skip_ac' => true],
+					$selector
+				);
+			if (isset($test->guid)) {
+				return ['result' => false, 'message' => 'That groupname is taken.'];
+			}
+
+			return ['result' => true, 'message' => (isset($this->guid) ? 'Groupname is valid.' : 'Groupname is available!')];
+		} else {
+			if (empty($this->groupname)) {
+				return ['result' => false, 'message' => 'Please specify an email.'];
+			}
+			if (Tilmeld::$config['max_username_length'] > 0 && strlen($this->groupname) > Tilmeld::$config['max_username_length']) {
+				return ['result' => false, 'message' => 'Emails must not exceed '.Tilmeld::$config['max_username_length'].' characters.'];
+			}
+
+			return $this->checkEmail();
+		}
+	}
+
+	/**
+	 * Check that an email is unique.
+	 *
+	 * @return array An associative array with a boolean 'result' entry and a 'message' entry.
+	 */
+	public function checkEmail() {
+		if (empty($this->email)) {
+			return ['result' => false, 'message' => 'Please specify an email.'];
+		}
+		if (!preg_match('/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i', $this->email)) {
+			return ['result' => false, 'message' => 'Email must be a correctly formatted address.'];
+		}
+		$selector = ['&',
+				'ilike' => ['email', str_replace(['%', '_'], ['\%', '\_'], $this->email)]
+			];
+		if (isset($this->guid)) {
+			$selector['!guid'] = $this->guid;
+		}
+		$test = \Nymph\Nymph::getEntity(
+				['class' => '\Tilmeld\Group', 'skip_ac' => true],
+				$selector
+			);
+		if (isset($test->guid)) {
+			return ['result' => false, 'message' => 'That email address is already registered.'];
+		}
+
+		return ['result' => true, 'message' => (isset($this->guid) ? 'Email is valid.' : 'Email address is valid!')];
 	}
 
 	/**

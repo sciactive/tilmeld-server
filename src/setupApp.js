@@ -137,6 +137,12 @@ angular.module('setupApp', ['ngRoute'])
 		loading: false,
 		sort: 'name',
 		entities: [],
+		timezones: tilmeldTimezones,
+		ability: '',
+		groupnameVerified: null,
+		groupnameVerifiedMessage: null,
+		emailVerified: null,
+		emailVerifiedMessage: null,
 		success: null
 	};
 	$scope.entity = new Group();
@@ -146,6 +152,57 @@ angular.module('setupApp', ['ngRoute'])
 		Nymph.sort($scope.uiState.entities, $scope.uiState.sort);
 		$scope.$apply();
 	});
+
+	var groupnameTimer = null;
+	$scope.$watch('entity.data.groupname', function(newValue, oldValue){
+		if (newValue === oldValue) {
+			return;
+		}
+		if (groupnameTimer) {
+			$timeout.cancel(groupnameTimer);
+		}
+		groupnameTimer = $timeout(function(){
+			if (newValue === '') {
+				$scope.uiState.groupnameVerified = null;
+				$scope.uiState.groupnameVerifiedMessage = null;
+				return;
+			}
+			$scope.entity.checkGroupname().then(function(data){
+				$scope.uiState.groupnameVerified = data.result;
+				$scope.uiState.groupnameVerifiedMessage = data.message;
+				$scope.$apply();
+			});
+		}, 400);
+	});
+	var emailTimer = null;
+	$scope.$watch('entity.data.email', function(newValue, oldValue){
+		if (newValue === oldValue) {
+			return;
+		}
+		if (emailTimer) {
+			$timeout.cancel(emailTimer);
+		}
+		emailTimer = $timeout(function(){
+			if (newValue === '') {
+				$scope.uiState.emailVerified = null;
+				$scope.uiState.emailVerifiedMessage = null;
+				return;
+			}
+			$scope.entity.checkEmail().then(function(data){
+				$scope.uiState.emailVerified = data.result;
+				$scope.uiState.emailVerifiedMessage = data.message;
+				$scope.$apply();
+			});
+		}, 400);
+	});
+
+	$scope.addAbility = function(){
+		if ($scope.uiState.ability === '') {
+			return;
+		}
+		$scope.entity.data.abilities.push($scope.uiState.ability);
+		$scope.uiState.ability = '';
+	};
 
 	$scope.saveEntity = function(){
 		$scope.entity.save().then(function(success){
@@ -173,14 +230,14 @@ angular.module('setupApp', ['ngRoute'])
 .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
 	$routeProvider
 		.when('/', {
-			templateUrl: baseURL+'html/instructions.html'
+			templateUrl: tilmeldURL+'html/instructions.html'
 		})
 		.when('/user/:entityId?', {
-			templateUrl: baseURL+'html/user.html',
+			templateUrl: tilmeldURL+'html/user.html',
 			controller: 'UserController'
 		})
 		.when('/group/:entityId?', {
-			templateUrl: baseURL+'html/group.html',
+			templateUrl: tilmeldURL+'html/group.html',
 			controller: 'GroupController'
 		});
 

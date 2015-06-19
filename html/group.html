@@ -1,315 +1,214 @@
-<?php
-/**
- * Provides a form for the user to edit a group.
- *
- * @package Tilmeld
- * @license http://www.gnu.org/licenses/agpl-3.0.html
- * @author Hunter Perrin <hperrin@gmail.com>
- * @copyright SciActive.com
- * @link http://sciactive.com/
- */
-$this->title = (!isset($this->entity->guid)) ? 'Editing New Group' : 'Editing ['.h($this->entity->groupname).']';
-$this->note = 'Provide group details in this form.';
-$_->com_pgrid->load();
-//$_->com_jstree->load();
-$_->uploader->load();
-?>
-<form class="pf-form" method="post" id="p_muid_form" action="<?php e(pines_url('com_user', 'savegroup')); ?>">
-	<ul class="nav nav-tabs" style="clear: both;">
-		<li class="active"><a href="#p_muid_tab_general" data-toggle="tab">General</a></li>
-		<li><a href="#p_muid_tab_logo" data-toggle="tab">Logo</a></li>
-		<li><a href="#p_muid_tab_location" data-toggle="tab">Address</a></li>
-		<?php if ($this->display_abilities) { ?>
-		<li><a href="#p_muid_tab_abilities" data-toggle="tab">Abilities</a></li>
-		<?php } ?>
+<div class="panel panel-default">
+	<div class="panel-heading">
+		Select a Group to edit.
+	</div>
+	<div class="panel-body">
+		<select class="form-control" ng-model="entity" ng-options="ent as ent.data.name+(ent.hasTag('enabled') ? '' : ' (Disabled)') for ent in uiState.entities track by ent.guid" ng-change="checkNewEntity()">
+			<option value="" ng-value="null">- New Group -</option>
+		</select>
+	</div>
+</div>
+<div class="page-header" style="margin-top: 0;">
+	<h2 style="margin-top: 0;">Editing {{entity.data.guid ? entity.data.name : 'New Group'}}</h2>
+</div>
+<form class="pf-form" name="groupform" ng-submit="saveEntity()" style="position: relative;" autocomplete="off">
+	<ul class="nav nav-tabs" style="clear: both; margin-bottom: 15px;">
+		<li class="active"><a href=".tab-pane-general" data-toggle="tab">General</a></li>
+		<li><a href=".tab-pane-location" data-toggle="tab">Address</a></li>
+		<li><a href=".tab-pane-abilities" data-toggle="tab">Abilities</a></li>
 	</ul>
-	<div id="p_muid_tabs" class="tab-content">
-		<div class="tab-pane active" id="p_muid_tab_general">
-			<?php if (isset($this->entity->guid)) { ?>
-			<div class="date_info" style="float: right; text-align: right;">
-				<div>Created: <span class="date"><?php e(format_date($this->entity->cdate, 'full_short')); ?></span></div>
-				<div>Modified: <span class="date"><?php e(format_date($this->entity->mdate, 'full_short')); ?></span></div>
-			</div>
-			<?php } ?>
-			<?php if ($this->display_username) { ?>
+	<div class="tab-content">
+		<div class="tab-pane tab-pane-general active">
 			<div class="pf-element">
-				<label><span class="pf-label">Group Name</span>
-					<input class="pf-field form-control" type="text" name="groupname" size="24" value="<?php e($this->entity->groupname); ?>" /></label>
+				<label>
+					<span class="pf-label">Groupname</span>
+					<span class="pf-group pf-full-width">
+						<span class="form-group" ng-class="{'has-success': uiState.groupnameVerified === true, 'has-error': uiState.groupnameVerified === false}">
+							<input class="pf-field form-control" type="text" name="groupname" size="24" ng-model="entity.data.groupname" />
+						</span>
+						<span class="pf-field" ng-if="uiState.groupnameVerifiedMessage">{{uiState.groupnameVerifiedMessage}}</span>
+					</span>
+				</label>
 			</div>
-			<?php } ?>
+			<div class="pf-element">
+				<label>
+					<span class="pf-label">Email</span>
+					<span class="pf-group pf-full-width">
+						<span class="form-group" ng-class="{'has-success': uiState.emailVerified === true, 'has-error': uiState.emailVerified === false}">
+							<input class="pf-field form-control" type="email" name="email" size="24" ng-model="entity.data.email" />
+						</span>
+						<span class="pf-field" ng-if="uiState.emailVerifiedMessage">{{uiState.emailVerifiedMessage}}</span>
+					</span>
+				</label>
+			</div>
 			<div class="pf-element">
 				<label><span class="pf-label">Display Name</span>
-					<input class="pf-field form-control" type="text" name="name" size="24" value="<?php e($this->entity->name); ?>" /></label>
+					<input class="pf-field form-control" type="text" name="name" size="24" ng-model="entity.data.name" /></label>
 			</div>
-			<?php if ($this->display_enable) { ?>
 			<div class="pf-element">
 				<label><span class="pf-label">Enabled</span>
-					<input class="pf-field" type="checkbox" name="enabled" value="ON"<?php echo $this->entity->hasTag('enabled') ? ' checked="checked"' : ''; ?> /></label>
-			</div>
-			<?php } ?>
-			<div class="pf-element">
-				<label><span class="pf-label">Email</span>
-					<input class="pf-field form-control" type="email" name="email" size="24" value="<?php e($this->entity->email); ?>" /></label>
-			</div>
-			<?php if (isset($_->com_mailer)) { ?>
-			<div class="pf-element">
-				<label><span class="pf-label">Mailing List</span>
-					<input class="pf-field" type="checkbox" name="mailing_list" value="ON"<?php echo $_->com_mailer->unsubscribe_query($this->entity->email) ? '' : ' checked="checked"'; ?> /> Subscribe to the mailing list.</label>
-			</div>
-			<?php } ?>
-			<div class="pf-element">
-				<label><span class="pf-label">Phone 1</span>
-					<input class="pf-field form-control" type="tel" name="phone" size="24" value="<?php e(format_phone($this->entity->phone)); ?>" onkeyup="this.value=this.value.replace(/\D*0?1?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d*)\D*/, '($1$2$3) $4$5$6-$7$8$9$10 x$11').replace(/\D*$/, '');" /></label>
+					<input class="pf-field" type="checkbox" name="enabled" ng-model="entity.data.enabled" /></label>
 			</div>
 			<div class="pf-element">
-				<label><span class="pf-label">Phone 2</span>
-					<input class="pf-field form-control" type="tel" name="phone2" size="24" value="<?php e(format_phone($this->entity->phone2)); ?>" onkeyup="this.value=this.value.replace(/\D*0?1?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d*)\D*/, '($1$2$3) $4$5$6-$7$8$9$10 x$11').replace(/\D*$/, '');" /></label>
-			</div>
-			<div class="pf-element">
-				<label><span class="pf-label">Fax</span>
-					<input class="pf-field form-control" type="tel" name="fax" size="24" value="<?php e(format_phone($this->entity->fax)); ?>" onkeyup="this.value=this.value.replace(/\D*0?1?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d*)\D*/, '($1$2$3) $4$5$6-$7$8$9$10 x$11').replace(/\D*$/, '');" /></label>
+				<label><span class="pf-label">Phone</span>
+					<input class="pf-field form-control" type="tel" name="phone" size="24" ng-model="entity.data.phone" /></label>
 			</div>
 			<div class="pf-element">
 				<label>
 					<span class="pf-label">Timezone</span>
-					<span class="pf-note">Users in this group will inherit this timezone. Primary group has priority over secondary groups.</span>
-					<select class="pf-field form-control" name="timezone">
-						<option value="">--System Default--</option>
-						<?php
-						$tz = DateTimeZone::listIdentifiers();
-						sort($tz);
-						foreach ($tz as $cur_tz) {
-							?><option value="<?php e($cur_tz); ?>"<?php echo $this->entity->timezone == $cur_tz ? ' selected="selected"' : ''; ?>><?php e($cur_tz); ?></option><?php
-						} ?>
+					<span class="pf-note">This overrides the primary group's timezone.</span>
+					<select class="pf-field form-control" ng-options="timezone for timezone in uiState.timezones" name="timezone" ng-model="entity.data.timezone">
+						<option value="">- System Default -</option>
 					</select>
 				</label>
+			</div>
+			<div class="pf-element">
+				<label><span class="pf-label">Mailing List</span>
+					<input class="pf-field" type="checkbox" name="mailingList" ng-model="entity.data.mailingList" /> Subscribe to the mailing list.</label>
 			</div>
 			<div class="pf-element">
 				<label>
 					<span class="pf-label">Parent</span>
-					<select class="pf-field form-control" name="parent">
-						<option value="none">--No Parent--</option>
-						<?php
-						\Tilmeld\Tilmeld::groupSort($this->group_array, 'name');
-						foreach ($this->group_array as $cur_group) {
-							?><option value="<?php e($cur_group->guid); ?>"<?php echo $cur_group->is($this->entity->parent) ? ' selected="selected"' : ''; ?>><?php e(str_repeat('->', $cur_group->getLevel())." {$cur_group->name} [{$cur_group->groupname}]"); ?></option><?php
-						} ?>
+					<select class="pf-field form-control" name="parent" ng-options="group as group.name+' ('+group.groupname+')' for group in entities track by group.guid" ng-model="entity.data.parent">
+						<option value="">- No Parent -</option>
 					</select>
 				</label>
 			</div>
-			<?php if ($this->display_default) { ?>
 			<div class="pf-element">
 				<label><span class="pf-label">New User Primary Group</span>
 					<span class="pf-note">Default primary group for newly registered users.</span>
-					<input class="pf-field" type="checkbox" name="default_primary" value="ON"<?php echo $this->entity->default_primary ? ' checked="checked"' : ''; ?> /></label>
+					<input class="pf-field" type="checkbox" name="defaultPrimary" ng-model="entity.data.defaultPrimary" /></label>
 			</div>
 			<div class="pf-element">
 				<label><span class="pf-label">New User Secondary Group</span>
 					<span class="pf-note">Default secondary group for newly registered users.</span>
-					<input class="pf-field" type="checkbox" name="default_secondary" value="ON"<?php echo $this->entity->default_secondary ? ' checked="checked"' : ''; ?> /></label>
+					<input class="pf-field" type="checkbox" name="defaultSecondary" ng-model="entity.data.defaultSecondary" /></label>
 			</div>
 			<div class="pf-element">
 				<label><span class="pf-label">Unverified User Secondary Group</span>
 					<span class="pf-note">Default secondary group for newly registered users who haven't verified their email. See config for details.</span>
-					<input class="pf-field" type="checkbox" name="unverified_secondary" value="ON"<?php echo $this->entity->unverified_secondary ? ' checked="checked"' : ''; ?> /></label>
-			</div>
-			<?php } ?>
-			<br class="pf-clearing" />
-		</div>
-		<div class="tab-pane" id="p_muid_tab_logo">
-			<div class="pf-element">
-				<span class="pf-label"><?php echo (isset($this->entity->logo)) ? 'Currently Set Logo' : 'Inherited Logo'; ?></span>
-				<div class="pf-group">
-					<span class="pf-field"><img src="<?php e($this->entity->getLogo()); ?>" alt="Group Logo" /></span>
-					<?php if (isset($this->entity->logo)) { ?>
-					<br />
-					<label><span class="pf-field"><input class="pf-field" type="checkbox" name="remove_logo" value="ON" />Remove this logo.</span></label>
-					<?php } ?>
-				</div>
-			</div>
-			<div class="pf-element">
-				<label><span class="pf-label">Change Logo</span>
-					<input class="pf-field form-control puploader" type="text" name="image" /></label>
+					<input class="pf-field" type="checkbox" name="unverifiedSecondary" ng-model="entity.data.unverifiedSecondary" /></label>
 			</div>
 			<br class="pf-clearing" />
 		</div>
-		<div class="tab-pane" id="p_muid_tab_location">
+		<div class="tab-pane tab-pane-location">
 			<div class="pf-element">
-				<script type="text/javascript">
-					$_(function(){
-						var address_us = $("#p_muid_address_us");
-						var addressInternational = $("#p_muid_addressInternational");
-						$("#p_muid_form [name=addressType]").change(function(){
-							var addressType = $(this);
-							if (addressType.is(":checked") && addressType.val() == "us") {
-								address_us.show();
-								addressInternational.hide();
-							} else if (addressType.is(":checked") && addressType.val() == "international") {
-								addressInternational.show();
-								address_us.hide();
-							}
-						}).change();
-					});
-				</script>
 				<span class="pf-label">Address Type</span>
-				<label><input class="pf-field" type="radio" name="addressType" value="us"<?php echo ($this->entity->addressType == 'us') ? ' checked="checked"' : ''; ?> /> US</label>
-				<label><input class="pf-field" type="radio" name="addressType" value="international"<?php echo $this->entity->addressType == 'international' ? ' checked="checked"' : ''; ?> /> International</label>
+				<label><input class="pf-field" type="radio" name="addressType" value="us" ng-model="entity.data.addressType" /> US</label>
+				<label><input class="pf-field" type="radio" name="addressType" value="international" ng-model="entity.data.addressType" /> International</label>
 			</div>
-			<div id="p_muid_address_us" style="display: none;">
+			<div ng-if="entity.data.addressType === 'us'">
 				<div class="pf-element">
 					<label><span class="pf-label">Address 1</span>
-						<input class="pf-field form-control" type="text" name="addressStreet" size="24" value="<?php e($this->entity->addressStreet); ?>" /></label>
+						<input class="pf-field form-control" type="text" name="addressStreet" size="24" ng-model="entity.data.addressStreet" /></label>
 				</div>
 				<div class="pf-element">
 					<label><span class="pf-label">Address 2</span>
-						<input class="pf-field form-control" type="text" name="addressStreet2" size="24" value="<?php e($this->entity->addressStreet2); ?>" /></label>
+						<input class="pf-field form-control" type="text" name="addressStreet2" size="24" ng-model="entity.data.addressStreet2" /></label>
 				</div>
 				<div class="pf-element">
 					<span class="pf-label">City, State</span>
-					<input class="pf-field form-control" type="text" name="addressCity" size="15" value="<?php e($this->entity->addressCity); ?>" />
-					<select class="pf-field form-control" name="addressState">
+					<input class="pf-field form-control" type="text" name="addressCity" size="15" ng-model="entity.data.addressCity" />
+					<select class="pf-field form-control" name="addressState" ng-model="entity.data.addressState">
 						<option value="">None</option>
-						<?php foreach ([
-								'AL' => 'Alabama',
-								'AK' => 'Alaska',
-								'AZ' => 'Arizona',
-								'AR' => 'Arkansas',
-								'CA' => 'California',
-								'CO' => 'Colorado',
-								'CT' => 'Connecticut',
-								'DE' => 'Delaware',
-								'DC' => 'DC',
-								'FL' => 'Florida',
-								'GA' => 'Georgia',
-								'HI' => 'Hawaii',
-								'ID' => 'Idaho',
-								'IL' => 'Illinois',
-								'IN' => 'Indiana',
-								'IA' => 'Iowa',
-								'KS' => 'Kansas',
-								'KY' => 'Kentucky',
-								'LA' => 'Louisiana',
-								'ME' => 'Maine',
-								'MD' => 'Maryland',
-								'MA' => 'Massachusetts',
-								'MI' => 'Michigan',
-								'MN' => 'Minnesota',
-								'MS' => 'Mississippi',
-								'MO' => 'Missouri',
-								'MT' => 'Montana',
-								'NE' => 'Nebraska',
-								'NV' => 'Nevada',
-								'NH' => 'New Hampshire',
-								'NJ' => 'New Jersey',
-								'NM' => 'New Mexico',
-								'NY' => 'New York',
-								'NC' => 'North Carolina',
-								'ND' => 'North Dakota',
-								'OH' => 'Ohio',
-								'OK' => 'Oklahoma',
-								'OR' => 'Oregon',
-								'PA' => 'Pennsylvania',
-								'RI' => 'Rhode Island',
-								'SC' => 'South Carolina',
-								'SD' => 'South Dakota',
-								'TN' => 'Tennessee',
-								'TX' => 'Texas',
-								'UT' => 'Utah',
-								'VT' => 'Vermont',
-								'VA' => 'Virginia',
-								'WA' => 'Washington',
-								'WV' => 'West Virginia',
-								'WI' => 'Wisconsin',
-								'WY' => 'Wyoming',
-								'AA' => 'Armed Forces (AA)',
-								'AE' => 'Armed Forces (AE)',
-								'AP' => 'Armed Forces (AP)'
-							] as $key => $cur_state) { ?>
-						<option value="<?php echo $key; ?>"<?php echo $this->entity->addressState == $key ? ' selected="selected"' : ''; ?>><?php echo $cur_state; ?></option>
-						<?php } ?>
+						<option value="AL">Alabama</option>
+						<option value="AK">Alaska</option>
+						<option value="AZ">Arizona</option>
+						<option value="AR">Arkansas</option>
+						<option value="CA">California</option>
+						<option value="CO">Colorado</option>
+						<option value="CT">Connecticut</option>
+						<option value="DE">Delaware</option>
+						<option value="DC">DC</option>
+						<option value="FL">Florida</option>
+						<option value="GA">Georgia</option>
+						<option value="HI">Hawaii</option>
+						<option value="ID">Idaho</option>
+						<option value="IL">Illinois</option>
+						<option value="IN">Indiana</option>
+						<option value="IA">Iowa</option>
+						<option value="KS">Kansas</option>
+						<option value="KY">Kentucky</option>
+						<option value="LA">Louisiana</option>
+						<option value="ME">Maine</option>
+						<option value="MD">Maryland</option>
+						<option value="MA">Massachusetts</option>
+						<option value="MI">Michigan</option>
+						<option value="MN">Minnesota</option>
+						<option value="MS">Mississippi</option>
+						<option value="MO">Missouri</option>
+						<option value="MT">Montana</option>
+						<option value="NE">Nebraska</option>
+						<option value="NV">Nevada</option>
+						<option value="NH">New Hampshire</option>
+						<option value="NJ">New Jersey</option>
+						<option value="NM">New Mexico</option>
+						<option value="NY">New York</option>
+						<option value="NC">North Carolina</option>
+						<option value="ND">North Dakota</option>
+						<option value="OH">Ohio</option>
+						<option value="OK">Oklahoma</option>
+						<option value="OR">Oregon</option>
+						<option value="PA">Pennsylvania</option>
+						<option value="RI">Rhode Island</option>
+						<option value="SC">South Carolina</option>
+						<option value="SD">South Dakota</option>
+						<option value="TN">Tennessee</option>
+						<option value="TX">Texas</option>
+						<option value="UT">Utah</option>
+						<option value="VT">Vermont</option>
+						<option value="VA">Virginia</option>
+						<option value="WA">Washington</option>
+						<option value="WV">West Virginia</option>
+						<option value="WI">Wisconsin</option>
+						<option value="WY">Wyoming</option>
+						<option value="AA">Armed Forces (AA)</option>
+						<option value="AE">Armed Forces (AE)</option>
+						<option value="AP">Armed Forces (AP)</option>
 					</select>
 				</div>
 				<div class="pf-element">
 					<label><span class="pf-label">Zip</span>
-						<input class="pf-field form-control" type="text" name="addressZip" size="24" value="<?php e($this->entity->addressZip); ?>" /></label>
+						<input class="pf-field form-control" type="text" name="addressZip" size="24" ng-model="entity.data.addressZip" /></label>
 				</div>
 			</div>
-			<div id="p_muid_addressInternational" style="display: none;">
+			<div ng-if="entity.data.addressType === 'international'">
 				<div class="pf-element pf-full-width">
 					<label><span class="pf-label">Address</span>
 						<span class="pf-group pf-full-width">
 							<span class="pf-field" style="display: block;">
-								<textarea style="width: 100%;" rows="3" cols="35" name="addressInternational"><?php e($this->entity->addressInternational); ?></textarea>
+								<textarea class="form-control" style="width: 100%;" rows="3" cols="35" name="addressInternational" ng-model="entity.data.addressInternational"></textarea>
 							</span>
 						</span></label>
 				</div>
 			</div>
 			<br class="pf-clearing" />
 		</div>
-		<?php if ( $this->display_abilities ) { ?>
-		<div class="tab-pane" id="p_muid_tab_abilities">
-			<style type="text/css" scoped="scoped">
-				#p_muid_tab_abilities .abilities_accordion {
-					margin-bottom: .2em;
-				}
-				#p_muid_tab_abilities .abilities_accordion .panel-heading .component {
-					float: right;
-				}
-			</style>
-			<script type="text/javascript">
-				$_(function(){
-					var sections = $("#p_muid_tab_abilities .abilities_accordion .panel-collapse");
-					$("#p_muid_tab_abilities").on("click", "button.expand_all", function(){
-						sections.collapse("show");
-					}).on("click", "button.collapse_all", function(){
-						sections.collapse("hide");
-					});
-				});
-			</script>
-			<div class="pf-element pf-full-width ui-helper-clearfix">
-				<div class="btn-group" style="float: right; clear: both;">
-					<button type="button" class="expand_all btn btn-default">Expand All</button>
-					<button type="button" class="collapse_all btn btn-default">Collapse All</button>
-				</div>
-			</div>
-			<br class="pf-clearing" />
-			<?php foreach ($this->sections as $cur_section) {
-				if ($cur_section == 'system')
-					$section_abilities = (array) $_->info->abilities;
-				else
-					$section_abilities = (array) $_->info->$cur_section->abilities;
-				if (!$section_abilities) continue; ?>
-			<div class="abilities_accordion panel-group">
-				<div class="panel panel-default">
-					<a class="panel-heading ui-helper-clearfix" href="javascript:void(0);" data-toggle="collapse" data-target=":focus + .panel-collapse" tabindex="0">
-						<big class="panel-title"><?php echo ($cur_section == 'system') ? h($_->info->name) : h($_->info->$cur_section->name); ?> <span class="component"><?php e($cur_section); ?></span></big>
-					</a>
-					<div class="panel-collapse collapse">
-						<div class="panel-body clearfix">
-							<div class="pf-element">
-								<?php foreach ($section_abilities as $cur_ability) { ?>
-								<label>
-									<input type="checkbox" name="<?php e($cur_section); ?>[]" value="<?php e($cur_ability[0]); ?>" <?php echo (array_search("{$cur_section}/{$cur_ability[0]}", $this->entity->abilities) !== false) ? 'checked="checked" ' : ''; ?>/>
-									<span title="<?php e("{$cur_section}/{$cur_ability[0]}"); ?>" class="label label-info"><?php e($cur_ability[1]); ?></span>&nbsp;<small><?php e($cur_ability[2]); ?></small>
-								</label>
-								<br class="pf-clearing" />
-								<?php } ?>
-							</div>
-						</div>
+		<div class="tab-pane tab-pane-abilities">
+			<div class="pf-element pf-full-width">
+				<span class="pf-label">Abilities</span>
+				<div class="pf-group pf-full-width">
+					<div class="text-right">
+						Add an ability: <input class="form-control" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" ng-click="addAbility()"><i class="glyphicon glyphicon-plus"></i></button>
 					</div>
+					<br />
+					<table class="table table-striped">
+						<tbody>
+							<tr ng-repeat="(key, ability) in entity.data.abilities">
+								<td style="vertical-align: middle;">{{ability}}</td>
+								<td class="text-right"><button class="btn btn-danger btn-xs" ng-click="entity.data.abilities.splice(key, 1)"><i class="glyphicon glyphicon-remove"></i></button></td>
+							</tr>
+						</tbody>
+					</table>
 				</div>
 			</div>
-			<?php } ?>
 			<br class="pf-clearing" />
 		</div>
-		<?php } ?>
 	</div>
-
-	<div class="pf-element pf-buttons">
-		<?php if ( isset($this->entity->guid) ) { ?>
-		<input type="hidden" name="id" value="<?php e($this->entity->guid); ?>" />
-		<?php } ?>
-		<input class="pf-button btn btn-primary" type="submit" value="Submit" />
-		<input class="pf-button btn btn-default" type="button" onclick="$_.get(<?php e(json_encode(pines_url('com_user', 'listgroups'))); ?>);" value="Cancel" />
+	<div class="pf-element panel panel-default button-panel">
+		<div class="panel-body">
+			<input class="pf-button btn btn-primary" type="submit" value="Save" />
+			<span ng-if="success" class="label label-success">Successfully saved!</span>
+		</div>
 	</div>
 </form>

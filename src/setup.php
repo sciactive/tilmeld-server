@@ -24,14 +24,14 @@ sort($timezones);
 				pubsubURL: 'ws://<?php echo getenv('DATABASE_URL') ? htmlspecialchars('nymph-pubsub-demo.herokuapp.com') : htmlspecialchars($_SERVER['HTTP_HOST']); ?>:<?php echo getenv('DATABASE_URL') ? '80' : '8080'; ?>',
 				rateLimit: 100
 			};
-			baseURL = <?php echo json_encode($baseURL); ?>;
+			tilmeldURL = <?php echo json_encode($tilmeldURL); ?>;
 			tilmeldTimezones = <?php echo json_encode($timezones); ?>;
 		</script>
 		<script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/Nymph.js"></script>
 		<script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/Entity.js"></script>
 		<script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/NymphPubSub.js"></script>
-		<script src="<?php echo htmlspecialchars($baseURL); ?>src/User.js"></script>
-		<script src="<?php echo htmlspecialchars($baseURL); ?>src/Group.js"></script>
+		<script src="<?php echo htmlspecialchars($tilmeldURL); ?>src/User.js"></script>
+		<script src="<?php echo htmlspecialchars($tilmeldURL); ?>src/Group.js"></script>
 
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
 		<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.js"></script>
@@ -43,7 +43,7 @@ sort($timezones);
 		<link rel="stylesheet" href="<?php echo htmlspecialchars($sciactiveBaseURL); ?>pform/css/pform.min.css">
 		<link rel="stylesheet" href="<?php echo htmlspecialchars($sciactiveBaseURL); ?>pform/css/pform-bootstrap.min.css">
 
-		<script src="<?php echo htmlspecialchars($baseURL); ?>src/setupApp.js"></script>
+		<script src="<?php echo htmlspecialchars($tilmeldURL); ?>src/setupApp.js"></script>
 
 		<style type="text/css">
 			form {

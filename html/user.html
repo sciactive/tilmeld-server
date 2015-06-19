@@ -11,14 +11,14 @@
 <div class="page-header" style="margin-top: 0;">
 	<h2 style="margin-top: 0;">Editing {{entity.data.guid ? (entity.is(currentUser) ? 'Yourself' : entity.data.name) : 'New User'}}</h2>
 </div>
-<form class="pf-form" method="post" name="userform" ng-submit="saveEntity()" style="position: relative;" autocomplete="off">
+<form class="pf-form" name="userform" ng-submit="saveEntity()" style="position: relative;" autocomplete="off">
 	<ul class="nav nav-tabs" style="clear: both; margin-bottom: 15px;">
 		<li class="active"><a href=".tab-pane-general" data-toggle="tab">General</a></li>
 		<li><a href=".tab-pane-groups" data-toggle="tab">Groups</a></li>
 		<li><a href=".tab-pane-location" data-toggle="tab">Address</a></li>
 		<li><a href=".tab-pane-abilities" data-toggle="tab">Abilities</a></li>
 	</ul>
-	<div id="p_muid_tabs" class="tab-content">
+	<div class="tab-content">
 		<div class="tab-pane tab-pane-general active">
 			<div style="float: right; text-align: right;">
 				<a href="https://en.gravatar.com/" target="_blank">
@@ -74,13 +74,13 @@
 					<span class="pf-label">Timezone</span>
 					<span class="pf-note">This overrides the primary group's timezone.</span>
 					<select class="pf-field form-control" ng-options="timezone for timezone in uiState.timezones" name="timezone" ng-model="entity.data.timezone">
-						<option value="">--Inherit From Group--</option>
+						<option value="">- Inherit From Group -</option>
 					</select>
 				</label>
 			</div>
 			<div class="pf-element">
 				<label><span class="pf-label">Mailing List</span>
-					<input class="pf-field" type="checkbox" name="mailing_list" ng-model="entity.data.mailing_list" /> Subscribe to the mailing list.</label>
+					<input class="pf-field" type="checkbox" name="mailingList" ng-model="entity.data.mailingList" /> Subscribe to the mailing list.</label>
 			</div>
 			<div class="pf-element">
 				<label><span class="pf-label"><span ng-if="entity.guid">Update </span>Password</span>
@@ -101,7 +101,7 @@
 				<label>
 					<span class="pf-label">Primary Group</span>
 					<select class="pf-field form-control" name="group" ng-options="group as group.name+' ('+group.groupname+')' for group in primaryGroups track by group.guid" ng-model="entity.data.group">
-						<option value="">-- No Primary Group --</option>
+						<option value="">- No Primary Group -</option>
 					</select>
 				</label>
 			</div>
