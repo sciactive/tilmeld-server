@@ -34,7 +34,7 @@
 					return $scope.entity;
 				};
 			}],
-			templateURL: tilmeldURL+'html/login.html'
+			templateURL: TilmeldOptions.tilmeldURL+'html/login.html'
 		};
 	});
 })();

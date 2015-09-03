@@ -8,11 +8,12 @@ angular.module('setupApp', ['ngRoute'])
 
 .controller('UserController', ['$scope', '$routeParams', '$timeout', function ($scope, $routeParams, $timeout) {
 	$scope.params = $routeParams;
+	$scope.TilmeldOptions = TilmeldOptions;
 	$scope.uiState = {
 		loading: false,
 		sort: 'nameFirst',
 		entities: [],
-		timezones: tilmeldTimezones,
+		timezones: TilmeldOptions.timezones,
 		ability: '',
 		verifyPassword: '',
 		passwordVerified: null,
@@ -108,6 +109,10 @@ angular.module('setupApp', ['ngRoute'])
 		$scope.uiState.ability = '';
 	};
 
+	$scope.addSysAdminAbility = function(){
+		$scope.entity.data.abilities = ['system/all'];
+	};
+
 	$scope.saveEntity = function(){
 		$scope.entity.save().then(function(success){
 			if (success) {
@@ -119,7 +124,9 @@ angular.module('setupApp', ['ngRoute'])
 			} else {
 				alert("Error saving user.");
 			}
-		}, function(){
+		}, function(errObj){
+			// Todo: handle exceptions.
+			console.log("errObj:",errObj);
 			alert("Error communicating data.");
 		});
 	};
@@ -137,7 +144,7 @@ angular.module('setupApp', ['ngRoute'])
 		loading: false,
 		sort: 'name',
 		entities: [],
-		timezones: tilmeldTimezones,
+		timezones: TilmeldOptions.timezones,
 		ability: '',
 		groupnameVerified: null,
 		groupnameVerifiedMessage: null,
@@ -230,14 +237,14 @@ angular.module('setupApp', ['ngRoute'])
 .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
 	$routeProvider
 		.when('/', {
-			templateUrl: tilmeldURL+'html/instructions.html'
+			templateUrl: TilmeldOptions.tilmeldURL+'html/instructions.html'
 		})
 		.when('/user/:entityId?', {
-			templateUrl: tilmeldURL+'html/user.html',
+			templateUrl: TilmeldOptions.tilmeldURL+'html/user.html',
 			controller: 'UserController'
 		})
 		.when('/group/:entityId?', {
-			templateUrl: tilmeldURL+'html/group.html',
+			templateUrl: TilmeldOptions.tilmeldURL+'html/group.html',
 			controller: 'GroupController'
 		});
 

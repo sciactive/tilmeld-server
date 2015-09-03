@@ -155,13 +155,7 @@ class Group extends AbleObject {
 				$this->whitelistData[] = 'addressZip';
 				$this->whitelistData[] = 'addressInternational';
 			}
-			$this->privateData = [
-				'verifyEmail',
-				'secret',
-				'secret_time',
-				'password',
-				'salt'
-			];
+			$this->privateData = [];
 		}
 	}
 

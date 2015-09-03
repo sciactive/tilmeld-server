@@ -23,7 +23,7 @@ if (!isset($user->guid)) {
 	return;
 }
 
-if (!isset($user->secret) || $_REQUEST['secret'] != $user->secret || strtotime('+'.Tilmeld::$config['pw_recovery_minutes'].' minutes', $user->secret_time) < time() ) {
+if (!isset($user->recoverSecret) || $_REQUEST['secret'] != $user->recoverSecret || strtotime('+'.Tilmeld::$config['pw_recovery_minutes'].' minutes', $user->recoverSecretTime) < time() ) {
 	pines_notice('The secret code given does not match this user.');
 	Tilmeld::print_login();
 	return;
@@ -32,7 +32,7 @@ if (!isset($user->secret) || $_REQUEST['secret'] != $user->secret || strtotime('
 if ($_REQUEST['form'] != 'true') {
 	$module = new module('com_user', 'recover_password', 'content');
 	$module->entity = $user;
-	$module->secret = $_REQUEST['secret'];
+	$module->recoverSecret = $_REQUEST['secret'];
 	return;
 }
 
@@ -43,8 +43,8 @@ if (empty($_REQUEST['password'])) {
 }
 
 $user->password($_REQUEST['password']);
-unset($user->secret);
-unset($user->secret_time);
+unset($user->recoverSecret);
+unset($user->recoverSecretTime);
 if ($user->save()) {
 	pines_notice('Your password has been reset. You can now login using your new password.');
 } else {

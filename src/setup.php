@@ -5,7 +5,7 @@
 //	die('You are not authorized to access this page.');
 //}
 
-$timezones = DateTimeZone::listIdentifiers();
+$timezones = \DateTimeZone::listIdentifiers();
 sort($timezones);
 
 ?>
@@ -24,8 +24,11 @@ sort($timezones);
 				pubsubURL: 'ws://<?php echo getenv('DATABASE_URL') ? htmlspecialchars('nymph-pubsub-demo.herokuapp.com') : htmlspecialchars($_SERVER['HTTP_HOST']); ?>:<?php echo getenv('DATABASE_URL') ? '80' : '8080'; ?>',
 				rateLimit: 100
 			};
-			tilmeldURL = <?php echo json_encode($tilmeldURL); ?>;
-			tilmeldTimezones = <?php echo json_encode($timezones); ?>;
+			TilmeldOptions = {
+				tilmeldURL: <?php echo json_encode($tilmeldURL); ?>,
+				timezones: <?php echo json_encode($timezones); ?>,
+				emailUsernames: <?php echo json_encode(\Tilmeld\Tilmeld::$config['email_usernames']); ?>
+			};
 		</script>
 		<script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/Nymph.js"></script>
 		<script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/Entity.js"></script>

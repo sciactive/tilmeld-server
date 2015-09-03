@@ -53,6 +53,7 @@ class User extends AbleObject {
 		'email',
 		'originalEmail',
 		'phone',
+		'mailingList',
 		'addressType',
 		'addressStreet',
 		'addressStreet2',
@@ -60,18 +61,15 @@ class User extends AbleObject {
 		'addressState',
 		'addressZip',
 		'addressInternational',
-		'group',
-		'groups',
 		'abilities',
 		'inheritAbilities',
 		'timezone',
-		'secret',
-		'secret_time',
+		'recoverSecret',
+		'recoverSecretTime',
 		'password',
 		'passwordTemp',
 		'salt',
-		'newEmailAddress',
-		'newEmailSecret',
+		'secret',
 		'cancelEmailAddress',
 		'cancelEmailSecret',
 		'emailChangeDate',
@@ -145,8 +143,8 @@ class User extends AbleObject {
 		if (Tilmeld::gatekeeper('tilmeld/manage')) {
 			// Users who can edit other users can see most of their data.
 			$this->privateData = [
-				'secret',
-				'secret_time',
+				'recoverSecret',
+				'recoverSecretTime',
 				'password',
 				'salt'
 			];
@@ -168,6 +166,7 @@ class User extends AbleObject {
 			}
 			if (in_array('email', Tilmeld::$config['user_fields'])) {
 				$this->whitelistData[] = 'email';
+				$this->whitelistData[] = 'mailingList';
 			}
 			if (in_array('phone', Tilmeld::$config['user_fields'])) {
 				$this->whitelistData[] = 'phone';
@@ -187,7 +186,10 @@ class User extends AbleObject {
 			$this->privateData = [
 				'originalEmail',
 				'secret',
-				'secret_time',
+				'cancelEmailAddress',
+				'cancelEmailSecret',
+				'recoverSecret',
+				'recoverSecretTime',
 				'password',
 				'salt'
 			];
@@ -260,6 +262,7 @@ class User extends AbleObject {
 			case 'types':
 				return 'users';
 			case 'avatar':
+			case 'icon':
 				$proto = isset($_SERVER['HTTPS']) ? 'https' : 'http';
 				if (!isset($this->email) || empty($this->email)) {
 					return $proto.'://secure.gravatar.com/avatar/?d=mm&s=40';
@@ -299,35 +302,73 @@ class User extends AbleObject {
 		$this->name = $this->nameFirst.(!empty($this->nameMiddle) ? ' '.$this->nameMiddle : '').(!empty($this->nameLast) ? ' '.$this->nameLast : '');
 
 		// Verification.
-		if (!$this->checkUsername()['result']) {
-			return false;
+		$unCheck = $this->checkUsername();
+		if (!$unCheck['result']) {
+			throw new Exceptions\BadUsernameException($unCheck['message']);
 		}
-		if (!$this->checkEmail()['result']) {
-			return false;
+		if (!Tilmeld::$config['email_usernames']) {
+			$emCheck = $this->checkEmail();
+			if (!$emCheck['result']) {
+				throw new Exceptions\BadEmailException($emCheck['message']);
+			}
 		}
 
 		// Email changes.
-		if (Tilmeld::$config['verify_email'] && !Tilmeld::gatekeeper('tilmeld/admin')) {
-			if (isset($this->guid) && $this->email !== $this->originalEmail) {
-				if (Tilmeld::$config['email_rate_limit'] !== '' && isset($this->emailChangeDate) && $this->emailChangeDate > strtotime('-'.Tilmeld::$config['email_rate_limit'])) {
-					pines_notice('You already changed your email address recently. Please wait until '.\µMailPHP\Mail::formatDate(strtotime('+'.Tilmeld::$config['email_rate_limit'], $this->emailChangeDate), 'full_short').' to change your email address again.');
-					$this->email = $this->originalEmail;
-				} else {
-					if (!isset($this->secret)) {
-						// Save the old email secret in case the cancel change
-						// link is clicked.
-						$this->originalEmailSecret = uniqid('', true);
-						$this->emailChangeDate = time();
-					}
+		if (!Tilmeld::gatekeeper('tilmeld/admin')) {
+			// The user isn't an admin, so email address changes should contain
+			// some security measures.
+			if (Tilmeld::$config['verify_email']) {
+				// The user needs to verify this new email address.
+				if (!isset($this->guid)) {
 					$this->secret = uniqid('', true);
 					$sendVerification = true;
+				} elseif ($this->email !== $this->originalEmail) {
+					// The user already has an old email address.
+					if (Tilmeld::$config['email_rate_limit'] !== '' && isset($this->emailChangeDate) && $this->emailChangeDate > strtotime('-'.Tilmeld::$config['email_rate_limit'])) {
+						throw new Exceptions\EmailChangeRateLimitExceededException('You already changed your email address recently. Please wait until '.\µMailPHP\Mail::formatDate(strtotime('+'.Tilmeld::$config['email_rate_limit'], $this->emailChangeDate), 'full_short').' to change your email address again.');
+						//$this->email = $this->originalEmail;
+					} else {
+						if (
+								!isset($this->secret) &&
+								(
+									// Make sure the user has at least the rate
+									// limit time to cancel an email change.
+									!isset($this->emailChangeDate) ||
+									$this->emailChangeDate < strtotime('-'.Tilmeld::$config['email_rate_limit'])
+								)
+							) {
+							// Save the old email in case the cancel change
+							// link is clicked.
+							$this->cancelEmailAddress = $this->originalEmail;
+							$this->cancelEmailSecret = uniqid('', true);
+							$this->emailChangeDate = time();
+						}
+						$this->secret = uniqid('', true);
+						$sendVerification = true;
+					}
 				}
+			} elseif (
+					isset($this->guid) &&
+					!empty($this->originalEmail) &&
+					$this->originalEmail !== $this->email &&
+					(
+						// Make sure the user has at least the rate limit time
+						// to cancel an email change.
+						!isset($this->emailChangeDate) ||
+						$this->emailChangeDate < strtotime('-'.Tilmeld::$config['email_rate_limit'])
+					)
+				) {
+				// The user doesn't need to verify their new email address, but
+				// should be able to cancel the email change from their old
+				// address.
+				$this->cancelEmailAddress = $this->originalEmail;
+				$this->cancelEmailSecret = uniqid('', true);
+				$sendVerification = true;
 			}
 		}
-		if (isset($this->guid) && !isset($this->secret) && !empty($this->originalEmail) && $this->originalEmail !== $this->email) {
-			$this->secret = uniqid('', true);
-			$this->originalEmailSecret = uniqid('', true);
-			$sendVerification = true;
+
+		if (!isset($this->password) && !isset($this->passwordTemp)) {
+			throw new Exceptions\BadDataException('A password is required.');
 		}
 
 		if (isset($this->passwordTemp) && $this->passwordTemp !== '') {
@@ -393,26 +434,53 @@ class User extends AbleObject {
 	}
 
 	/**
-	 * Send the user an email verification link.
+	 * Send the user email verification/change/cancellation links.
 	 *
-	 * The user must be a new user, with a GUID and a secret.
-	 *
-	 * @param string $url The URL that the user is taken to after verification.
 	 * @return bool True on success, false on failure.
 	 */
-	public function sendEmailVerification($url = '') {
-		if (!isset($this->guid) || !isset($this->secret)) {
+	public function sendEmailVerification() {
+		if (!isset($this->guid)) {
 			return false;
 		}
-		$link = htmlspecialchars(Tilmeld::$config['setup_url'].(strpos(Tilmeld::$config['setup_url'], '?') ? '&' : '?').'action=verifyuser&type=register&id='.$this->guid.'&secret='.$this->secret);
-		$macros = [
-			'verify_link' => $link,
-			'to_phone' => htmlspecialchars(\µMailPHP\Mail::formatPhone($this->phone)),
-			'to_timezone' => htmlspecialchars($this->timezone),
-			'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
-		];
-		$mail = new \µMailPHP\Mail('\Tilmeld\Mail\VerifyEmail', $this, $macros);
-		return $mail->send();
+		$success = true;
+		if (isset($this->secret) && !isset($this->cancelEmailSecret)) {
+			$link = htmlspecialchars(Tilmeld::$config['setup_url'].(strpos(Tilmeld::$config['setup_url'], '?') ? '&' : '?').'action=verifyemail&id='.$this->guid.'&secret='.$this->secret);
+			$macros = [
+				'verify_link' => $link,
+				'to_phone' => htmlspecialchars(\µMailPHP\Mail::formatPhone($this->phone)),
+				'to_timezone' => htmlspecialchars($this->timezone),
+				'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
+			];
+			$mail = new \µMailPHP\Mail('\Tilmeld\Mail\VerifyEmail', $this, $macros);
+			$success = $success && $mail->send();
+		}
+		if (isset($this->secret) && isset($this->cancelEmailSecret)) {
+			$link = htmlspecialchars(Tilmeld::$config['setup_url'].(strpos(Tilmeld::$config['setup_url'], '?') ? '&' : '?').'action=verifyemailchange&id='.$this->guid.'&secret='.$this->secret);
+			$macros = [
+				'verify_link' => $link,
+				'old_email' => htmlspecialchars($this->cancelEmailAddress),
+				'new_email' => htmlspecialchars($this->email),
+				'to_phone' => htmlspecialchars(\µMailPHP\Mail::formatPhone($this->phone)),
+				'to_timezone' => htmlspecialchars($this->timezone),
+				'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
+			];
+			$mail = new \µMailPHP\Mail('\Tilmeld\Mail\VerifyEmailChange', $this, $macros);
+			$success = $success && $mail->send();
+		}
+		if (isset($this->cancelEmailSecret)) {
+			$link = htmlspecialchars(Tilmeld::$config['setup_url'].(strpos(Tilmeld::$config['setup_url'], '?') ? '&' : '?').'action=cancelemailchange&id='.$this->guid.'&secret='.$this->cancelEmailSecret);
+			$macros = [
+				'cancel_link' => $link,
+				'old_email' => htmlspecialchars($this->cancelEmailAddress),
+				'new_email' => htmlspecialchars($this->email),
+				'to_phone' => htmlspecialchars(\µMailPHP\Mail::formatPhone($this->phone)),
+				'to_timezone' => htmlspecialchars($this->timezone),
+				'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
+			];
+			$mail = new \µMailPHP\Mail('\Tilmeld\Mail\CancelEmailChange', $this, $macros);
+			$success = $success && $mail->send();
+		}
+		return $success;
 	}
 
 	/**
@@ -797,14 +865,14 @@ class User extends AbleObject {
 			$this->email = $this->username;
 		}
 
-		$this->group = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('defaultPrimary', true)));
+		$this->group = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\Group'), array('&', 'data' => array('defaultPrimary', true)));
 		if (!isset($this->group->guid)) {
 			unset($this->group);
 		}
 		if (Tilmeld::$config['verify_email'] && Tilmeld::$config['unverified_access']) {
-			$this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('unverifiedSecondary', true)));
+			$this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group'), array('&', 'data' => array('unverifiedSecondary', true)));
 		} else {
-			$this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('defaultSecondary', true)));
+			$this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group'), array('&', 'data' => array('defaultSecondary', true)));
 		}
 
 		if (Tilmeld::$config['verify_email']) {
@@ -812,9 +880,8 @@ class User extends AbleObject {
 			if (!Tilmeld::$config['unverified_access']) {
 				$this->enabled = false;
 			}
-			$this->secret = uniqid('', true);
 		} else {
-			$this->enable();
+			$this->enabled = true;
 		}
 
 		// If create_admin is true and there are no other users, grant "system/all".
@@ -823,7 +890,7 @@ class User extends AbleObject {
 			// Make sure it's not just null, cause that means an error.
 			if ($otherUsers === array()) {
 				$this->grant('system/all');
-				$this->enable();
+				$this->enabled = true;
 			}
 		}
 
@@ -841,20 +908,16 @@ class User extends AbleObject {
 			);
 			$mail = new \µMailPHP\Mail('\Tilmeld\Mail\UserRegistered', null, $macros);
 			$mail->send();
-			if (Tilmeld::$config['verify_email']) {
-				// Send the verification email.
-				if ($this->sendEmailVerification()) {
-					if (Tilmeld::$config['unverified_access']) {
-						Tilmeld::login($this);
-					}
-					return ['result' => true, 'message' => "Almost there. An email has been sent to {$this->email} with a verification link for you to finish registration."];
-				} else {
-					return ['result' => false, 'message' => 'Couldn\'t send registration email.'];
-				}
+			if (Tilmeld::$config['verify_email'] && !Tilmeld::$config['unverified_access']) {
+				$message = "Almost there. An email has been sent to {$this->email} with a verification link for you to finish registration.";
+			} elseif (Tilmeld::$config['verify_email'] && Tilmeld::$config['unverified_access']) {
+				Tilmeld::login($this);
+				$message = "You're now logged in! An email has been sent to {$this->email} with a verification link for you to finish registration.";
 			} else {
 				Tilmeld::login($this);
-				return ['result' => true, 'message' => 'You\'re now registered and logged in!'];
+				$message = 'You\'re now registered and logged in!';
 			}
+			return ['result' => true, 'message' => $message];
 		} else {
 			return ['result' => false, 'message' => 'Error registering user.'];
 		}
@@ -925,14 +988,14 @@ class User extends AbleObject {
 		}
 
 		// Create a unique secret.
-		$this->secret = uniqid('', true);
-		$this->secret_time = time();
+		$this->recoverSecret = uniqid('', true);
+		$this->recoverSecretTime = time();
 		if (!$this->save()) {
 			return ['result' => false, 'message' => 'Couldn\'t save user secret.'];
 		}
 
 		// Send the recovery email.
-		$link = htmlspecialchars(Tilmeld::$config['setup_url'].(strpos(Tilmeld::$config['setup_url'], '?') ? '&' : '?').'action=recover&id='.$this->guid.'&secret='.$this->secret);
+		$link = htmlspecialchars(Tilmeld::$config['setup_url'].(strpos(Tilmeld::$config['setup_url'], '?') ? '&' : '?').'action=recover&id='.$this->guid.'&secret='.$this->recoverSecret);
 		$macros = array(
 			'recover_link' => $link,
 			'minutes' => htmlspecialchars(Tilmeld::$config['pw_recovery_minutes']),
