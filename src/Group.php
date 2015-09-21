@@ -3,7 +3,7 @@
  * Group class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/agpl-3.0.html
+ * @license http://www.gnu.org/licenses/lgpl.html
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -207,6 +207,48 @@ class Group extends AbleObject {
 		if (!isset($this->groupname)) {
 			return false;
 		}
+
+		// Formatting.
+		$this->groupname = trim($this->groupname);
+		$this->email = trim($this->email);
+		$this->name = trim($this->name);
+		$this->phone = preg_replace('/\D/', '', $this->phone);
+
+		// Verification.
+		$unCheck = $this->checkGroupname();
+		if (!$unCheck['result']) {
+			throw new Exceptions\BadUsernameException($unCheck['message']);
+		}
+		if (!Tilmeld::$config['email_usernames']) {
+			$emCheck = $this->checkEmail();
+			if (!$emCheck['result']) {
+				throw new Exceptions\BadEmailException($emCheck['message']);
+			}
+		}
+
+        // Validate group parent. Make sure it's not a descendant of this group.
+        if (
+                isset($this->parent) &&
+                (
+                    !isset($this->parent->guid) ||
+                    $this->is($this->parent) ||
+                    $this->parent->isDescendant($this)
+                )
+            ) {
+            $this->parent = null;
+        }
+
+        // Only one default primary group is allowed.
+        if ($this->defaultPrimary) {
+            $currentPrimary = \Nymph\Nymph::getEntity(['class' => '\Tilmeld\Group'], ['&', 'data' => ['defaultPrimary', true]]);
+            if (isset($currentPrimary) && !$this->is($currentPrimary)) {
+                unset($currentPrimary->defaultPrimary);
+                if (!$currentPrimary->save()) {
+                    throw new Exceptions\CouldNotChangeDefaultPrimaryGroupException("Could not change new user primary group from {$currentPrimary->groupname}.");
+                }
+            }
+        }
+
 		return parent::save();
 	}
 

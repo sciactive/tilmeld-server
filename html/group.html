@@ -63,10 +63,6 @@
 				</label>
 			</div>
 			<div class="pf-element">
-				<label><span class="pf-label">Mailing List</span>
-					<input class="pf-field" type="checkbox" name="mailingList" ng-model="entity.data.mailingList" /> Subscribe to the mailing list.</label>
-			</div>
-			<div class="pf-element">
 				<label>
 					<span class="pf-label">Parent</span>
 					<select class="pf-field form-control" name="parent" ng-options="group as group.name+' ('+group.groupname+')' for group in entities track by group.guid" ng-model="entity.data.parent">
@@ -189,14 +185,14 @@
 				<span class="pf-label">Abilities</span>
 				<div class="pf-group pf-full-width">
 					<div class="text-right">
-						Add an ability: <input class="form-control" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" ng-click="addAbility()"><i class="glyphicon glyphicon-plus"></i></button>
+						Add an ability: <input class="form-control" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" type="button" ng-click="addAbility()"><i class="glyphicon glyphicon-plus"></i></button> <button class="btn btn-primary" type="button" ng-click="addSysAdminAbility()">Make SysAdmin Group</button>
 					</div>
 					<br />
 					<table class="table table-striped">
 						<tbody>
 							<tr ng-repeat="(key, ability) in entity.data.abilities">
 								<td style="vertical-align: middle;">{{ability}}</td>
-								<td class="text-right"><button class="btn btn-danger btn-xs" ng-click="entity.data.abilities.splice(key, 1)"><i class="glyphicon glyphicon-remove"></i></button></td>
+								<td class="text-right"><button class="btn btn-danger btn-xs" type="button" ng-click="entity.data.abilities.splice(key, 1)"><i class="glyphicon glyphicon-remove"></i></button></td>
 							</tr>
 						</tbody>
 					</table>

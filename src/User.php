@@ -3,7 +3,7 @@
  * User class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/agpl-3.0.html
+ * @license http://www.gnu.org/licenses/lgpl.html
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -53,7 +53,6 @@ class User extends AbleObject {
 		'email',
 		'originalEmail',
 		'phone',
-		'mailingList',
 		'addressType',
 		'addressStreet',
 		'addressStreet2',
@@ -166,7 +165,6 @@ class User extends AbleObject {
 			}
 			if (in_array('email', Tilmeld::$config['user_fields'])) {
 				$this->whitelistData[] = 'email';
-				$this->whitelistData[] = 'mailingList';
 			}
 			if (in_array('phone', Tilmeld::$config['user_fields'])) {
 				$this->whitelistData[] = 'phone';

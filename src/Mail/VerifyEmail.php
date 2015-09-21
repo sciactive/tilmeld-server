@@ -3,7 +3,7 @@
  * VerifyEmail class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/agpl-3.0.html
+ * @license http://www.gnu.org/licenses/lgpl.html
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -18,7 +18,6 @@ class VerifyEmail extends \µMailPHP\Definition {
 	public static $cname = 'Verify Email';
 	public static $description = 'This email is sent to a new user to let them verify their address.';
 	public static $expectsRecipient = true;
-	public static $unsubscribe = false;
 	public static $macros = [
 		'verify_link' => 'The URL to verify the email address, to be used in a link.',
 		'to_phone' => 'The recipient\'s phone number.',

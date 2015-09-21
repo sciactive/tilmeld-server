@@ -3,7 +3,7 @@
  * RecoverAccount class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/agpl-3.0.html
+ * @license http://www.gnu.org/licenses/lgpl.html
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -18,7 +18,6 @@ class RecoverAccount extends \µMailPHP\Definition {
 	public static $cname = 'Recover Account';
 	public static $description = 'This email is sent when a user can\'t access their account so they can recover their username and/or password.';
 	public static $expectsRecipient = true;
-	public static $unsubscribe = false;
 	public static $macros = [
 		'recover_link' => 'The URL to change their password, to be used in a link.',
 		'minutes' => 'How many minutes a recovery request is valid.',

@@ -211,6 +211,10 @@ angular.module('setupApp', ['ngRoute'])
 		$scope.uiState.ability = '';
 	};
 
+	$scope.addSysAdminAbility = function(){
+		$scope.entity.data.abilities = ['system/all'];
+	};
+
 	$scope.saveEntity = function(){
 		$scope.entity.save().then(function(success){
 			if (success) {

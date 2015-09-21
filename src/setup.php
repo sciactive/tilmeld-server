@@ -76,7 +76,7 @@ sort($timezones);
 			<div class="row">
 				<div class="col-lg-3">
 					<ul class="nav nav-pills nav-stacked">
-						<li role="presentation" ng-class="{active: $location.path() === '/'}"><a href="#">Instructions</a></li>
+						<li role="presentation" ng-class="{active: $location.path() === '/'}"><a href="#/">Instructions</a></li>
 						<li role="presentation" ng-class="{active: $location.path().indexOf('/user/') === 0}"><a href="#/user/">Users</a></li>
 						<li role="presentation" ng-class="{active: $location.path().indexOf('/group/') === 0}"><a href="#/group/">Groups</a></li>
 					</ul>

@@ -3,7 +3,7 @@
  * CancelEmailChange class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/agpl-3.0.html
+ * @license http://www.gnu.org/licenses/lgpl.html
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -18,7 +18,6 @@ class CancelEmailChange extends \µMailPHP\Definition {
 	public static $cname = 'Cancel Email Change';
 	public static $description = 'This email is sent to a user\'s old email when they change their email to let them cancel their change.';
 	public static $expectsRecipient = true;
-	public static $unsubscribe = false;
 	public static $macros = [
 		'cancel_link' => 'The URL to cancel the change, to be used in a link.',
 		'old_email' => 'The old email address.',

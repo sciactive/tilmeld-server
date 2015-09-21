@@ -207,12 +207,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/reactphp/dns.git",
-                "reference": "e61f53c03be1ee277d4dd9650412285a64a0a4d2"
+                "reference": "3fa027f1fe57e146203538c41db5b3e6c296b67a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/reactphp/dns/zipball/e61f53c03be1ee277d4dd9650412285a64a0a4d2",
-                "reference": "e61f53c03be1ee277d4dd9650412285a64a0a4d2",
+                "url": "https://api.github.com/repos/reactphp/dns/zipball/3fa027f1fe57e146203538c41db5b3e6c296b67a",
+                "reference": "3fa027f1fe57e146203538c41db5b3e6c296b67a",
                 "shasum": ""
             },
             "require": {
@@ -241,7 +241,7 @@
                 "dns",
                 "dns-resolver"
             ],
-            "time": "2015-06-02 14:02:29"
+            "time": "2015-09-06 18:06:51"
         },
         {
             "name": "react/event-loop",
@@ -665,12 +665,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/umailphp.git",
-                "reference": "55533aac9580494a4921a3b3e5db35567b032c3d"
+                "reference": "4c30b291a9fd8a47bb9e0b6079e0bd6bc35d7478"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/umailphp/zipball/55533aac9580494a4921a3b3e5db35567b032c3d",
-                "reference": "55533aac9580494a4921a3b3e5db35567b032c3d",
+                "url": "https://api.github.com/repos/sciactive/umailphp/zipball/4c30b291a9fd8a47bb9e0b6079e0bd6bc35d7478",
+                "reference": "4c30b291a9fd8a47bb9e0b6079e0bd6bc35d7478",
                 "shasum": ""
             },
             "require": {
@@ -704,7 +704,7 @@
                 "email",
                 "templating"
             ],
-            "time": "2015-04-21 21:44:54"
+            "time": "2015-09-20 19:41:24"
         },
         {
             "name": "videlalvaro/php-amqplib",
@@ -801,12 +801,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-http.git",
-                "reference": "b5b2236547802678a25d019487f4950883fa93c8"
+                "reference": "88d395197acc3b11ce3a30bd4173a0746f9e2005"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-http/zipball/b5b2236547802678a25d019487f4950883fa93c8",
-                "reference": "b5b2236547802678a25d019487f4950883fa93c8",
+                "url": "https://api.github.com/repos/zendframework/zend-http/zipball/88d395197acc3b11ce3a30bd4173a0746f9e2005",
+                "reference": "88d395197acc3b11ce3a30bd4173a0746f9e2005",
                 "shasum": ""
             },
             "require": {
@@ -843,7 +843,7 @@
                 "http",
                 "zf2"
             ],
-            "time": "2015-08-05 15:49:22"
+            "time": "2015-09-14 16:00:50"
         },
         {
             "name": "zendframework/zend-loader",
@@ -895,12 +895,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-log.git",
-                "reference": "33f868744ebaf440738bdc024a29be2cd9bf6029"
+                "reference": "8b8ff870720a459deca8e3c99da669a435ee3ff4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-log/zipball/33f868744ebaf440738bdc024a29be2cd9bf6029",
-                "reference": "33f868744ebaf440738bdc024a29be2cd9bf6029",
+                "url": "https://api.github.com/repos/zendframework/zend-log/zipball/8b8ff870720a459deca8e3c99da669a435ee3ff4",
+                "reference": "8b8ff870720a459deca8e3c99da669a435ee3ff4",
                 "shasum": ""
             },
             "require": {
@@ -951,7 +951,7 @@
                 "logging",
                 "zf2"
             ],
-            "time": "2015-07-20 17:43:38"
+            "time": "2015-09-03 05:42:44"
         },
         {
             "name": "zendframework/zend-servicemanager",
@@ -1010,18 +1010,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-stdlib.git",
-                "reference": "297c69931ebc0d17a454656fd3b63e3fb0098f1d"
+                "reference": "2e4f5dbc8ab050ab4acc6da9e6bca18204e91a62"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-stdlib/zipball/297c69931ebc0d17a454656fd3b63e3fb0098f1d",
-                "reference": "297c69931ebc0d17a454656fd3b63e3fb0098f1d",
+                "url": "https://api.github.com/repos/zendframework/zend-stdlib/zipball/2e4f5dbc8ab050ab4acc6da9e6bca18204e91a62",
+                "reference": "2e4f5dbc8ab050ab4acc6da9e6bca18204e91a62",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.5"
             },
             "require-dev": {
+                "athletic/athletic": "~0.1",
                 "fabpot/php-cs-fixer": "1.7.*",
                 "phpunit/phpunit": "~4.0",
                 "zendframework/zend-config": "~2.5",
@@ -1058,7 +1059,7 @@
                 "stdlib",
                 "zf2"
             ],
-            "time": "2015-07-21 17:11:52"
+            "time": "2015-09-17 14:41:47"
         },
         {
             "name": "zendframework/zend-uri",
@@ -1113,12 +1114,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/zendframework/zend-validator.git",
-                "reference": "8dedd745505124b55ade1b44312dcddbc419b774"
+                "reference": "724f69f845f27e0436af7343a5bd5c9e7748bcaa"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/zendframework/zend-validator/zipball/8dedd745505124b55ade1b44312dcddbc419b774",
-                "reference": "8dedd745505124b55ade1b44312dcddbc419b774",
+                "url": "https://api.github.com/repos/zendframework/zend-validator/zipball/724f69f845f27e0436af7343a5bd5c9e7748bcaa",
+                "reference": "724f69f845f27e0436af7343a5bd5c9e7748bcaa",
                 "shasum": ""
             },
             "require": {
@@ -1171,7 +1172,7 @@
                 "validator",
                 "zf2"
             ],
-            "time": "2015-08-26 20:26:03"
+            "time": "2015-09-03 19:14:39"
         }
     ],
     "packages-dev": [],

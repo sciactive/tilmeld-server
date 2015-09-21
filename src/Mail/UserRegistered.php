@@ -3,7 +3,7 @@
  * UserRegistered class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/agpl-3.0.html
+ * @license http://www.gnu.org/licenses/lgpl.html
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -18,7 +18,6 @@ class UserRegistered extends \µMailPHP\Definition {
 	public static $cname = 'New User Registered';
 	public static $description = 'This email is sent when a new user registers himself on the site.';
 	public static $expectsRecipient = false;
-	public static $unsubscribe = true;
 	public static $macros = [
 		'user_username' => 'The user\'s username.',
 		'user_name' => 'The user\'s full name.',

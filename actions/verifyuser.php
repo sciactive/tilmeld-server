@@ -3,7 +3,7 @@
  * Verify a newly registered user's e-mail address.
  *
  * @package Components\user
- * @license http://www.gnu.org/licenses/agpl-3.0.html
+ * @license http://www.gnu.org/licenses/lgpl.html
  * @author Zak Huber <zak@sciactive.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
