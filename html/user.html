@@ -1,238 +1,238 @@
 <div class="panel panel-default">
-	<div class="panel-heading">
-		Select a User to edit.
-	</div>
-	<div class="panel-body">
-		<select class="form-control" ng-model="entity" ng-options="ent as ent.data.name+(ent.data.enabled ? '' : ' (Disabled)') for ent in uiState.entities track by ent.guid" ng-change="checkNewEntity()">
-			<option value="" ng-value="null">- New User -</option>
-		</select>
-	</div>
+  <div class="panel-heading">
+    Select a User to edit.
+  </div>
+  <div class="panel-body">
+    <select class="form-control" ng-model="entity" ng-options="ent as ent.data.name+(ent.data.enabled ? '' : ' (Disabled)') for ent in uiState.entities track by ent.guid" ng-change="checkNewEntity()">
+      <option value="" ng-value="null">- New User -</option>
+    </select>
+  </div>
 </div>
 <div class="page-header" style="margin-top: 0;">
-	<h2 style="margin-top: 0;">Editing {{entity.data.guid ? (entity.is(currentUser) ? 'Yourself' : entity.data.name) : 'New User'}}</h2>
+  <h2 style="margin-top: 0;">Editing {{entity.data.guid ? (entity.is(currentUser) ? 'Yourself' : entity.data.name) : 'New User'}}</h2>
 </div>
 <form class="pf-form" name="userform" ng-submit="saveEntity()" style="position: relative;" autocomplete="off">
-	<ul class="nav nav-tabs" style="clear: both; margin-bottom: 15px;">
-		<li class="active"><a href=".tab-pane-general" data-toggle="tab">General</a></li>
-		<li><a href=".tab-pane-groups" data-toggle="tab">Groups</a></li>
-		<li><a href=".tab-pane-location" data-toggle="tab">Address</a></li>
-		<li><a href=".tab-pane-abilities" data-toggle="tab">Abilities</a></li>
-	</ul>
-	<div class="tab-content">
-		<div class="tab-pane tab-pane-general active">
-			<div style="float: right; text-align: right;">
-				<a href="https://en.gravatar.com/" target="_blank">
-					<span class="thumbnail pull-right">
-						<img ng-src="{{entity.info.avatar}}" alt="Avatar" title="Avatar by Gravatar" />
-					</span>
-				</a>
-			</div>
-			<div class="pf-element" ng-if="!TilmeldOptions.emailUsernames">
-				<label>
-					<span class="pf-label">Username</span>
-					<span class="pf-group pf-full-width">
-						<span class="form-group" ng-class="{'has-success': uiState.usernameVerified === true, 'has-error': uiState.usernameVerified === false}">
-							<input class="pf-field form-control" type="text" name="username" size="24" ng-model="entity.data.username" />
-						</span>
-						<span class="pf-field" ng-if="uiState.usernameVerifiedMessage">{{uiState.usernameVerifiedMessage}}</span>
-					</span>
-				</label>
-			</div>
-			<div class="pf-element">
-				<label>
-					<span class="pf-label">Email</span>
-					<span class="pf-group pf-full-width">
-						<span class="form-group" ng-class="{'has-success': uiState.emailVerified === true, 'has-error': uiState.emailVerified === false}">
-							<input class="pf-field form-control" type="email" name="email" size="24" ng-model="entity.data.email" />
-						</span>
-						<span class="pf-field" ng-if="uiState.emailVerifiedMessage">{{uiState.emailVerifiedMessage}}</span>
-					</span>
-				</label>
-			</div>
-			<div class="pf-element">
-				<label><span class="pf-label">First Name</span>
-					<input class="pf-field form-control" type="text" name="nameFirst" size="24" ng-model="entity.data.nameFirst" /></label>
-			</div>
-			<div class="pf-element">
-				<label><span class="pf-label">Middle Name</span>
-					<input class="pf-field form-control" type="text" name="nameMiddle" size="24" ng-model="entity.data.nameMiddle" /></label>
-			</div>
-			<div class="pf-element">
-				<label><span class="pf-label">Last Name</span>
-					<input class="pf-field form-control" type="text" name="nameLast" size="24" ng-model="entity.data.nameLast" /></label>
-			</div>
-			<div class="pf-element">
-				<label><span class="pf-label">Enabled</span>
-					<input class="pf-field" type="checkbox" name="enabled" ng-model="entity.data.enabled" /></label>
-			</div>
-			<div class="pf-element">
-				<label><span class="pf-label">Phone</span>
-					<input class="pf-field form-control" type="tel" name="phone" size="24" ng-model="entity.data.phone" /></label>
-			</div>
-			<div class="pf-element">
-				<label>
-					<span class="pf-label">Timezone</span>
-					<span class="pf-note">This overrides the primary group's timezone.</span>
-					<select class="pf-field form-control" ng-options="timezone for timezone in uiState.timezones" name="timezone" ng-model="entity.data.timezone">
-						<option value="">- Inherit From Group -</option>
-					</select>
-				</label>
-			</div>
-			<div class="pf-element">
-				<label><span class="pf-label"><span ng-if="entity.guid">Update </span>Password</span>
-					<input class="pf-field form-control" type="password" name="password" size="24" ng-model="entity.data.passwordTemp" /></label>
-			</div>
-			<div class="pf-element">
-				<label>
-					<span class="pf-label">Repeat Password</span>
-					<span class="form-group" ng-class="{'has-success': uiState.passwordVerified === true, 'has-error': uiState.passwordVerified === false}">
-						<input class="pf-field form-control" type="password" name="password2" size="24" ng-model="uiState.verifyPassword" ng-keyup="verifyPassword()" />
-					</span>
-				</label>
-			</div>
-			<br class="pf-clearing" />
-		</div>
-		<div class="tab-pane tab-pane-groups">
-			<div class="pf-element">
-				<label>
-					<span class="pf-label">Primary Group</span>
-					<select class="pf-field form-control" name="group" ng-options="group as group.name+' ('+group.groupname+')' for group in primaryGroups track by group.guid" ng-model="entity.data.group">
-						<option value="">- No Primary Group -</option>
-					</select>
-				</label>
-			</div>
-			<div class="pf-element">
-				<label>
-					<span class="pf-label">Groups
-						<span class="pf-note">Use CTRL (CMD on Mac) to select multiple.</span></span>
-					<select class="pf-field form-control" name="groups" multiple="true" size="12" ng-options="group as group.name+' ('+group.groupname+')' for group in secondaryGroups track by group.guid" ng-model="entity.data.groups" style="min-width: 200px;"></select>
-				</label>
-			</div>
-			<br class="pf-clearing" />
-		</div>
-		<div class="tab-pane tab-pane-location">
-			<div class="pf-element">
-				<span class="pf-label">Address Type</span>
-				<label><input class="pf-field" type="radio" name="addressType" value="us" ng-model="entity.data.addressType" /> US</label>
-				<label><input class="pf-field" type="radio" name="addressType" value="international" ng-model="entity.data.addressType" /> International</label>
-			</div>
-			<div ng-if="entity.data.addressType === 'us'">
-				<div class="pf-element">
-					<label><span class="pf-label">Address 1</span>
-						<input class="pf-field form-control" type="text" name="addressStreet" size="24" ng-model="entity.data.addressStreet" /></label>
-				</div>
-				<div class="pf-element">
-					<label><span class="pf-label">Address 2</span>
-						<input class="pf-field form-control" type="text" name="addressStreet2" size="24" ng-model="entity.data.addressStreet2" /></label>
-				</div>
-				<div class="pf-element">
-					<span class="pf-label">City, State</span>
-					<input class="pf-field form-control" type="text" name="addressCity" size="15" ng-model="entity.data.addressCity" />
-					<select class="pf-field form-control" name="addressState" ng-model="entity.data.addressState">
-						<option value="">None</option>
-						<option value="AL">Alabama</option>
-						<option value="AK">Alaska</option>
-						<option value="AZ">Arizona</option>
-						<option value="AR">Arkansas</option>
-						<option value="CA">California</option>
-						<option value="CO">Colorado</option>
-						<option value="CT">Connecticut</option>
-						<option value="DE">Delaware</option>
-						<option value="DC">DC</option>
-						<option value="FL">Florida</option>
-						<option value="GA">Georgia</option>
-						<option value="HI">Hawaii</option>
-						<option value="ID">Idaho</option>
-						<option value="IL">Illinois</option>
-						<option value="IN">Indiana</option>
-						<option value="IA">Iowa</option>
-						<option value="KS">Kansas</option>
-						<option value="KY">Kentucky</option>
-						<option value="LA">Louisiana</option>
-						<option value="ME">Maine</option>
-						<option value="MD">Maryland</option>
-						<option value="MA">Massachusetts</option>
-						<option value="MI">Michigan</option>
-						<option value="MN">Minnesota</option>
-						<option value="MS">Mississippi</option>
-						<option value="MO">Missouri</option>
-						<option value="MT">Montana</option>
-						<option value="NE">Nebraska</option>
-						<option value="NV">Nevada</option>
-						<option value="NH">New Hampshire</option>
-						<option value="NJ">New Jersey</option>
-						<option value="NM">New Mexico</option>
-						<option value="NY">New York</option>
-						<option value="NC">North Carolina</option>
-						<option value="ND">North Dakota</option>
-						<option value="OH">Ohio</option>
-						<option value="OK">Oklahoma</option>
-						<option value="OR">Oregon</option>
-						<option value="PA">Pennsylvania</option>
-						<option value="RI">Rhode Island</option>
-						<option value="SC">South Carolina</option>
-						<option value="SD">South Dakota</option>
-						<option value="TN">Tennessee</option>
-						<option value="TX">Texas</option>
-						<option value="UT">Utah</option>
-						<option value="VT">Vermont</option>
-						<option value="VA">Virginia</option>
-						<option value="WA">Washington</option>
-						<option value="WV">West Virginia</option>
-						<option value="WI">Wisconsin</option>
-						<option value="WY">Wyoming</option>
-						<option value="AA">Armed Forces (AA)</option>
-						<option value="AE">Armed Forces (AE)</option>
-						<option value="AP">Armed Forces (AP)</option>
-					</select>
-				</div>
-				<div class="pf-element">
-					<label><span class="pf-label">Zip</span>
-						<input class="pf-field form-control" type="text" name="addressZip" size="24" ng-model="entity.data.addressZip" /></label>
-				</div>
-			</div>
-			<div ng-if="entity.data.addressType === 'international'">
-				<div class="pf-element pf-full-width">
-					<label><span class="pf-label">Address</span>
-						<span class="pf-group pf-full-width">
-							<span class="pf-field" style="display: block;">
-								<textarea class="form-control" style="width: 100%;" rows="3" cols="35" name="addressInternational" ng-model="entity.data.addressInternational"></textarea>
-							</span>
-						</span></label>
-				</div>
-			</div>
-			<br class="pf-clearing" />
-		</div>
-		<div class="tab-pane tab-pane-abilities">
-			<div class="pf-element pf-full-width">
-				<span class="pf-label">Abilities</span>
-				<div class="pf-group pf-full-width">
-					<div class="text-right">
-						Add an ability: <input class="form-control" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" type="button" ng-click="addAbility()"><i class="glyphicon glyphicon-plus"></i></button> <button class="btn btn-primary" type="button" ng-click="addSysAdminAbility()">Make SysAdmin</button>
-					</div>
-					<br />
-					<table class="table table-striped">
-						<tbody>
-							<tr ng-repeat="(key, ability) in entity.data.abilities">
-								<td style="vertical-align: middle;">{{ability}}</td>
-								<td class="text-right"><button class="btn btn-danger btn-xs" type="button" ng-click="entity.data.abilities.splice(key, 1)"><i class="glyphicon glyphicon-remove"></i></button></td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
-			</div>
-			<div class="pf-element">
-				<label><span class="pf-label">Inherit Abilities</span>
-					<span class="pf-note">Additionally, inherit the abilities of the group(s) this user belongs to.</span>
-					<input class="pf-field" type="checkbox" name="inheritAbilities" ng-model="entity.data.inheritAbilities" /></label>
-			</div>
-			<br class="pf-clearing" />
-		</div>
-	</div>
-	<div class="pf-element panel panel-default button-panel">
-		<div class="panel-body">
-			<input class="pf-button btn btn-primary" type="submit" value="Save" />
-			<span ng-if="success" class="label label-success">Successfully saved!</span>
-		</div>
-	</div>
+  <ul class="nav nav-tabs" style="clear: both; margin-bottom: 15px;">
+    <li class="active"><a href=".tab-pane-general" data-toggle="tab">General</a></li>
+    <li><a href=".tab-pane-groups" data-toggle="tab">Groups</a></li>
+    <li><a href=".tab-pane-location" data-toggle="tab">Address</a></li>
+    <li><a href=".tab-pane-abilities" data-toggle="tab">Abilities</a></li>
+  </ul>
+  <div class="tab-content">
+    <div class="tab-pane tab-pane-general active">
+      <div style="float: right; text-align: right;">
+        <a href="https://en.gravatar.com/" target="_blank">
+          <span class="thumbnail pull-right">
+            <img ng-src="{{entity.info.avatar}}" alt="Avatar" title="Avatar by Gravatar" />
+          </span>
+        </a>
+      </div>
+      <div class="pf-element" ng-if="!TilmeldOptions.emailUsernames">
+        <label>
+          <span class="pf-label">Username</span>
+          <span class="pf-group pf-full-width">
+            <span class="form-group" ng-class="{'has-success': uiState.usernameVerified === true, 'has-error': uiState.usernameVerified === false}">
+              <input class="pf-field form-control" type="text" name="username" size="24" ng-model="entity.data.username" />
+            </span>
+            <span class="pf-field" ng-if="uiState.usernameVerifiedMessage">{{uiState.usernameVerifiedMessage}}</span>
+          </span>
+        </label>
+      </div>
+      <div class="pf-element">
+        <label>
+          <span class="pf-label">Email</span>
+          <span class="pf-group pf-full-width">
+            <span class="form-group" ng-class="{'has-success': uiState.emailVerified === true, 'has-error': uiState.emailVerified === false}">
+              <input class="pf-field form-control" type="email" name="email" size="24" ng-model="entity.data.email" />
+            </span>
+            <span class="pf-field" ng-if="uiState.emailVerifiedMessage">{{uiState.emailVerifiedMessage}}</span>
+          </span>
+        </label>
+      </div>
+      <div class="pf-element">
+        <label><span class="pf-label">First Name</span>
+          <input class="pf-field form-control" type="text" name="nameFirst" size="24" ng-model="entity.data.nameFirst" /></label>
+      </div>
+      <div class="pf-element">
+        <label><span class="pf-label">Middle Name</span>
+          <input class="pf-field form-control" type="text" name="nameMiddle" size="24" ng-model="entity.data.nameMiddle" /></label>
+      </div>
+      <div class="pf-element">
+        <label><span class="pf-label">Last Name</span>
+          <input class="pf-field form-control" type="text" name="nameLast" size="24" ng-model="entity.data.nameLast" /></label>
+      </div>
+      <div class="pf-element">
+        <label><span class="pf-label">Enabled</span>
+          <input class="pf-field" type="checkbox" name="enabled" ng-model="entity.data.enabled" /></label>
+      </div>
+      <div class="pf-element">
+        <label><span class="pf-label">Phone</span>
+          <input class="pf-field form-control" type="tel" name="phone" size="24" ng-model="entity.data.phone" /></label>
+      </div>
+      <div class="pf-element">
+        <label>
+          <span class="pf-label">Timezone</span>
+          <span class="pf-note">This overrides the primary group's timezone.</span>
+          <select class="pf-field form-control" ng-options="timezone for timezone in uiState.timezones" name="timezone" ng-model="entity.data.timezone">
+            <option value="">- Inherit From Group -</option>
+          </select>
+        </label>
+      </div>
+      <div class="pf-element">
+        <label><span class="pf-label"><span ng-if="entity.guid">Update </span>Password</span>
+          <input class="pf-field form-control" type="password" name="password" size="24" ng-model="entity.data.passwordTemp" /></label>
+      </div>
+      <div class="pf-element">
+        <label>
+          <span class="pf-label">Repeat Password</span>
+          <span class="form-group" ng-class="{'has-success': uiState.passwordVerified === true, 'has-error': uiState.passwordVerified === false}">
+            <input class="pf-field form-control" type="password" name="password2" size="24" ng-model="uiState.verifyPassword" ng-keyup="verifyPassword()" />
+          </span>
+        </label>
+      </div>
+      <br class="pf-clearing" />
+    </div>
+    <div class="tab-pane tab-pane-groups">
+      <div class="pf-element">
+        <label>
+          <span class="pf-label">Primary Group</span>
+          <select class="pf-field form-control" name="group" ng-options="group as group.name+' ('+group.groupname+')' for group in primaryGroups track by group.guid" ng-model="entity.data.group">
+            <option value="">- No Primary Group -</option>
+          </select>
+        </label>
+      </div>
+      <div class="pf-element">
+        <label>
+          <span class="pf-label">Groups
+            <span class="pf-note">Use CTRL (CMD on Mac) to select multiple.</span></span>
+          <select class="pf-field form-control" name="groups" multiple="true" size="12" ng-options="group as group.name+' ('+group.groupname+')' for group in secondaryGroups track by group.guid" ng-model="entity.data.groups" style="min-width: 200px;"></select>
+        </label>
+      </div>
+      <br class="pf-clearing" />
+    </div>
+    <div class="tab-pane tab-pane-location">
+      <div class="pf-element">
+        <span class="pf-label">Address Type</span>
+        <label><input class="pf-field" type="radio" name="addressType" value="us" ng-model="entity.data.addressType" /> US</label>
+        <label><input class="pf-field" type="radio" name="addressType" value="international" ng-model="entity.data.addressType" /> International</label>
+      </div>
+      <div ng-if="entity.data.addressType === 'us'">
+        <div class="pf-element">
+          <label><span class="pf-label">Address 1</span>
+            <input class="pf-field form-control" type="text" name="addressStreet" size="24" ng-model="entity.data.addressStreet" /></label>
+        </div>
+        <div class="pf-element">
+          <label><span class="pf-label">Address 2</span>
+            <input class="pf-field form-control" type="text" name="addressStreet2" size="24" ng-model="entity.data.addressStreet2" /></label>
+        </div>
+        <div class="pf-element">
+          <span class="pf-label">City, State</span>
+          <input class="pf-field form-control" type="text" name="addressCity" size="15" ng-model="entity.data.addressCity" />
+          <select class="pf-field form-control" name="addressState" ng-model="entity.data.addressState">
+            <option value="">None</option>
+            <option value="AL">Alabama</option>
+            <option value="AK">Alaska</option>
+            <option value="AZ">Arizona</option>
+            <option value="AR">Arkansas</option>
+            <option value="CA">California</option>
+            <option value="CO">Colorado</option>
+            <option value="CT">Connecticut</option>
+            <option value="DE">Delaware</option>
+            <option value="DC">DC</option>
+            <option value="FL">Florida</option>
+            <option value="GA">Georgia</option>
+            <option value="HI">Hawaii</option>
+            <option value="ID">Idaho</option>
+            <option value="IL">Illinois</option>
+            <option value="IN">Indiana</option>
+            <option value="IA">Iowa</option>
+            <option value="KS">Kansas</option>
+            <option value="KY">Kentucky</option>
+            <option value="LA">Louisiana</option>
+            <option value="ME">Maine</option>
+            <option value="MD">Maryland</option>
+            <option value="MA">Massachusetts</option>
+            <option value="MI">Michigan</option>
+            <option value="MN">Minnesota</option>
+            <option value="MS">Mississippi</option>
+            <option value="MO">Missouri</option>
+            <option value="MT">Montana</option>
+            <option value="NE">Nebraska</option>
+            <option value="NV">Nevada</option>
+            <option value="NH">New Hampshire</option>
+            <option value="NJ">New Jersey</option>
+            <option value="NM">New Mexico</option>
+            <option value="NY">New York</option>
+            <option value="NC">North Carolina</option>
+            <option value="ND">North Dakota</option>
+            <option value="OH">Ohio</option>
+            <option value="OK">Oklahoma</option>
+            <option value="OR">Oregon</option>
+            <option value="PA">Pennsylvania</option>
+            <option value="RI">Rhode Island</option>
+            <option value="SC">South Carolina</option>
+            <option value="SD">South Dakota</option>
+            <option value="TN">Tennessee</option>
+            <option value="TX">Texas</option>
+            <option value="UT">Utah</option>
+            <option value="VT">Vermont</option>
+            <option value="VA">Virginia</option>
+            <option value="WA">Washington</option>
+            <option value="WV">West Virginia</option>
+            <option value="WI">Wisconsin</option>
+            <option value="WY">Wyoming</option>
+            <option value="AA">Armed Forces (AA)</option>
+            <option value="AE">Armed Forces (AE)</option>
+            <option value="AP">Armed Forces (AP)</option>
+          </select>
+        </div>
+        <div class="pf-element">
+          <label><span class="pf-label">Zip</span>
+            <input class="pf-field form-control" type="text" name="addressZip" size="24" ng-model="entity.data.addressZip" /></label>
+        </div>
+      </div>
+      <div ng-if="entity.data.addressType === 'international'">
+        <div class="pf-element pf-full-width">
+          <label><span class="pf-label">Address</span>
+            <span class="pf-group pf-full-width">
+              <span class="pf-field" style="display: block;">
+                <textarea class="form-control" style="width: 100%;" rows="3" cols="35" name="addressInternational" ng-model="entity.data.addressInternational"></textarea>
+              </span>
+            </span></label>
+        </div>
+      </div>
+      <br class="pf-clearing" />
+    </div>
+    <div class="tab-pane tab-pane-abilities">
+      <div class="pf-element pf-full-width">
+        <span class="pf-label">Abilities</span>
+        <div class="pf-group pf-full-width">
+          <div class="text-right">
+            Add an ability: <input class="form-control" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" type="button" ng-click="addAbility()"><i class="glyphicon glyphicon-plus"></i></button> <button class="btn btn-primary" type="button" ng-click="addSysAdminAbility()">Make SysAdmin</button>
+          </div>
+          <br />
+          <table class="table table-striped">
+            <tbody>
+              <tr ng-repeat="(key, ability) in entity.data.abilities">
+                <td style="vertical-align: middle;">{{ability}}</td>
+                <td class="text-right"><button class="btn btn-danger btn-xs" type="button" ng-click="entity.data.abilities.splice(key, 1)"><i class="glyphicon glyphicon-remove"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="pf-element">
+        <label><span class="pf-label">Inherit Abilities</span>
+          <span class="pf-note">Additionally, inherit the abilities of the group(s) this user belongs to.</span>
+          <input class="pf-field" type="checkbox" name="inheritAbilities" ng-model="entity.data.inheritAbilities" /></label>
+      </div>
+      <br class="pf-clearing" />
+    </div>
+  </div>
+  <div class="pf-element panel panel-default button-panel">
+    <div class="panel-body">
+      <input class="pf-button btn btn-primary" type="submit" value="Save" />
+      <span ng-if="success" class="label label-success">Successfully saved!</span>
+    </div>
+  </div>
 </form>

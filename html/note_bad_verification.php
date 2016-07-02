@@ -11,6 +11,6 @@
 $this->title = 'Verification Failed';
 ?>
 <div>
-	The secret code given is incorrect. If you changed your email address after
-	signing up, you will need to use the link emailed to your new address.
+  The secret code given is incorrect. If you changed your email address after
+  signing up, you will need to use the link emailed to your new address.
 </div>

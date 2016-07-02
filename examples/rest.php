@@ -10,22 +10,22 @@ require __DIR__.'/../src/autoload.php';
 \Tilmeld\Tilmeld::configure();
 
 \Nymph\Nymph::configure([
-	'MySQL' => [
-		'database' => 'nymph_example',
-		'user' => 'nymph_example',
-		'password' => 'omgomg'
-	]
+  'MySQL' => [
+    'database' => 'nymph_example',
+    'user' => 'nymph_example',
+    'password' => 'omgomg'
+  ]
 ]);
 
 $NymphREST = new \Nymph\REST();
 
 try {
-	if (in_array($_SERVER['REQUEST_METHOD'], ['PUT', 'DELETE'])) {
-		parse_str(file_get_contents("php://input"), $args);
-		$NymphREST->run($_SERVER['REQUEST_METHOD'], $args['action'], $args['data']);
-	} else {
-		$NymphREST->run($_SERVER['REQUEST_METHOD'], $_REQUEST['action'], $_REQUEST['data']);
-	}
+  if (in_array($_SERVER['REQUEST_METHOD'], ['PUT', 'DELETE'])) {
+    parse_str(file_get_contents("php://input"), $args);
+    $NymphREST->run($_SERVER['REQUEST_METHOD'], $args['action'], $args['data']);
+  } else {
+    $NymphREST->run($_SERVER['REQUEST_METHOD'], $_REQUEST['action'], $_REQUEST['data']);
+  }
 } catch (\Nymph\Exceptions\QueryFailedException $e) {
-	echo $e->getMessage()."\n\n".$e->getQuery();
+  echo $e->getMessage()."\n\n".$e->getQuery();
 }
