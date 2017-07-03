@@ -7,7 +7,7 @@
  * that is already taken or doesn't meet minimum criteria.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/lgpl.html
+ * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/

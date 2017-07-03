@@ -1,9 +1,11 @@
-<?php namespace Tilmeld;
+<?php
+namespace Tilmeld;
+
 /**
  * Tilmeld class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/lgpl.html
+ * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -62,7 +64,7 @@ class Tilmeld {
    * @param array $config An associative array of Tilmeld's configuration.
    */
   public static function configure($config = []) {
-    \SciActive\RequirePHP::_('TilmeldConfig', [], function() use ($config){
+    \SciActive\RequirePHP::_('TilmeldConfig', [], function () use ($config) {
       $defaults = include dirname(__DIR__).'/conf/defaults.php';
       $tilmeldConfig = [];
       foreach ($defaults as $curName => $curOption) {
@@ -161,17 +163,16 @@ class Tilmeld {
     if (is_a($entity, '\Tilmeld\User') || is_a($entity, '\Tilmeld\Group')) {
       return true;
     }
-    if (
-        (!isset($entity->user) || !isset($entity->user->guid)) &&
+    if ((!isset($entity->user) || !isset($entity->user->guid)) &&
         (!isset($entity->group) || !isset($entity->group->guid))
       ) {
       return true;
     }
 
     // Load access control, since we need it now...
-    $ac_user = isset($entity->ac_user) ? $entity->ac_user : 3;
-    $ac_group = isset($entity->ac_group) ? $entity->ac_group : 3;
-    $ac_other = isset($entity->ac_other) ? $entity->ac_other : 0;
+    $ac_user = $entity->ac_user ?? 3;
+    $ac_group = $entity->ac_group ?? 3;
+    $ac_other = $entity->ac_other ?? 0;
 
     if (User::current() !== null) {
       return ($ac_other >= $type);
@@ -179,8 +180,7 @@ class Tilmeld {
     if (is_callable([$entity->user, 'is']) && $entity->user->is(User::current())) {
       return ($ac_user >= $type);
     }
-    if (
-        is_callable([$entity->group, 'is']) &&
+    if (is_callable([$entity->group, 'is']) &&
         (
           $entity->group->is(User::current(true)->group) ||
           $entity->group->inArray(User::current(true)->groups) ||
@@ -201,8 +201,7 @@ class Tilmeld {
    */
   public static function fillSession() {
     self::session('write');
-    if (
-        (object) $_SESSION['tilmeld_user'] === $_SESSION['tilmeld_user'] &&
+    if ((object) $_SESSION['tilmeld_user'] === $_SESSION['tilmeld_user'] &&
         $_SESSION['tilmeld_user']->guid === $_SESSION['tilmeld_user_id']
       ) {
       $tmp_user = \Nymph\Nymph::getEntity(
@@ -211,7 +210,7 @@ class Tilmeld {
             'guid' => [$_SESSION['tilmeld_user']->guid],
             'gt' => ['mdate', $_SESSION['tilmeld_user']->mdate]
           ]
-        );
+      );
       if (!isset($tmp_user)) {
         $_SESSION['tilmeld_user']->clearCache();
         date_default_timezone_set($_SESSION['tilmeld_user_timezone']);
@@ -287,22 +286,6 @@ class Tilmeld {
     // We're changing users, so clear the gatekeeper cache.
     self::$gatekeeperCache = [];
     self::session('destroy');
-  }
-
-  /**
-   * Creates and attaches a module which lets the user log in.
-   *
-   * @param string $position The position in which to place the module.
-   * @param string $url An optional url to redirect to after login.
-   * @return module The new module.
-   */
-  public static function printLogin($position = 'content', $url = null) {
-    $module = new module('com_user', 'modules/login', $position);
-    $module->url = $url;
-    if (isset($_REQUEST['url'])) {
-      $module->url = $_REQUEST['url'];
-    }
-    return $module;
   }
 
   /**

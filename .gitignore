@@ -1,2 +1,3 @@
-bower_components
-vendor
+bower_components/
+vendor/
+node_modules/

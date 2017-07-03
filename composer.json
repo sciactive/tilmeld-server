@@ -1,38 +1,42 @@
 {
-    "name": "sciactive/tilmeld",
-    "description": "Nymph user and group management with access controls.",
-    "version": "1.0.0-alpha.1",
-    "type": "library",
-    "keywords": [
+  "name": "sciactive/tilmeld",
+  "description": "Nymph user and group management with access controls.",
+  "version": "1.0.0-alpha.1",
+  "type": "library",
+  "keywords": [
+    "users",
+    "groups",
 		"user management",
 		"user manager",
 		"group management",
-		"group manager"
+		"group manager",
+    "acl",
+    "nymph"
 	],
-    "homepage": "http://tilmeld.org/",
-    "time": "2014-12-25",
-    "license": "LGPL",
-    "authors": [
-        {
-            "name": "Hunter Perrin",
-            "email": "hunter@sciactive.com",
-            "homepage": "https://github.com/hperrin",
-            "role": "Developer"
-        }
-    ],
-    "support": {
-        "issues": "https://github.com/sciactive/tilmeld/issues",
-        "wiki": "https://github.com/sciactive/tilmeld/wiki",
-        "source": "https://github.com/sciactive/tilmeld"
-    },
-    "archive": {
-        "exclude": ["**/.*", "node_modules", "bower_components", "bower.json"]
-    },
+  "homepage": "http://tilmeld.org/",
+  "time": "2017-06-16",
+  "license": "Apache-2.0",
+  "authors": [
+      {
+          "name": "Hunter Perrin",
+          "email": "hperrin@gmail.com",
+          "homepage": "https://github.com/hperrin",
+          "role": "Developer"
+      }
+  ],
+  "support": {
+      "issues": "https://github.com/sciactive/tilmeld/issues",
+      "wiki": "https://github.com/sciactive/tilmeld/wiki",
+      "source": "https://github.com/sciactive/tilmeld"
+  },
+  "archive": {
+      "exclude": ["**/.*", "node_modules", "bower_components", "bower.json"]
+  },
 	"require": {
-		"sciactive/hookphp": "~1.1",
-		"sciactive/nymph-server": "dev-master",
-		"sciactive/nymph-pubsub": "dev-master",
-		"sciactive/umailphp": "dev-master"
+		"sciactive/hookphp": "~2.0",
+		"sciactive/nymph-server": "~1.5.4",
+		"sciactive/nymph-pubsub": "~1.5.5",
+		"sciactive/umailphp": "~1.0.1"
 	},
 	"minimum-stability": "dev"
 }

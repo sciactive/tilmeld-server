@@ -3,7 +3,7 @@
  * RecoverAccount class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/lgpl.html
+ * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -14,7 +14,7 @@
  *
  * @package Tilmeld
  */
-class RecoverAccount extends \µMailPHP\Definition {
+class RecoverAccount extends \uMailPHP\Definition {
   public static $cname = 'Recover Account';
   public static $description = 'This email is sent when a user can\'t access their account so they can recover their username and/or password.';
   public static $expectsRecipient = true;

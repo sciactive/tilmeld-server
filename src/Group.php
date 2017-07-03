@@ -1,9 +1,11 @@
-<?php namespace Tilmeld;
+<?php
+namespace Tilmeld;
+
 /**
  * Group class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/lgpl.html
+ * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -194,7 +196,7 @@ class Group extends AbleObject {
         ['&',
           'ref' => ['parent', $this]
         ]
-      );
+    );
     foreach ($entities as $cur_group) {
       if (!$cur_group->delete()) {
         return false;
@@ -226,28 +228,27 @@ class Group extends AbleObject {
       }
     }
 
-        // Validate group parent. Make sure it's not a descendant of this group.
-        if (
-                isset($this->parent) &&
-                (
-                    !isset($this->parent->guid) ||
-                    $this->is($this->parent) ||
-                    $this->parent->isDescendant($this)
-                )
-            ) {
-            $this->parent = null;
-        }
+    // Validate group parent. Make sure it's not a descendant of this group.
+    if (isset($this->parent) &&
+        (
+          !isset($this->parent->guid) ||
+          $this->is($this->parent) ||
+          $this->parent->isDescendant($this)
+        )
+      ) {
+      $this->parent = null;
+    }
 
-        // Only one default primary group is allowed.
-        if ($this->defaultPrimary) {
-            $currentPrimary = \Nymph\Nymph::getEntity(['class' => '\Tilmeld\Group'], ['&', 'data' => ['defaultPrimary', true]]);
-            if (isset($currentPrimary) && !$this->is($currentPrimary)) {
-                unset($currentPrimary->defaultPrimary);
-                if (!$currentPrimary->save()) {
-                    throw new Exceptions\CouldNotChangeDefaultPrimaryGroupException("Could not change new user primary group from {$currentPrimary->groupname}.");
-                }
-            }
+    // Only one default primary group is allowed.
+    if ($this->defaultPrimary) {
+      $currentPrimary = \Nymph\Nymph::getEntity(['class' => '\Tilmeld\Group'], ['&', 'data' => ['defaultPrimary', true]]);
+      if (isset($currentPrimary) && !$this->is($currentPrimary)) {
+        unset($currentPrimary->defaultPrimary);
+        if (!$currentPrimary->save()) {
+          throw new Exceptions\CouldNotChangeDefaultPrimaryGroupException("Could not change new user primary group from {$currentPrimary->groupname}.");
         }
+      }
+    }
 
     return parent::save();
   }
@@ -264,7 +265,7 @@ class Group extends AbleObject {
           'data' => ['enabled', true],
           'ref' => ['parent', $this]
         ]
-      );
+    );
     return $return;
   }
 
@@ -282,7 +283,7 @@ class Group extends AbleObject {
           'data' => ['enabled', true],
           'ref' => ['parent', $this]
         ]
-      );
+    );
     foreach ($entities as $entity) {
       $child_array = $entity->getDescendants(true);
       $return = array_merge($return, $child_array);
@@ -381,7 +382,7 @@ class Group extends AbleObject {
           'data' => ['enabled', true]
         ],
         $or
-      );
+    );
     return $return;
   }
 
@@ -413,7 +414,7 @@ class Group extends AbleObject {
       $test = \Nymph\Nymph::getEntity(
           ['class' => '\Tilmeld\Group', 'skip_ac' => true],
           $selector
-        );
+      );
       if (isset($test->guid)) {
         return ['result' => false, 'message' => 'That groupname is taken.'];
       }
@@ -452,7 +453,7 @@ class Group extends AbleObject {
     $test = \Nymph\Nymph::getEntity(
         ['class' => '\Tilmeld\Group', 'skip_ac' => true],
         $selector
-      );
+    );
     if (isset($test->guid)) {
       return ['result' => false, 'message' => 'That email address is already registered.'];
     }

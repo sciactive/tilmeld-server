@@ -1,0 +1,37 @@
+{
+  "name": "tilmeld",
+  "version": "1.0.0-alpha.1",
+  "description": "Nymph user and group management with access controls.",
+  "main": "arc/autoload.php",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sciactive/tilmeld.git"
+  },
+  "keywords": [
+    "users",
+    "groups",
+    "user management",
+    "user manager",
+    "group management",
+    "group manager",
+    "acl",
+    "nymph"
+  ],
+  "author": "Hunter Perrin <hperrin@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/sciactive/tilmeld/issues"
+  },
+  "homepage": "https://github.com/sciactive/tilmeld#readme",
+  "dependencies": {
+    "nymph-client": "^1.5.4",
+    "pform": "^3.2.2",
+    "umailphp": "^1.0.1"
+  }
+}

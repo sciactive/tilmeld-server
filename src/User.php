@@ -1,9 +1,11 @@
-<?php namespace Tilmeld;
+<?php
+namespace Tilmeld;
+
 /**
  * User class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/lgpl.html
+ * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -323,11 +325,10 @@ class User extends AbleObject {
         } elseif ($this->email !== $this->originalEmail) {
           // The user already has an old email address.
           if (Tilmeld::$config['email_rate_limit'] !== '' && isset($this->emailChangeDate) && $this->emailChangeDate > strtotime('-'.Tilmeld::$config['email_rate_limit'])) {
-            throw new Exceptions\EmailChangeRateLimitExceededException('You already changed your email address recently. Please wait until '.\µMailPHP\Mail::formatDate(strtotime('+'.Tilmeld::$config['email_rate_limit'], $this->emailChangeDate), 'full_short').' to change your email address again.');
+            throw new Exceptions\EmailChangeRateLimitExceededException('You already changed your email address recently. Please wait until '.\uMailPHP\Mail::formatDate(strtotime('+'.Tilmeld::$config['email_rate_limit'], $this->emailChangeDate), 'full_short').' to change your email address again.');
             //$this->email = $this->originalEmail;
           } else {
-            if (
-                !isset($this->secret) &&
+            if (!isset($this->secret) &&
                 (
                   // Make sure the user has at least the rate
                   // limit time to cancel an email change.
@@ -345,8 +346,7 @@ class User extends AbleObject {
             $sendVerification = true;
           }
         }
-      } elseif (
-          isset($this->guid) &&
+      } elseif (isset($this->guid) &&
           !empty($this->originalEmail) &&
           $this->originalEmail !== $this->email &&
           (
@@ -445,11 +445,11 @@ class User extends AbleObject {
       $link = htmlspecialchars(Tilmeld::$config['setup_url'].(strpos(Tilmeld::$config['setup_url'], '?') ? '&' : '?').'action=verifyemail&id='.$this->guid.'&secret='.$this->secret);
       $macros = [
         'verify_link' => $link,
-        'to_phone' => htmlspecialchars(\µMailPHP\Mail::formatPhone($this->phone)),
+        'to_phone' => htmlspecialchars(\uMailPHP\Mail::formatPhone($this->phone)),
         'to_timezone' => htmlspecialchars($this->timezone),
         'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
       ];
-      $mail = new \µMailPHP\Mail('\Tilmeld\Mail\VerifyEmail', $this, $macros);
+      $mail = new \uMailPHP\Mail('\Tilmeld\Mail\VerifyEmail', $this, $macros);
       $success = $success && $mail->send();
     }
     if (isset($this->secret) && isset($this->cancelEmailSecret)) {
@@ -458,11 +458,11 @@ class User extends AbleObject {
         'verify_link' => $link,
         'old_email' => htmlspecialchars($this->cancelEmailAddress),
         'new_email' => htmlspecialchars($this->email),
-        'to_phone' => htmlspecialchars(\µMailPHP\Mail::formatPhone($this->phone)),
+        'to_phone' => htmlspecialchars(\uMailPHP\Mail::formatPhone($this->phone)),
         'to_timezone' => htmlspecialchars($this->timezone),
         'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
       ];
-      $mail = new \µMailPHP\Mail('\Tilmeld\Mail\VerifyEmailChange', $this, $macros);
+      $mail = new \uMailPHP\Mail('\Tilmeld\Mail\VerifyEmailChange', $this, $macros);
       $success = $success && $mail->send();
     }
     if (isset($this->cancelEmailSecret)) {
@@ -471,11 +471,11 @@ class User extends AbleObject {
         'cancel_link' => $link,
         'old_email' => htmlspecialchars($this->cancelEmailAddress),
         'new_email' => htmlspecialchars($this->email),
-        'to_phone' => htmlspecialchars(\µMailPHP\Mail::formatPhone($this->phone)),
+        'to_phone' => htmlspecialchars(\uMailPHP\Mail::formatPhone($this->phone)),
         'to_timezone' => htmlspecialchars($this->timezone),
         'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
       ];
-      $mail = new \µMailPHP\Mail('\Tilmeld\Mail\CancelEmailChange', $this, $macros);
+      $mail = new \uMailPHP\Mail('\Tilmeld\Mail\CancelEmailChange', $this, $macros);
       $success = $success && $mail->send();
     }
     return $success;
@@ -523,36 +523,6 @@ class User extends AbleObject {
         $module->group_array_secondary = $highest_parent->getDescendants();
       }
     }
-    foreach ($_->components as $cur_component) {
-      $module->sections[] = $cur_component;
-    }
-
-    return $module;
-  }
-
-  /**
-   * Print a form to change the user's password.
-   *
-   * @return module The form's module.
-   */
-  public function printFormPassword() {
-    $module = new module('com_user', 'form_password', 'content');
-    $module->entity = $this;
-
-    return $module;
-  }
-
-  /**
-   * Print a registration form for the user to fill out.
-   *
-   * @return module The form's module.
-   */
-  public function printRegister() {
-    $module = new module('com_user', 'form_register', 'content');
-    $module->entity = $this;
-    foreach ($_->components as $cur_component) {
-      $module->sections[] = $cur_component;
-    }
 
     return $module;
   }
@@ -564,7 +534,7 @@ class User extends AbleObject {
    * @return mixed True if the user is already in the group. The resulting array of groups if the user was not.
    */
   public function addGroup($group) {
-    if ( !$group->inArray((array) $this->groups) ) {
+    if (!$group->inArray((array) $this->groups)) {
       $this->groups[] = $group;
       return $this->groups;
     }
@@ -725,7 +695,7 @@ class User extends AbleObject {
     if (isset($this->group->guid) && !empty($this->group->timezone)) {
       return $return_date_time_zone_object ? new DateTimeZone($this->group->timezone) : $this->group->timezone;
     }
-    foreach((array) $this->groups as $cur_group) {
+    foreach ((array) $this->groups as $cur_group) {
       if (!empty($cur_group->timezone)) {
         return $return_date_time_zone_object ? new DateTimeZone($cur_group->timezone) : $cur_group->timezone;
       }
@@ -762,7 +732,7 @@ class User extends AbleObject {
       $test = \Nymph\Nymph::getEntity(
           ['class' => '\Tilmeld\User', 'skip_ac' => true],
           $selector
-        );
+      );
       if (isset($test->guid)) {
         return ['result' => false, 'message' => 'That username is taken.'];
       }
@@ -801,7 +771,7 @@ class User extends AbleObject {
     $test = \Nymph\Nymph::getEntity(
         ['class' => '\Tilmeld\User', 'skip_ac' => true],
         $selector
-      );
+    );
     if (isset($test->guid)) {
       return ['result' => false, 'message' => 'That email address is already registered.'];
     }
@@ -832,7 +802,7 @@ class User extends AbleObject {
     $test = \Nymph\Nymph::getEntity(
         ['class' => '\Tilmeld\User', 'skip_ac' => true],
         $selector
-      );
+    );
     if (isset($test->guid)) {
       return ['result' => false, 'message' => 'Phone number is in use.'];
     }
@@ -900,11 +870,11 @@ class User extends AbleObject {
         'user_first_name' => htmlspecialchars($this->nameFirst),
         'user_last_name' => htmlspecialchars($this->nameLast),
         'user_email' => htmlspecialchars($this->email),
-        'user_phone' => htmlspecialchars(\µMailPHP\Mail::formatPhone($this->phone)),
+        'user_phone' => htmlspecialchars(\uMailPHP\Mail::formatPhone($this->phone)),
         'user_timezone' => htmlspecialchars($this->timezone),
         'user_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
       );
-      $mail = new \µMailPHP\Mail('\Tilmeld\Mail\UserRegistered', null, $macros);
+      $mail = new \uMailPHP\Mail('\Tilmeld\Mail\UserRegistered', null, $macros);
       $mail->send();
       if (Tilmeld::$config['verify_email'] && !Tilmeld::$config['unverified_access']) {
         $message = "Almost there. An email has been sent to {$this->email} with a verification link for you to finish registration.";
@@ -941,8 +911,7 @@ class User extends AbleObject {
       return ['result' => true, 'message' => 'You are already logged in.'];
     }
     // Check that a challenge block was created within 10 minutes.
-    if (
-        (Tilmeld::$config['sawasc'] && Tilmeld::$config['pw_method'] !== 'salt') &&
+    if ((Tilmeld::$config['sawasc'] && Tilmeld::$config['pw_method'] !== 'salt') &&
         (!isset($_SESSION['sawasc']['ServerCB']) || $_SESSION['sawasc']['timestamp'] < time() - 600)
       ) {
       return ['result' => false, 'message' => 'Your login request session has expired, please try again.'];
@@ -997,11 +966,11 @@ class User extends AbleObject {
     $macros = array(
       'recover_link' => $link,
       'minutes' => htmlspecialchars(Tilmeld::$config['pw_recovery_minutes']),
-      'to_phone' => htmlspecialchars(\µMailPHP\Mail::formatPhone($this->phone)),
+      'to_phone' => htmlspecialchars(\uMailPHP\Mail::formatPhone($this->phone)),
       'to_timezone' => htmlspecialchars($this->timezone),
       'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
     );
-    $mail = new \µMailPHP\Mail('\Tilmeld\Mail\RecoverAccount', $this, $macros);
+    $mail = new \uMailPHP\Mail('\Tilmeld\Mail\RecoverAccount', $this, $macros);
     if ($mail->send()) {
       return ['result' => true, 'message' => 'We\'ve sent an email to your registered address. Please check your email to continue with account recovery.'];
     } else {

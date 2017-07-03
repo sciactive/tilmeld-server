@@ -1,9 +1,11 @@
-<?php namespace Tilmeld;
+<?php
+namespace Tilmeld;
+
 /**
  * able_object class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/lgpl.html
+ * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -20,7 +22,7 @@ class AbleObject extends \Nymph\Entity {
    *
    * Abilities should be named following this form!!
    *
-   *	 com_componentname/abilityname
+   *     com_componentname/abilityname
    *
    * If it is a system ability (ie. not part of a component, substitute
    * "com_componentname" with "system". The system ability "all" means the

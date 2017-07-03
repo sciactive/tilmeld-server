@@ -3,7 +3,7 @@
  * VerifyEmail class.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/lgpl.html
+ * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
@@ -14,7 +14,7 @@
  *
  * @package Tilmeld
  */
-class VerifyEmail extends \µMailPHP\Definition {
+class VerifyEmail extends \uMailPHP\Definition {
   public static $cname = 'Verify Email';
   public static $description = 'This email is sent to a new user to let them verify their address.';
   public static $expectsRecipient = true;

@@ -12,6 +12,6 @@ include __DIR__.'/../src/autoload.php';
 // This is how you enter the setup app.
 // (only for umail) include 'UserVerifyMail.php'; // Make sure all of your definition classes are loaded.
 $tilmeldURL = '../'; // This is the URL of the Tilmeld root.
-$sciactiveBaseURL = '../bower_components/'; // This is the URL of the SciActive libraries.
+$sciactiveBaseURL = '../node_modules/'; // This is the URL of the SciActive libraries.
 $restEndpoint = 'rest.php'; // This is the URL of the Nymph endpoint.
 include '../src/setup.php'; // And this will load the Tilmeld setup app.

@@ -11,6 +11,7 @@ require __DIR__.'/../src/autoload.php';
 
 \Nymph\Nymph::configure([
   'MySQL' => [
+    'host' => '127.0.0.1',
     'database' => 'nymph_example',
     'user' => 'nymph_example',
     'password' => 'omgomg'

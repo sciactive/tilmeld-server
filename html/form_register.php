@@ -3,7 +3,7 @@
  * Provides a form to register a new user.
  *
  * @package Tilmeld
- * @license http://www.gnu.org/licenses/lgpl.html
+ * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Zak Huber <zak@sciactive.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/

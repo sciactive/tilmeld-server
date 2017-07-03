@@ -6,7 +6,7 @@
     "Hunter Perrin <hunter@sciactive.com>"
   ],
   "main": "src/nymph-directives.js",
-  "license": "LGPL",
+  "license": "Apache-2.0",
   "ignore": [
     "**/.*",
     "node_modules",
@@ -15,8 +15,8 @@
     "composer.lock"
   ],
   "dependencies": {
-    "pform": "~3.2",
-    "nymph-client": "master",
-    "umailphp": "https://github.com/sciactive/umailphp.git#master"
+    "pform": "~3.2.2",
+    "nymph-client": "~1.5.4",
+    "umailphp": "~1.0.1"
   }
 }

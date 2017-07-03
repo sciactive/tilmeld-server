@@ -1,40 +1,5 @@
-<?php
-/**
- * Provides a form for the user to log in.
- *
- * @package Tilmeld
- * @license http://www.gnu.org/licenses/lgpl.html
- * @author Hunter Perrin <hperrin@gmail.com>
- * @copyright SciActive.com
- * @link http://sciactive.com/
- */
 
-if (empty($this->title))
-  $this->title = 'Log in to '.h($_->config->system_name);
-$this->checkUsername = (\Tilmeld\Tilmeld::$config['allow_registration'] && \Tilmeld\Tilmeld::$config['checkUsername']);
-if ($this->checkUsername)
-  $_->icons->load();
-
-// Activate SAWASC support.
-$this->sawasc = $_->com_user->activateSawasc();
-
-?>
-<?php if ($this->checkUsername) { ?>
-<style type="text/css">
-  #p_muid_username_loading {
-    background-position: left;
-    background-repeat: no-repeat;
-    padding-left: 16px;
-    display: none;
-  }
-  #p_muid_username_message {
-    background-position: left;
-    background-repeat: no-repeat;
-    padding-left: 20px;
-    line-height: 16px;
-  }
-</style>
-<?php } if ($this->sawasc || ($this->style != 'compact' && $this->style != 'small')) { ?>
+<?php if ($this->sawasc || ($this->style != 'compact' && $this->style != 'small')) { ?>
 <script type="text/javascript">
   <?php if ($this->sawasc) { ?>
   $_.loadjs("<?php e($_->config->location); ?>components/com_user/includes/hash.js");
@@ -410,4 +375,18 @@ $this->sawasc = $_->com_user->activateSawasc();
   });
 </script>
 <a href="javascript:void(0);" id="p_muid_compact_link"><?php e($this->compact_text); ?></a>
-<?php }
+
+<style>
+  .username-loading {
+    background-position: left;
+    background-repeat: no-repeat;
+    padding-left: 16px;
+    display: none;
+  }
+  .username-message {
+    background-position: left;
+    background-repeat: no-repeat;
+    padding-left: 20px;
+    line-height: 16px;
+  }
+</style>
