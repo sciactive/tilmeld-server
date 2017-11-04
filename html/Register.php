@@ -1,27 +1,20 @@
 <?php
-/**
- * Provides a form to register a new user.
- *
- * @package Tilmeld
- * @license https://www.apache.org/licenses/LICENSE-2.0
- * @author Zak Huber <zak@sciactive.com>
- * @copyright SciActive.com
- * @link http://sciactive.com/
- */
 $this->title = 'New User Registration';
 $this->note = 'Please fill in your account details.';
+
+$config = \Tilmeld\Entities\User::getClientConfig();
 ?>
 <form class="pf-form" method="post" id="p_muid_form" action="<?php e(pines_url('com_user', 'registeruser')); ?>">
   <ul class="nav nav-tabs" style="clear: both;">
     <li class="active"><a href="#p_muid_tab_general" data-toggle="tab">General</a></li>
-    <?php if (in_array('address', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+    <?php if (in_array('address', $config->reg_fields)) { ?>
     <li><a href="#p_muid_tab_location" data-toggle="tab">Address</a></li>
     <?php } ?>
   </ul>
   <div id="p_muid_tabs" class="tab-content">
     <div class="tab-pane active" id="p_muid_tab_general">
       <div class="pf-element" style="float: right;"><span class="pf-required">*</span> Required Field</div>
-      <?php if (in_array('name', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+      <?php if (in_array('name', $config->reg_fields)) { ?>
       <div class="pf-element">
         <label><span class="pf-label">First Name <span class="pf-required">*</span></span>
           <input class="pf-field form-control" type="text" name="nameFirst" size="24" value="<?php e($this->entity->nameFirst); ?>" /></label>
@@ -34,30 +27,28 @@ $this->note = 'Please fill in your account details.';
         <label><span class="pf-label">Last Name</span>
           <input class="pf-field form-control" type="text" name="nameLast" size="24" value="<?php e($this->entity->nameLast); ?>" /></label>
       </div>
-      <?php } if (!\Tilmeld\Tilmeld::$config['email_usernames'] && in_array('email', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+      <?php } if (!$config->email_usernames && in_array('email', $config->reg_fields)) { ?>
       <div class="pf-element">
         <label><span class="pf-label">Email <span class="pf-required">*</span></span>
           <input class="pf-field form-control" type="email" name="email" size="24" value="<?php e($this->entity->email); ?>" /></label>
       </div>
-      <?php } if (in_array('phone', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+      <?php } if (in_array('phone', $config->reg_fields)) { ?>
       <div class="pf-element">
         <label><span class="pf-label">Phone</span>
           <input class="pf-field form-control" type="tel" name="phone" size="24" value="<?php e(format_phone($this->entity->phone)); ?>" onkeyup="this.value=this.value.replace(/\D*0?1?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d*)\D*/, '($1$2$3) $4$5$6-$7$8$9$10 x$11').replace(/\D*$/, '');" /></label>
       </div>
-      <?php } if (in_array('fax', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+      <?php } if (in_array('fax', $config->reg_fields)) { ?>
       <div class="pf-element">
         <label><span class="pf-label">Fax</span>
           <input class="pf-field form-control" type="tel" name="fax" size="24" value="<?php e(format_phone($this->entity->fax)); ?>" onkeyup="this.value=this.value.replace(/\D*0?1?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d)?\D*(\d*)\D*/, '($1$2$3) $4$5$6-$7$8$9$10 x$11').replace(/\D*$/, '');" /></label>
       </div>
-      <?php } if (in_array('timezone', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+      <?php } if (in_array('timezone', $config->reg_fields)) { ?>
       <div class="pf-element">
         <label><span class="pf-label">Timezone</span>
           <span class="pf-note">This overrides the primary group's timezone.</span>
           <select class="pf-field form-control" name="timezone">
             <option value="">--Default--</option>
-            <?php $tz = DateTimeZone::listIdentifiers();
-            sort($tz);
-            foreach ($tz as $cur_tz) { ?>
+            <?php foreach ($config->timezones as $cur_tz) { ?>
             <option value="<?php e($cur_tz); ?>"<?php echo $this->entity->timezone == $cur_tz ? ' selected="selected"' : ''; ?>><?php e($cur_tz); ?></option>
             <?php } ?>
           </select></label>
@@ -65,7 +56,7 @@ $this->note = 'Please fill in your account details.';
       <?php } ?>
       <br class="pf-clearing" />
     </div>
-    <?php if (in_array('address', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+    <?php if (in_array('address', $config->reg_fields)) { ?>
     <div class="tab-pane" id="p_muid_tab_location">
       <div class="pf-element">
         <script type="text/javascript">

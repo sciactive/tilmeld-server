@@ -1,5 +1,7 @@
 <?php
-namespace Tilmeld;
+namespace Tilmeld\Entities;
+
+use \Tilmeld\Tilmeld as Tilmeld;
 
 /**
  * User class.
@@ -9,12 +11,6 @@ namespace Tilmeld;
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
- */
-
-/**
- * A user.
- *
- * @package Tilmeld
  * @property int $guid The GUID of the user.
  * @property string $username The user's username.
  * @property string $nameFirst The user's first name.
@@ -31,18 +27,19 @@ namespace Tilmeld;
  * @property string $addressState The user's state abbreviation for US addresses.
  * @property string $addressZip The user's ZIP code for US addresses.
  * @property string $addressInternational The user's full address for international addresses.
- * @property \Tilmeld\Group $group The user's primary group.
+ * @property \Tilmeld\Entities\Group $group The user's primary group.
  * @property array $groups The user's secondary groups.
  * @property bool $inheritAbilities Whether the user should inherit the abilities of his groups.
  * @property string $passwordTemp Temporary storage for passwords. This will be hashed before going into the database.
  */
 class User extends AbleObject {
-  const ETYPE = 'user';
+  const ETYPE = 'tilmeld_user';
   protected $tags = [];
   protected $clientEnabledMethods = [
     'checkUsername',
     'checkEmail',
     'checkPhone',
+    'getAvatar',
     'register',
     'logout',
     'login',
@@ -50,6 +47,7 @@ class User extends AbleObject {
   ];
   public static $clientEnabledStaticMethods = [
     'current',
+    'getClientConfig',
   ];
   protected $privateData = [
     'email',
@@ -253,31 +251,12 @@ class User extends AbleObject {
     return parent::__unset($name);
   }
 
-  public function info($type) {
-    switch ($type) {
-      case 'name':
-        return $this->name;
-      case 'type':
-        return 'user';
-      case 'types':
-        return 'users';
-      case 'avatar':
-      case 'icon':
-        $proto = isset($_SERVER['HTTPS']) ? 'https' : 'http';
-        if (!isset($this->email) || empty($this->email)) {
-          return $proto.'://secure.gravatar.com/avatar/?d=mm&s=40';
-        }
-        return $proto.'://secure.gravatar.com/avatar/'.md5(strtolower(trim($this->email))).'?d=identicon&s=40';
-      default:
-        return parent::info($type);
+  public function getAvatar() {
+    $proto = isset($_SERVER['HTTPS']) ? 'https' : 'http';
+    if (!isset($this->email) || empty($this->email)) {
+      return $proto.'://secure.gravatar.com/avatar/?d=mm&s=40';
     }
-    return null;
-  }
-
-  public function jsonSerialize($clientClassName = true) {
-    $object = parent::jsonSerialize($clientClassName);
-    $object->info['avatar'] = $this->info('avatar');
-    return $object;
+    return $proto.'://secure.gravatar.com/avatar/'.md5(strtolower(trim($this->email))).'?d=identicon&s=40';
   }
 
   public function delete() {
@@ -449,7 +428,7 @@ class User extends AbleObject {
         'to_timezone' => htmlspecialchars($this->timezone),
         'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
       ];
-      $mail = new \uMailPHP\Mail('\Tilmeld\Mail\VerifyEmail', $this, $macros);
+      $mail = new \uMailPHP\Mail('\Tilmeld\Entities\Mail\VerifyEmail', $this, $macros);
       $success = $success && $mail->send();
     }
     if (isset($this->secret) && isset($this->cancelEmailSecret)) {
@@ -462,7 +441,7 @@ class User extends AbleObject {
         'to_timezone' => htmlspecialchars($this->timezone),
         'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
       ];
-      $mail = new \uMailPHP\Mail('\Tilmeld\Mail\VerifyEmailChange', $this, $macros);
+      $mail = new \uMailPHP\Mail('\Tilmeld\Entities\Mail\VerifyEmailChange', $this, $macros);
       $success = $success && $mail->send();
     }
     if (isset($this->cancelEmailSecret)) {
@@ -475,7 +454,7 @@ class User extends AbleObject {
         'to_timezone' => htmlspecialchars($this->timezone),
         'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
       ];
-      $mail = new \uMailPHP\Mail('\Tilmeld\Mail\CancelEmailChange', $this, $macros);
+      $mail = new \uMailPHP\Mail('\Tilmeld\Entities\Mail\CancelEmailChange', $this, $macros);
       $success = $success && $mail->send();
     }
     return $success;
@@ -499,7 +478,7 @@ class User extends AbleObject {
     $module->sections = ['system'];
     $highest_parent = Tilmeld::$config['highest_primary'];
     if ($highest_parent == 0) {
-      $module->group_array_primary = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['&', 'data' => ['enabled', true]]);
+      $module->group_array_primary = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Entities\Group'], ['&', 'data' => ['enabled', true]]);
     } elseif ($highest_parent < 0) {
       $module->group_array_primary = [];
     } else {
@@ -512,7 +491,7 @@ class User extends AbleObject {
     }
     $highest_parent = Tilmeld::$config['highest_secondary'];
     if ($highest_parent == 0) {
-      $module->group_array_secondary = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['&', 'data' => ['enabled', true]]);
+      $module->group_array_secondary = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Entities\Group'], ['&', 'data' => ['enabled', true]]);
     } elseif ($highest_parent < 0) {
       $module->group_array_secondary = [];
     } else {
@@ -530,7 +509,7 @@ class User extends AbleObject {
   /**
    * Add the user to a (secondary) group.
    *
-   * @param \Tilmeld\Group $group The group.
+   * @param \Tilmeld\Entities\Group $group The group.
    * @return mixed True if the user is already in the group. The resulting array of groups if the user was not.
    */
   public function addGroup($group) {
@@ -580,28 +559,9 @@ class User extends AbleObject {
   }
 
   /**
-   * Check the given client hash and server challenge using SAWASC.
-   *
-   * @param string $ClientHash The hash provided by the client.
-   * @param string $ServerCB The challenge block generated by the server.
-   * @param string $algo Hash algorithm. Check hash_algos().
-   * @return bool True if the hashes match, otherwise false.
-   */
-  public function checkSawasc($ClientHash, $ServerCB, $algo) {
-    if ($this->salt == '7d5bc9dc81c200444e53d1d10ecc420a') {
-      $input = $this->password;
-    } else {
-      $input = md5($this->password.'7d5bc9dc81c200444e53d1d10ecc420a');
-    }
-    $ServerComb = $ServerCB.$input;
-    $ServerHash = hash($algo, $ServerComb);
-    return ($ClientHash === $ServerHash);
-  }
-
-  /**
    * Remove the user from a (secondary) group.
    *
-   * @param \Tilmeld\Group $group The group.
+   * @param \Tilmeld\Entities\Group $group The group.
    * @return mixed True if the user wasn't in the group. The resulting array of groups if the user was.
    */
   public function delGroup($group) {
@@ -730,7 +690,7 @@ class User extends AbleObject {
         $selector['!guid'] = $this->guid;
       }
       $test = \Nymph\Nymph::getEntity(
-          ['class' => '\Tilmeld\User', 'skip_ac' => true],
+          ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
           $selector
       );
       if (isset($test->guid)) {
@@ -769,7 +729,7 @@ class User extends AbleObject {
       $selector['!guid'] = $this->guid;
     }
     $test = \Nymph\Nymph::getEntity(
-        ['class' => '\Tilmeld\User', 'skip_ac' => true],
+        ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
         $selector
     );
     if (isset($test->guid)) {
@@ -800,7 +760,7 @@ class User extends AbleObject {
       $selector['!guid'] = $this->guid;
     }
     $test = \Nymph\Nymph::getEntity(
-        ['class' => '\Tilmeld\User', 'skip_ac' => true],
+        ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
         $selector
     );
     if (isset($test->guid)) {
@@ -833,14 +793,14 @@ class User extends AbleObject {
       $this->email = $this->username;
     }
 
-    $this->group = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\Group'), array('&', 'data' => array('defaultPrimary', true)));
+    $this->group = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\Entities\Group'), array('&', 'data' => array('defaultPrimary', true)));
     if (!isset($this->group->guid)) {
       unset($this->group);
     }
     if (Tilmeld::$config['verify_email'] && Tilmeld::$config['unverified_access']) {
-      $this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group'), array('&', 'data' => array('unverifiedSecondary', true)));
+      $this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Entities\Group'), array('&', 'data' => array('unverifiedSecondary', true)));
     } else {
-      $this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group'), array('&', 'data' => array('defaultSecondary', true)));
+      $this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Entities\Group'), array('&', 'data' => array('defaultSecondary', true)));
     }
 
     if (Tilmeld::$config['verify_email']) {
@@ -854,7 +814,7 @@ class User extends AbleObject {
 
     // If create_admin is true and there are no other users, grant "system/all".
     if (Tilmeld::$config['create_admin']) {
-      $otherUsers = \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\User', 'skip_ac' => true, 'limit' => 1));
+      $otherUsers = \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Entities\User', 'skip_ac' => true, 'limit' => 1));
       // Make sure it's not just null, cause that means an error.
       if ($otherUsers === array()) {
         $this->grant('system/all');
@@ -874,7 +834,7 @@ class User extends AbleObject {
         'user_timezone' => htmlspecialchars($this->timezone),
         'user_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
       );
-      $mail = new \uMailPHP\Mail('\Tilmeld\Mail\UserRegistered', null, $macros);
+      $mail = new \uMailPHP\Mail('\Tilmeld\Entities\Mail\UserRegistered', null, $macros);
       $mail->send();
       if (Tilmeld::$config['verify_email'] && !Tilmeld::$config['unverified_access']) {
         $message = "Almost there. An email has been sent to {$this->email} with a verification link for you to finish registration.";
@@ -910,25 +870,8 @@ class User extends AbleObject {
     if ($this->gatekeeper()) {
       return ['result' => true, 'message' => 'You are already logged in.'];
     }
-    // Check that a challenge block was created within 10 minutes.
-    if ((Tilmeld::$config['sawasc'] && Tilmeld::$config['pw_method'] !== 'salt') &&
-        (!isset($_SESSION['sawasc']['ServerCB']) || $_SESSION['sawasc']['timestamp'] < time() - 600)
-      ) {
-      return ['result' => false, 'message' => 'Your login request session has expired, please try again.'];
-    }
-    if (Tilmeld::$config['sawasc'] && Tilmeld::$config['pw_method'] != 'salt') {
-      Tilmeld::session('write');
-      if (!$this->checkSawasc($data['ClientHash'], $_SESSION['sawasc']['ServerCB'], $_SESSION['sawasc']['algo'])) {
-        unset($_SESSION['sawasc']);
-        Tilmeld::session('close');
-        return ['result' => false, 'message' => 'Incorrect login/password.'];
-      }
-      unset($_SESSION['sawasc']);
-      Tilmeld::session('close');
-    } else {
-      if (!$this->checkPassword($data['password'])) {
-        return ['result' => false, 'message' => 'Incorrect login/password.'];
-      }
+    if (!$this->checkPassword($data['password'])) {
+      return ['result' => false, 'message' => 'Incorrect login/password.'];
     }
 
     // Authentication was successful, attempt to login.
@@ -970,11 +913,23 @@ class User extends AbleObject {
       'to_timezone' => htmlspecialchars($this->timezone),
       'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
     );
-    $mail = new \uMailPHP\Mail('\Tilmeld\Mail\RecoverAccount', $this, $macros);
+    $mail = new \uMailPHP\Mail('\Tilmeld\Entities\Mail\RecoverAccount', $this, $macros);
     if ($mail->send()) {
       return ['result' => true, 'message' => 'We\'ve sent an email to your registered address. Please check your email to continue with account recovery.'];
     } else {
       return ['result' => false, 'message' => 'Couldn\'t send recovery email.'];
     }
+  }
+
+  public static function getClientConfig() {
+    $timezones = \DateTimeZone::listIdentifiers();
+    sort($timezones);
+    return (object) [
+      'reg_fields' => Tilmeld::$config['reg_fields'],
+      'email_usernames' => Tilmeld::$config['email_usernames'],
+      'allow_registration' => Tilmeld::$config['allow_registration'],
+      'pw_recovery' => Tilmeld::$config['pw_recovery'],
+      'timezones' => $timezones,
+    ];
   }
 }

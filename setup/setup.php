@@ -1,12 +1,20 @@
 <?php
 
-//if (!\Tilmeld\User::current(true)->gatekeeper('tilmeld/admin')) {
+//if (!\Tilmeld\Entities\User::current(true)->gatekeeper('tilmeld/admin')) {
 //	header('HTTP/1.1 403 Forbidden');
 //	die('You are not authorized to access this page.');
 //}
 
-$timezones = \DateTimeZone::listIdentifiers();
-sort($timezones);
+function is_secure() {
+  // Always assume secure on production.
+  if (getenv('NYMPH_PRODUCTION')) {
+    return true;
+  }
+  if (isset($_SERVER['HTTPS'])) {
+    return (strtolower($_SERVER['HTTPS']) == 'on' || $_SERVER['HTTPS'] == '1');
+  }
+  return (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443');
+}
 
 ?>
 <!DOCTYPE html>
@@ -21,20 +29,18 @@ sort($timezones);
       })();
       NymphOptions = {
         restURL: <?php echo json_encode($restEndpoint); ?>,
-        pubsubURL: 'ws://<?php echo getenv('DATABASE_URL') ? htmlspecialchars('nymph-pubsub-demo.herokuapp.com') : htmlspecialchars($_SERVER['HTTP_HOST']); ?>:<?php echo getenv('DATABASE_URL') ? '80' : '8080'; ?>',
+        pubsubURL: '<?php echo is_secure() ? 'wss' : 'ws'; ?>://<?php echo getenv('NYMPH_PRODUCTION') ? 'nymph-pubsub-demo.herokuapp.com' : '\'+window.location.hostname+\''; ?>:<?php echo getenv('NYMPH_PRODUCTION') ? (is_secure() ? '443' : '80') : '8081'; ?>',
         rateLimit: 100
       };
       TilmeldOptions = {
-        tilmeldURL: <?php echo json_encode($tilmeldURL); ?>,
-        timezones: <?php echo json_encode($timezones); ?>,
-        emailUsernames: <?php echo json_encode(\Tilmeld\Tilmeld::$config['email_usernames']); ?>
+        tilmeldURL: <?php echo json_encode($tilmeldURL); ?>
       };
     </script>
-    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/Nymph.js"></script>
-    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/Entity.js"></script>
-    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/src/NymphPubSub.js"></script>
-    <script src="<?php echo htmlspecialchars($tilmeldURL); ?>src/User.js"></script>
-    <script src="<?php echo htmlspecialchars($tilmeldURL); ?>src/Group.js"></script>
+    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib-umd/Nymph.js"></script>
+    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib-umd/Entity.js"></script>
+    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib-umd/PubSub.js"></script>
+    <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/User.js"></script>
+    <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Group.js"></script>
 
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.js"></script>
@@ -46,27 +52,7 @@ sort($timezones);
     <link rel="stylesheet" href="<?php echo htmlspecialchars($sciactiveBaseURL); ?>pform/css/pform.css">
     <link rel="stylesheet" href="<?php echo htmlspecialchars($sciactiveBaseURL); ?>pform/css/pform-bootstrap.css">
 
-    <script src="<?php echo htmlspecialchars($tilmeldURL); ?>src/setupApp.js"></script>
-
-    <style type="text/css">
-      form {
-        padding-bottom: 64px;
-      }
-      .button-panel {
-        position: fixed;
-        bottom: 0;
-        padding-bottom: 0;
-        margin-bottom: 0;
-        border-radius: 0;
-        width: 100%;
-        border: 0;
-        z-index: 100;
-        height: 64px;
-      }
-      .tab-content {
-        padding-top: 20px;
-      }
-    </style>
+    <script src="<?php echo htmlspecialchars($tilmeldURL); ?>setup/setupApp.js"></script>
   </head>
   <body>
     <div class="container" ng-controller="MainController">

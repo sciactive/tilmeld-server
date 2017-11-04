@@ -1,35 +1,16 @@
-
-<?php if ($this->sawasc || ($this->style != 'compact' && $this->style != 'small')) { ?>
+<?php
+$config = \Tilmeld\Entities\User::getClientConfig();
+?>
+<?php if ($this->style != 'compact' && $this->style != 'small') { ?>
 <script type="text/javascript">
-  <?php if ($this->sawasc) { ?>
-  $_.loadjs("<?php e($_->config->location); ?>components/com_user/includes/hash.js");
-  <?php } ?>
   $_(function(){
-    <?php if ($this->style != 'compact' && $this->style != 'small') { ?>
     $("input[name=username]", "#p_muid_form").focus();
-    <?php } if ($this->sawasc) { ?>
-    $("#p_muid_form").submit(function(){
-      // SAWASC code
-      if ($("input[name=existing]:checked", "#p_muid_form").length)
-        return true;
-      var password_box = $("input[name=password]", "#p_muid_form");
-      var password = password_box.val();
-      var ClientComb = <?php echo json_encode($_SESSION['sawasc']['ServerCB']); ?> + md5(password+'7d5bc9dc81c200444e53d1d10ecc420a');
-      <?php if ($_SESSION['sawasc']['algo'] == 'whirlpool') { ?>
-      var ClientHash = Whirlpool(ClientComb).toLowerCase();
-      <?php } else { ?>
-      var ClientHash = md5(ClientComb);
-      <?php } ?>
-      $("input[name=ClientHash]", "#p_muid_form").val(ClientHash);
-      password_box.val("");
-    });
-    <?php } ?>
   });
 </script>
 <?php } ?>
 <div id="p_muid_form" class="clearfix"<?php echo ($this->style == 'compact') ? ' style="display: none; max-height: 500px; overflow-y: auto; overflow-x: hidden;"' : ''; ?>>
   <form class="pf-form" method="post" action="<?php e(pines_url()); ?>">
-    <?php if (\Tilmeld\Tilmeld::$config['allow_registration']) { ?>
+    <?php if ($config->allow_registration) { ?>
     <div class="pf-element">
       <script type="text/javascript">
         $_(function(){
@@ -127,11 +108,11 @@
     </div>
     <?php } ?>
     <div class="pf-element">
-      <label><span class="pf-label"><?php echo \Tilmeld\Tilmeld::$config['email_usernames'] ? 'Email' : 'Username'; ?></span>
+      <label><span class="pf-label"><?php echo $config->email_usernames ? 'Email' : 'Username'; ?></span>
         <?php if ($this->style != 'small') { ?>
         <span class="pf-group" style="display: block;">
         <?php } ?>
-          <input class="pf-field form-control" type="<?php echo \Tilmeld\Tilmeld::$config['email_usernames'] ? 'email' : 'text'; ?>" name="username" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" />
+          <input class="pf-field form-control" type="<?php echo $config->email_usernames ? 'email' : 'text'; ?>" name="username" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" />
           <?php if ($this->checkUsername) { echo ($this->style == 'compact') ? '<br class="pf-clearing" />' : ''; ?>
           <span class="pf-field picon picon-throbber loader" id="p_muid_username_loading" style="display: none;">&nbsp;</span>
           <span class="pf-field picon" id="p_muid_username_message" style="display: none;"></span>
@@ -143,26 +124,26 @@
     </div>
     <div class="pf-element">
       <label><span class="pf-label">Password</span>
-        <?php echo (\Tilmeld\Tilmeld::$config['pw_empty'] ? '<span class="pf-note">May be blank.</span>' : ''); ?>
+        <?php echo ($config->pw_empty ? '<span class="pf-note">May be blank.</span>' : ''); ?>
         <input class="pf-field form-control" type="password" name="password" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
     </div>
-    <?php if (\Tilmeld\Tilmeld::$config['allow_registration']) { ?>
+    <?php if ($config->allow_registration) { ?>
     <div id="p_muid_register_form" style="display: none;">
       <div class="pf-element">
         <label><span class="pf-label">Re-enter Password</span>
           <input class="pf-field form-control" type="password" name="password2" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
       </div>
-      <?php if (\Tilmeld\Tilmeld::$config['referral_codes']) { ?>
+      <?php if ($config->referral_codes) { ?>
       <div class="pf-element">
         <label><span class="pf-label">Referral Code</span>
           <span class="pf-note">Optional</span>
           <input class="pf-field form-control" type="text" name="referral_code" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
       </div>
-      <?php } if (\Tilmeld\Tilmeld::$config['one_step_registration']) { ?>
+      <?php } if ($config->one_step_registration) { ?>
       <div class="pf-element">
         <span class="pf-required">*</span> Required field.
       </div>
-      <?php if (in_array('name', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+      <?php if (in_array('name', $config->reg_fields)) { ?>
       <div class="pf-element">
         <label><span class="pf-label">First Name <span class="pf-required">*</span></span>
           <input class="pf-field form-control" type="text" name="nameFirst" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
@@ -175,38 +156,36 @@
         <label><span class="pf-label">Last Name</span>
           <input class="pf-field form-control" type="text" name="nameLast" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
       </div>
-      <?php } if (!\Tilmeld\Tilmeld::$config['email_usernames'] && in_array('email', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+      <?php } if (!$config->email_usernames && in_array('email', $config->reg_fields)) { ?>
       <div class="pf-element">
         <label><span class="pf-label">Email <span class="pf-required">*</span></span>
           <input class="pf-field form-control" type="email" name="email" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
       </div>
-      <?php } if (in_array('phone', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+      <?php } if (in_array('phone', $config->reg_fields)) { ?>
       <div class="pf-element">
         <label><span class="pf-label">Phone Number</span>
           <input class="pf-field form-control" type="tel" name="phone" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
       </div>
-      <?php } if (in_array('fax', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+      <?php } if (in_array('fax', $config->reg_fields)) { ?>
       <div class="pf-element">
         <label><span class="pf-label">Fax Number</span>
           <input class="pf-field form-control" type="tel" name="fax" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
       </div>
-      <?php } if (in_array('timezone', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+      <?php } if (in_array('timezone', $config->reg_fields)) { ?>
       <div class="pf-element<?php echo ($this->style == 'small') ? ' pf-full-width' : ''; ?>">
         <label><span class="pf-label">Timezone</span>
-          <span class="pf-note">This overrides the primary group's timezone.</span>
+          <span class="pf-note">This overrides the primary group&apos;s timezone.</span>
           <?php echo ($this->style == 'compact') ? '<div class="pf-group">' : ''; ?>
           <select class="pf-field form-control" name="timezone"<?php echo ($this->style == 'small') ? ' style="max-width: 95%;"' : ''; ?>>
             <option value="">--Default--</option>
-            <?php $tz = DateTimeZone::listIdentifiers();
-            sort($tz);
-            foreach ($tz as $cur_tz) { ?>
+            <?php foreach ($config->timezones as $cur_tz) { ?>
             <option value="<?php e($cur_tz); ?>"><?php e($cur_tz); ?></option>
             <?php } ?>
           </select>
           <?php echo ($this->style == 'compact') ? '</div>' : ''; ?>
         </label>
       </div>
-      <?php } if (in_array('address', \Tilmeld\Tilmeld::$config['reg_fields'])) { ?>
+      <?php } if (in_array('address', $config->reg_fields)) { ?>
       <div class="pf-element">
         <script type="text/javascript">
           $_(function(){
@@ -326,9 +305,7 @@
     <div class="pf-element<?php echo ($this->style == 'small') ? '' : ' pf-buttons'; ?>">
       <input type="hidden" name="option" value="com_user" />
       <input type="hidden" name="action" value="login" />
-      <?php if ($this->sawasc) { ?>
-      <input type="hidden" name="ClientHash" value="" />
-      <?php } if ( !empty($this->url) ) { ?>
+      <?php if ( !empty($this->url) ) { ?>
       <input type="hidden" name="url" value="<?php e($this->url); ?>" />
       <?php } ?>
       <input class="pf-button btn btn-primary" type="submit" name="submit" value="Log In" />
@@ -336,12 +313,12 @@
       <input class="pf-button btn btn-default" type="reset" name="reset" value="Reset" />
       <?php } ?>
     </div>
-    <?php if (!$this->hide_recovery && \Tilmeld\Tilmeld::$config['pw_recovery']) { ?>
+    <?php if (!$this->hide_recovery && $config->pw_recovery) { ?>
     <div class="pf-element" id="p_muid_recovery">
       <?php if ($this->style != 'small') { ?>
       <span class="pf-label" style="height: 1px;">&nbsp;</span>
       <?php } ?>
-      <a class="pf-field" href="<?php e(pines_url('com_user', 'recover')); ?>">I can't access my account.</a>
+      <a class="pf-field" href="<?php e(pines_url('com_user', 'recover')); ?>">I can&apos;t access my account.</a>
     </div>
     <?php } ?>
   </form>

@@ -1,13 +1,4 @@
 <?php
-/**
- * Provides a form to change a password.
- *
- * @package Tilmeld
- * @license https://www.apache.org/licenses/LICENSE-2.0
- * @author Hunter Perrin <hperrin@gmail.com>
- * @copyright SciActive.com
- * @link http://sciactive.com/
- */
 $this->title = 'Change Your Password';
 ?>
 <script type="text/javascript">

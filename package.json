@@ -2,11 +2,13 @@
   "name": "tilmeld",
   "version": "1.0.0-alpha.1",
   "description": "Nymph user and group management with access controls.",
-  "main": "arc/autoload.php",
   "directories": {
     "example": "examples"
   },
   "scripts": {
+    "build": "babel -d lib/ src/Entities/",
+    "watch": "babel --watch -d lib/ src/Entities/",
+    "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -30,8 +32,15 @@
   },
   "homepage": "https://github.com/sciactive/tilmeld#readme",
   "dependencies": {
-    "nymph-client": "^1.5.4",
+    "nymph-client": "^2.2.0",
     "pform": "^3.2.2",
-    "umailphp": "^1.0.1"
+    "umailphp": "^2.0.0"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-stage-3": "^6.24.1"
   }
 }

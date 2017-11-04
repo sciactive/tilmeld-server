@@ -1,6 +1,9 @@
 <?php
 namespace Tilmeld;
 
+use Entities\User as User;
+use Entities\Group as Group;
+
 /**
  * Tilmeld class.
  *
@@ -68,44 +71,11 @@ class Tilmeld {
       $defaults = include dirname(__DIR__).'/conf/defaults.php';
       $tilmeldConfig = [];
       foreach ($defaults as $curName => $curOption) {
-        if ((array) $curOption === $curOption && isset($curOption['value'])) {
-          $tilmeldConfig[$curName] = $curOption['value'];
-        } else {
-          $tilmeldConfig[$curName] = [];
-          foreach ($curOption as $curSubName => $curSubOption) {
-            $tilmeldConfig[$curName][$curSubName] = $curSubOption['value'];
-          }
-        }
+        $tilmeldConfig[$curName] = $curOption;
       }
-      return array_replace_recursive($tilmeldConfig, $config);
+      return array_replace($tilmeldConfig, $config);
     });
     self::$config = \SciActive\RequirePHP::_('TilmeldConfig');
-  }
-
-  /**
-   * Activate the SAWASC system.
-   * @return bool True if SAWASC could be activated, false otherwise.
-   */
-  public static function activateSawasc() {
-    if (!self::$config['sawasc']) {
-      return false;
-    }
-    if (self::$config['pw_method'] == 'salt') {
-      pines_notice('SAWASC is not compatible with the Salt password storage method.');
-      return false;
-    }
-    // Check that a challenge block was created within 10 minutes.
-    if (!isset($_SESSION['sawasc']['ServerCB']) || $_SESSION['sawasc']['timestamp'] < time() - 600) {
-      // If not, generate one.
-      self::session('write');
-      $_SESSION['sawasc'] = [
-        'ServerCB' => uniqid('', true),
-        'timestamp' => time(),
-        'algo' => self::$config['sawasc_hash']
-      ];
-      self::session('close');
-    }
-    return true;
   }
 
   /**
@@ -160,7 +130,7 @@ class Tilmeld {
     if (User::current(true)->gatekeeper('system/all')) {
       return true;
     }
-    if (is_a($entity, '\Tilmeld\User') || is_a($entity, '\Tilmeld\Group')) {
+    if (is_a($entity, '\Tilmeld\Entities\User') || is_a($entity, '\Tilmeld\Entities\Group')) {
       return true;
     }
     if ((!isset($entity->user) || !isset($entity->user->guid)) &&
@@ -205,7 +175,7 @@ class Tilmeld {
         $_SESSION['tilmeld_user']->guid === $_SESSION['tilmeld_user_id']
       ) {
       $tmp_user = \Nymph\Nymph::getEntity(
-          ['class' => '\Tilmeld\User'],
+          ['class' => '\Tilmeld\Entities\User'],
           ['&',
             'guid' => [$_SESSION['tilmeld_user']->guid],
             'gt' => ['mdate', $_SESSION['tilmeld_user']->mdate]
@@ -260,7 +230,7 @@ class Tilmeld {
   /**
    * Logs the given user into the system.
    *
-   * @param \Tilmeld\User $user The user.
+   * @param \Tilmeld\Entities\User $user The user.
    * @return bool True on success, false on failure.
    */
   public static function login($user) {

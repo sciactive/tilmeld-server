@@ -1,23 +1,19 @@
 <?php
-namespace Tilmeld;
+namespace Tilmeld\Entities;
+
+use \Tilmeld\Tilmeld as Tilmeld;
 
 /**
  * Group class.
+ *
+ * Note: When delete() is called all descendants of this group will also be
+ * deleted.
  *
  * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
- */
-
-/**
- * Group of users.
- *
- * Note: When delete() is called all descendants of this group will also be
- * deleted.
- *
- * @package Tilmeld
  * @property int $guid The GUID of the group.
  * @property string $groupname The group's groupname.
  * @property string $name The group's name.
@@ -33,11 +29,12 @@ namespace Tilmeld;
  * @property Group $parent The group's parent.
  */
 class Group extends AbleObject {
-  const ETYPE = 'group';
+  const ETYPE = 'tilmeld_group';
   protected $tags = [];
   public $clientEnabledMethods = [
     'checkGroupname',
     'checkEmail',
+    'getAvatar',
     'getChildren',
     'getDescendants',
     'getLevel',
@@ -88,30 +85,12 @@ class Group extends AbleObject {
     $this->updateDataProtection();
   }
 
-  public function info($type) {
-    switch ($type) {
-      case 'name':
-        return $this->name;
-      case 'type':
-        return 'group';
-      case 'types':
-        return 'groups';
-      case 'avatar':
-        $proto = $_SERVER['HTTPS'] ? 'https' : 'http';
-        if (!isset($this->email) || empty($this->email)) {
-          return $proto.'://secure.gravatar.com/avatar/?d=mm&s=40';
-        }
-        return $proto.'://secure.gravatar.com/avatar/'.md5(strtolower(trim($this->email))).'?d=identicon&s=40';
-      default:
-        return parent::info($type);
+  public function getAvatar() {
+    $proto = $_SERVER['HTTPS'] ? 'https' : 'http';
+    if (!isset($this->email) || empty($this->email)) {
+      return $proto.'://secure.gravatar.com/avatar/?d=mm&s=40';
     }
-    return null;
-  }
-
-  public function jsonSerialize($clientClassName = true) {
-    $object = parent::jsonSerialize($clientClassName);
-    $object->info['avatar'] = $this->info('avatar');
-    return $object;
+    return $proto.'://secure.gravatar.com/avatar/'.md5(strtolower(trim($this->email))).'?d=identicon&s=40';
   }
 
   public function putData($data, $sdata = []) {
@@ -192,7 +171,7 @@ class Group extends AbleObject {
       return false;
     }
     $entities = \Nymph\Nymph::getEntities(
-        ['class' => '\Tilmeld\Group'],
+        ['class' => '\Tilmeld\Entities\Group'],
         ['&',
           'ref' => ['parent', $this]
         ]
@@ -241,7 +220,7 @@ class Group extends AbleObject {
 
     // Only one default primary group is allowed.
     if ($this->defaultPrimary) {
-      $currentPrimary = \Nymph\Nymph::getEntity(['class' => '\Tilmeld\Group'], ['&', 'data' => ['defaultPrimary', true]]);
+      $currentPrimary = \Nymph\Nymph::getEntity(['class' => '\Tilmeld\Entities\Group'], ['&', 'data' => ['defaultPrimary', true]]);
       if (isset($currentPrimary) && !$this->is($currentPrimary)) {
         unset($currentPrimary->defaultPrimary);
         if (!$currentPrimary->save()) {
@@ -260,7 +239,7 @@ class Group extends AbleObject {
    */
   public function getChildren() {
     $return = (array) \Nymph\Nymph::getEntities(
-        ['class' => '\Tilmeld\Group'],
+        ['class' => '\Tilmeld\Entities\Group'],
         ['&',
           'data' => ['enabled', true],
           'ref' => ['parent', $this]
@@ -278,7 +257,7 @@ class Group extends AbleObject {
   public function getDescendants($andSelf = false) {
     $return = [];
     $entities = \Nymph\Nymph::getEntities(
-        ['class' => '\Tilmeld\Group'],
+        ['class' => '\Tilmeld\Entities\Group'],
         ['&',
           'data' => ['enabled', true],
           'ref' => ['parent', $this]
@@ -326,7 +305,7 @@ class Group extends AbleObject {
     $highestPrimaryParent = Tilmeld::$config['highest_primary'];
     $primaryGroups = [];
     if ($highestPrimaryParent == 0) {
-      $primaryGroups = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group']);
+      $primaryGroups = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Entities\Group']);
     } else {
       if ($highestPrimaryParent > 0) {
         $highestPrimaryParent = Group::factory($highestPrimaryParent);
@@ -346,7 +325,7 @@ class Group extends AbleObject {
     $highestSecondaryParent = Tilmeld::$config['highest_secondary'];
     $secondaryGroups = [];
     if ($highestSecondaryParent == 0) {
-      $secondaryGroups = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group']);
+      $secondaryGroups = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Entities\Group']);
     } else {
       if ($highestSecondaryParent > 0) {
         $highestSecondaryParent = Group::factory($highestSecondaryParent);
@@ -377,7 +356,7 @@ class Group extends AbleObject {
     }
     $groups[] = $this;
     $return = \Nymph\Nymph::getEntities(
-        ['class' => '\Tilmeld\User'],
+        ['class' => '\Tilmeld\Entities\User'],
         ['&',
           'data' => ['enabled', true]
         ],
@@ -412,7 +391,7 @@ class Group extends AbleObject {
         $selector['!guid'] = $this->guid;
       }
       $test = \Nymph\Nymph::getEntity(
-          ['class' => '\Tilmeld\Group', 'skip_ac' => true],
+          ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
           $selector
       );
       if (isset($test->guid)) {
@@ -451,7 +430,7 @@ class Group extends AbleObject {
       $selector['!guid'] = $this->guid;
     }
     $test = \Nymph\Nymph::getEntity(
-        ['class' => '\Tilmeld\Group', 'skip_ac' => true],
+        ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
         $selector
     );
     if (isset($test->guid)) {
@@ -474,7 +453,7 @@ class Group extends AbleObject {
     $module->display_default = gatekeeper('com_user/defaultgroups');
     $module->display_abilities = gatekeeper('com_user/abilities');
     $module->sections = ['system'];
-    $module->group_array = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Group'], ['&', 'data' => ['enabled', true]]);
+    $module->group_array = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Entities\Group'], ['&', 'data' => ['enabled', true]]);
     foreach ($_->components as $cur_component) {
       $module->sections[] = $cur_component;
     }

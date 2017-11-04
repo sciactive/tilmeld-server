@@ -27,7 +27,7 @@
           </span>
         </a>
       </div>
-      <div class="pf-element" ng-if="!TilmeldOptions.emailUsernames">
+      <div class="pf-element" ng-if="!clientConfig.emailUsernames">
         <label>
           <span class="pf-label">Username</span>
           <span class="pf-group pf-full-width">
@@ -73,7 +73,7 @@
         <label>
           <span class="pf-label">Timezone</span>
           <span class="pf-note">This overrides the primary group's timezone.</span>
-          <select class="pf-field form-control" ng-options="timezone for timezone in uiState.timezones" name="timezone" ng-model="entity.data.timezone">
+          <select class="pf-field form-control" ng-options="timezone for timezone in clientConfig.timezones" name="timezone" ng-model="entity.data.timezone">
             <option value="">- Inherit From Group -</option>
           </select>
         </label>
@@ -229,10 +229,8 @@
       <br class="pf-clearing" />
     </div>
   </div>
-  <div class="pf-element panel panel-default button-panel">
-    <div class="panel-body">
-      <input class="pf-button btn btn-primary" type="submit" value="Save" />
-      <span ng-if="success" class="label label-success">Successfully saved!</span>
-    </div>
+  <div class="pf-element pf-full-width">
+    <input class="btn btn-primary" type="submit" value="Save" />
+    <span ng-if="success" class="label label-success">Successfully saved!</span>
   </div>
 </form>

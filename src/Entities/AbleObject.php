@@ -1,8 +1,10 @@
 <?php
-namespace Tilmeld;
+namespace Tilmeld\Entities;
 
 /**
- * able_object class.
+ * AbleObject class.
+ *
+ * Entities which support abilities, such as users and groups.
  *
  * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
@@ -10,23 +12,9 @@ namespace Tilmeld;
  * @copyright SciActive.com
  * @link http://sciactive.com/
  */
-
-/**
- * Entities which support abilities, such as users and groups.
- *
- * @package Tilmeld
- */
 class AbleObject extends \Nymph\Entity {
   /**
    * Grant an ability.
-   *
-   * Abilities should be named following this form!!
-   *
-   *     com_componentname/abilityname
-   *
-   * If it is a system ability (ie. not part of a component, substitute
-   * "com_componentname" with "system". The system ability "all" means the
-   * user has every ability available.
    *
    * @param string $ability The ability.
    */

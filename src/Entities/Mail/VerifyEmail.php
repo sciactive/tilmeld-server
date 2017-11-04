@@ -1,4 +1,4 @@
-<?php namespace Tilmeld\Mail;
+<?php namespace Tilmeld\Entities\Mail;
 /**
  * VerifyEmail class.
  *
@@ -14,7 +14,7 @@
  *
  * @package Tilmeld
  */
-class VerifyEmail extends \uMailPHP\Definition {
+class VerifyEmail extends \uMailPHP\Entities\Definition {
   public static $cname = 'Verify Email';
   public static $description = 'This email is sent to a new user to let them verify their address.';
   public static $expectsRecipient = true;
@@ -32,6 +32,6 @@ class VerifyEmail extends \uMailPHP\Definition {
   }
 
   public static function getHTML() {
-    return file_get_contents(__DIR__.'/../../html/Mail/VerifyEmail.html');
+    return file_get_contents(__DIR__.'/html/Mail/VerifyEmail.html');
   }
 }

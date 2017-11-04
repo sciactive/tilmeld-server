@@ -2,6 +2,7 @@
   "name": "sciactive/tilmeld",
   "description": "Nymph user and group management with access controls.",
   "version": "1.0.0-alpha.1",
+  "time": "2017-06-16",
   "type": "library",
   "keywords": [
     "users",
@@ -14,29 +15,28 @@
     "nymph"
 	],
   "homepage": "http://tilmeld.org/",
-  "time": "2017-06-16",
   "license": "Apache-2.0",
   "authors": [
-      {
-          "name": "Hunter Perrin",
-          "email": "hperrin@gmail.com",
-          "homepage": "https://github.com/hperrin",
-          "role": "Developer"
-      }
+    {
+      "name": "Hunter Perrin",
+      "email": "hperrin@gmail.com",
+      "homepage": "https://github.com/hperrin",
+      "role": "Developer"
+    }
   ],
   "support": {
-      "issues": "https://github.com/sciactive/tilmeld/issues",
-      "wiki": "https://github.com/sciactive/tilmeld/wiki",
-      "source": "https://github.com/sciactive/tilmeld"
+    "issues": "https://github.com/sciactive/tilmeld/issues",
+    "wiki": "https://github.com/sciactive/tilmeld/wiki",
+    "source": "https://github.com/sciactive/tilmeld"
   },
   "archive": {
-      "exclude": ["**/.*", "node_modules", "bower_components", "bower.json"]
+    "exclude": ["**/.*", "node_modules", "bower_components", "bower.json"]
   },
 	"require": {
 		"sciactive/hookphp": "~2.0",
-		"sciactive/nymph-server": "~1.5.4",
-		"sciactive/nymph-pubsub": "~1.5.5",
-		"sciactive/umailphp": "~1.0.1"
+		"sciactive/nymph-server": "~2.2",
+		"sciactive/nymph-pubsub": "~2.2",
+		"sciactive/umailphp": "~2.0"
 	},
 	"minimum-stability": "dev"
 }

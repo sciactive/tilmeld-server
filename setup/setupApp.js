@@ -1,4 +1,13 @@
 angular.module('setupApp', ['ngRoute'])
+.service('Nymph', function() {
+  return Nymph.default;
+})
+.service('User', function() {
+  return User.default;
+})
+.service('Group', function() {
+  return Group.default;
+})
 
 .controller('MainController', ['$scope', '$route', '$routeParams', '$location', function ($scope, $route, $routeParams, $location) {
   $scope.$route = $route;
@@ -6,14 +15,13 @@ angular.module('setupApp', ['ngRoute'])
   $scope.$routeParams = $routeParams;
 }])
 
-.controller('UserController', ['$scope', '$routeParams', '$timeout', function ($scope, $routeParams, $timeout) {
+.controller('UserController', ['$scope', '$routeParams', '$timeout', 'Nymph', 'User', 'Group', function ($scope, $routeParams, $timeout, Nymph, User, Group) {
   $scope.params = $routeParams;
-  $scope.TilmeldOptions = TilmeldOptions;
+  $scope.clientConfig = {};
   $scope.uiState = {
     loading: false,
     sort: 'nameFirst',
     entities: [],
-    timezones: TilmeldOptions.timezones,
     ability: '',
     verifyPassword: '',
     passwordVerified: null,
@@ -34,6 +42,12 @@ angular.module('setupApp', ['ngRoute'])
       $scope.$apply();
     }
   });
+  User.getClientConfig().then(function(config){
+    if (config) {
+      $scope.clientConfig = config;
+      $scope.$apply();
+    }
+  });
   Group.getPrimaryGroups().then(function(groups){
     $scope.primaryGroups = groups;
     $scope.$apply();
@@ -42,7 +56,7 @@ angular.module('setupApp', ['ngRoute'])
     $scope.secondaryGroups = groups;
     $scope.$apply();
   });
-  Nymph.getEntities({"class": '\\Tilmeld\\User'}).subscribe(function(entities){
+  Nymph.getEntities({"class": User.class}).subscribe(function(entities){
     Nymph.updateArray($scope.uiState.entities, entities);
     Nymph.sort($scope.uiState.entities, $scope.uiState.sort);
     $scope.$apply();
@@ -138,13 +152,13 @@ angular.module('setupApp', ['ngRoute'])
   };
 }])
 
-.controller('GroupController', ['$scope', '$routeParams', '$timeout', function ($scope, $routeParams, $timeout) {
+.controller('GroupController', ['$scope', '$routeParams', '$timeout', 'Nymph', 'User', 'Group', function ($scope, $routeParams, $timeout, Nymph, User, Group) {
   $scope.params = $routeParams;
+  $scope.clientConfig = {};
   $scope.uiState = {
     loading: false,
     sort: 'name',
     entities: [],
-    timezones: TilmeldOptions.timezones,
     ability: '',
     groupnameVerified: null,
     groupnameVerifiedMessage: null,
@@ -154,7 +168,13 @@ angular.module('setupApp', ['ngRoute'])
   };
   $scope.entity = new Group();
 
-  Nymph.getEntities({"class": '\\Tilmeld\\Group'}).subscribe(function(entities){
+  User.getClientConfig().then(function(config){
+    if (config) {
+      $scope.clientConfig = config;
+      $scope.$apply();
+    }
+  });
+  Nymph.getEntities({"class": Group.class}).subscribe(function(entities){
     Nymph.updateArray($scope.uiState.entities, entities);
     Nymph.sort($scope.uiState.entities, $scope.uiState.sort);
     $scope.$apply();
@@ -241,14 +261,14 @@ angular.module('setupApp', ['ngRoute'])
 .config(['$routeProvider', '$locationProvider', function ($routeProvider, $locationProvider) {
   $routeProvider
     .when('/', {
-      templateUrl: TilmeldOptions.tilmeldURL+'html/instructions.html'
+      templateUrl: TilmeldOptions.tilmeldURL+'setup/instructions.html'
     })
     .when('/user/:entityId?', {
-      templateUrl: TilmeldOptions.tilmeldURL+'html/user.html',
+      templateUrl: TilmeldOptions.tilmeldURL+'setup/user.html',
       controller: 'UserController'
     })
     .when('/group/:entityId?', {
-      templateUrl: TilmeldOptions.tilmeldURL+'html/group.html',
+      templateUrl: TilmeldOptions.tilmeldURL+'setup/group.html',
       controller: 'GroupController'
     });
 

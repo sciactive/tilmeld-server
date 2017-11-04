@@ -18,10 +18,13 @@ require __DIR__.'/../src/autoload.php';
 ]);
 
 $config = [];
-// If we're on Heroku, bind to the given port.
-if (getenv('DATABASE_URL') && getenv('PORT')) {
+// If we're on production, bind to the given port.
+if (getenv('NYMPH_PRODUCTION') && getenv('PORT')) {
   $config['port'] = (int) getenv('PORT');
+} else {
+  $config['port'] = 8081;
 }
+
 $opts = getopt('p:e:r:');
 // This lets us load multiple nymph-pubsub servers.
 if (isset($opts['p'])) {
@@ -30,13 +33,15 @@ if (isset($opts['p'])) {
 if (isset($opts['e'])) {
   $config['entries'] = [];
   foreach (explode(',', $opts['e']) as $port) {
-    $config['entries'][] = "ws://127.0.0.1:{$port}/";
+    $config['entries'][] =
+        ($port == '443' ? 'wss' : 'ws') . "://127.0.0.1:{$port}/";
   }
 }
 if (isset($opts['r'])) {
   $config['relays'] = [];
   foreach (explode(',', $opts['r']) as $port) {
-    $config['relays'][] = "ws://127.0.0.1:{$port}/";
+    $config['relays'][] =
+        ($port == '443' ? 'wss' : 'ws') . "://127.0.0.1:{$port}/";
   }
 }
 

@@ -29,7 +29,7 @@ switch ($_REQUEST['type']) {
     }
 
     if (Tilmeld::$config['unverified_access'])
-      $user->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Group', 'skip_ac' => true), array('&', 'data' => array('defaultSecondary', true)));
+      $user->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Entities\Group', 'skip_ac' => true), array('&', 'data' => array('defaultSecondary', true)));
     $user->enable();
     unset($user->secret);
     break;
@@ -47,7 +47,7 @@ switch ($_REQUEST['type']) {
       }
     }
     $test = \Nymph\Nymph::getEntity(
-        array('class' => '\Tilmeld\User', 'skip_ac' => true),
+        array('class' => '\Tilmeld\Entities\User', 'skip_ac' => true),
         array('&',
           'match' => array('email', '/^'.preg_quote($user->newEmailAddress, '/').'$/i'),
           '!guid' => $user->guid
