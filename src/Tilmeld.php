@@ -22,6 +22,11 @@ use Entities\Group as Group;
  * @package Tilmeld
  */
 class Tilmeld {
+  const NO_ACCESS = 0;
+  const READ_ACCESS = 1;
+  const WRITE_ACCESS = 2;
+  const DELETE_ACCESS = 4;
+
   /**
    * A copy of the Tilmeld config.
    *
@@ -92,26 +97,27 @@ class Tilmeld {
    * all users in the entity's group and all ancestor groups, and "ac_other"
    * refers to any user who doesn't fit these descriptions.
    *
-   * Each variable should be either 0, 1, 2, or 3. If it is 0, the user has no
-   * access to the entity. If it is 1, the user has read access to the entity.
-   * If it is 2, the user has read and write access to the entity. If it is 3,
-   * the user has read, write, and delete access to the entity.
+   * Each property should be either NO_ACCESS, READ_ACCESS, WRITE_ACCESS, or
+   * DELETE_ACCESS. If it is NO_ACCESS, the user has no access to the entity. If
+   * it is READ_ACCESS, the user has read access to the entity. If it is
+   * WRITE_ACCESS, the user has read and write access to the entity. If it is
+   * DELETE_ACCESS, the user has read, write, and delete access to the entity.
    *
    * AC properties defaults to:
    *
-   * - ac_user = 3
-   * - ac_group = 3
-   * - ac_other = 0
+   * - ac_user = Tilmeld::DELETE_ACCESS
+   * - ac_group = Tilmeld::READ_ACCESS
+   * - ac_other = Tilmeld::NO_ACCESS
    *
    * The following conditions will result in different checks, which determine
    * whether the check passes:
    *
    * - No user is logged in. (Check other AC.)
    * - The entity has no "user" and no "group". (Always true.)
-   * - The user has the "system/all" ability. (Always true.)
+   * - The user has the "system/admin" ability. (Always true.)
    * - The entity is the user. (Always true.)
    * - It is the user's primary group. (Always true.)
-   * - The entity is a user or group. (Always true.)
+   * - It is a user or group. (Always true.)
    * - Its "user" is the user. (It is owned by the user.) (Check user AC.)
    * - Its "group" is the user's primary group. (Check group AC.)
    * - Its "group" is one of the user's secondary groups. (Check group AC.)
@@ -120,14 +126,14 @@ class Tilmeld {
    * - None of the above. (Check other AC.)
    *
    * @param object &$entity The entity to check.
-   * @param int $type The lowest level of permission to consider a pass. 1 is read, 2 is write, 3 is delete.
+   * @param int $type The lowest level of permission to consider a pass. One of Tilmeld::READ_ACCESS, Tilmeld::WRITE_ACCESS, or Tilmeld::DELETE_ACCESS.
    * @return bool Whether the current user has at least $type permission for the entity.
    */
-  public static function checkPermissions(&$entity, $type = 1) {
+  public static function checkPermissions(&$entity, $type = Tilmeld::READ) {
     if ((object) $entity !== $entity) {
       return false;
     }
-    if (User::current(true)->gatekeeper('system/all')) {
+    if (User::current(true)->gatekeeper('system/admin')) {
       return true;
     }
     if (is_a($entity, '\Tilmeld\Entities\User') || is_a($entity, '\Tilmeld\Entities\Group')) {
@@ -140,11 +146,11 @@ class Tilmeld {
     }
 
     // Load access control, since we need it now...
-    $ac_user = $entity->ac_user ?? 3;
-    $ac_group = $entity->ac_group ?? 3;
-    $ac_other = $entity->ac_other ?? 0;
+    $ac_user = $entity->ac_user ?? Tilmeld::DELETE_ACCESS;
+    $ac_group = $entity->ac_group ?? Tilmeld::READ_ACCESS;
+    $ac_other = $entity->ac_other ?? Tilmeld::NO_ACCESS;
 
-    if (User::current() !== null) {
+    if (User::current() === null) {
       return ($ac_other >= $type);
     }
     if (is_callable([$entity->user, 'is']) && $entity->user->is(User::current())) {

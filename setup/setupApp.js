@@ -124,7 +124,9 @@ angular.module('setupApp', ['ngRoute'])
   };
 
   $scope.addSysAdminAbility = function(){
-    $scope.entity.data.abilities = ['system/all'];
+    if ($scope.entity.data.abilities.indexOf('system/admin') === -1){
+      $scope.entity.data.abilities.push('system/admin');
+    }
   };
 
   $scope.saveEntity = function(){
@@ -232,7 +234,9 @@ angular.module('setupApp', ['ngRoute'])
   };
 
   $scope.addSysAdminAbility = function(){
-    $scope.entity.data.abilities = ['system/all'];
+    if ($scope.entity.data.abilities.indexOf('system/admin') === -1){
+      $scope.entity.data.abilities.push('system/admin');
+    }
   };
 
   $scope.saveEntity = function(){

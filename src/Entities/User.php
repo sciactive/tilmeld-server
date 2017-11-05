@@ -370,7 +370,7 @@ class User extends AbleObject {
    * If $ability is null, it will check to see if the user is currently logged
    * in.
    *
-   * If the user has the "system/all" ability, this function will return true.
+   * If the user has the "system/admin" ability, this function will return true.
    *
    * @param string $ability The ability.
    * @return bool True or false.
@@ -401,7 +401,7 @@ class User extends AbleObject {
     if ((array) $abilities !== $abilities) {
       return false;
     }
-    return (in_array($ability, $abilities) || in_array('system/all', $abilities));
+    return (in_array($ability, $abilities) || in_array('system/admin', $abilities));
   }
 
   public function clearCache() {
@@ -812,12 +812,12 @@ class User extends AbleObject {
       $this->enabled = true;
     }
 
-    // If create_admin is true and there are no other users, grant "system/all".
+    // If create_admin is true and there are no other users, grant "system/admin".
     if (Tilmeld::$config['create_admin']) {
       $otherUsers = \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Entities\User', 'skip_ac' => true, 'limit' => 1));
       // Make sure it's not just null, cause that means an error.
       if ($otherUsers === array()) {
-        $this->grant('system/all');
+        $this->grant('system/admin');
         $this->enabled = true;
       }
     }

@@ -132,9 +132,4 @@ return (object) [
    * The maximum length for usernames. 0 for unlimited.
    */
   'max_username_length' => 0,
-  /*
-   * Groupname Max Length
-   * The maximum length for groupnames. 0 for unlimited.
-   */
-  'max_groupname_length' => 0,
 ];

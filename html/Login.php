@@ -124,7 +124,6 @@ $config = \Tilmeld\Entities\User::getClientConfig();
     </div>
     <div class="pf-element">
       <label><span class="pf-label">Password</span>
-        <?php echo ($config->pw_empty ? '<span class="pf-note">May be blank.</span>' : ''); ?>
         <input class="pf-field form-control" type="password" name="password" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
     </div>
     <?php if ($config->allow_registration) { ?>
@@ -133,13 +132,6 @@ $config = \Tilmeld\Entities\User::getClientConfig();
         <label><span class="pf-label">Re-enter Password</span>
           <input class="pf-field form-control" type="password" name="password2" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
       </div>
-      <?php if ($config->referral_codes) { ?>
-      <div class="pf-element">
-        <label><span class="pf-label">Referral Code</span>
-          <span class="pf-note">Optional</span>
-          <input class="pf-field form-control" type="text" name="referral_code" size="<?php echo ($this->style == 'small') ? '10' : '24'; ?>" /></label>
-      </div>
-      <?php } if ($config->one_step_registration) { ?>
       <div class="pf-element">
         <span class="pf-required">*</span> Required field.
       </div>
@@ -298,8 +290,7 @@ $config = \Tilmeld\Entities\User::getClientConfig();
             </span></label>
         </div>
       </div>
-      <?php	}
-      } ?>
+      <?php	} ?>
     </div>
     <?php } ?>
     <div class="pf-element<?php echo ($this->style == 'small') ? '' : ' pf-buttons'; ?>">
