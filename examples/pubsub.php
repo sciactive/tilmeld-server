@@ -2,20 +2,15 @@
 
 error_reporting(E_ALL);
 
+if (php_sapi_name() != "cli") {
+  die("You can only run pubsub.php from the command line.");
+}
+
 date_default_timezone_set('America/Los_Angeles');
 
 require __DIR__.'/../vendor/autoload.php';
 require __DIR__.'/../src/autoload.php';
-
-\Tilmeld\Tilmeld::configure();
-
-\Nymph\Nymph::configure([
-  'MySQL' => [
-    'database' => 'nymph_example',
-    'user' => 'nymph_example',
-    'password' => 'omgomg'
-  ]
-]);
+require __DIR__.'/config.php';
 
 $config = [];
 // If we're on production, bind to the given port.

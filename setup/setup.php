@@ -16,8 +16,7 @@ function is_secure() {
   return (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == '443');
 }
 
-?>
-<!DOCTYPE html>
+?><!DOCTYPE html>
 <html ng-app="setupApp">
   <head>
     <title>Tilmeld Setup App</title>
@@ -39,8 +38,8 @@ function is_secure() {
     <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib-umd/Nymph.js"></script>
     <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib-umd/Entity.js"></script>
     <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib-umd/PubSub.js"></script>
-    <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/User.js"></script>
-    <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Group.js"></script>
+    <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Entities/User.js"></script>
+    <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Entities/Group.js"></script>
 
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.js"></script>

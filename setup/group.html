@@ -204,5 +204,6 @@
   <div class="pf-element pf-full-width">
     <input class="btn btn-primary" type="submit" value="Save" />
     <span ng-if="success" class="label label-success">Successfully saved!</span>
+    <input class="btn btn-danger pull-right" type="button" value="Delete" ng-if="entity.guid" ng-click="deleteEntity()" />
   </div>
 </form>

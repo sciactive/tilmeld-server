@@ -62,7 +62,7 @@ return (object) [
    * users" secondary group(s) until they verify their email. If set to false,
    * their account will instead be disabled until they verify.
    */
-  'unverified_access' => false,
+  'unverified_access' => true,
   /*
    * Rate Limit User Email Changes
    * Don't let users change their email address more often than this. You can

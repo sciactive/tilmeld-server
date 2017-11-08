@@ -14,7 +14,7 @@
  *
  * @package Tilmeld
  */
-class VerifyEmailChange extends \uMailPHP\Entities\Definition {
+class VerifyEmailChange extends \uMailPHP\Definition {
   public static $cname = 'Verify Email Change';
   public static $description = 'This email is sent to a user\'s new email when they change their email to let them verify their new address.';
   public static $expectsRecipient = true;
@@ -34,6 +34,6 @@ class VerifyEmailChange extends \uMailPHP\Entities\Definition {
   }
 
   public static function getHTML() {
-    return file_get_contents(__DIR__.'/html/Mail/VerifyEmailChange.html');
+    return file_get_contents(__DIR__.'/html/VerifyEmailChange.html');
   }
 }

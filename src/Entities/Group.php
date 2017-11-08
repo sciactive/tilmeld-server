@@ -1,7 +1,7 @@
 <?php
 namespace Tilmeld\Entities;
 
-use \Tilmeld\Tilmeld as Tilmeld;
+use Tilmeld\Tilmeld as Tilmeld;
 
 /**
  * Group class.

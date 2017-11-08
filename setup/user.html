@@ -23,11 +23,11 @@
       <div style="float: right; text-align: right;">
         <a href="https://en.gravatar.com/" target="_blank">
           <span class="thumbnail pull-right">
-            <img ng-src="{{entity.info.avatar}}" alt="Avatar" title="Avatar by Gravatar" />
+            <img ng-src="{{avatar}}" alt="Avatar" title="Avatar by Gravatar" />
           </span>
         </a>
       </div>
-      <div class="pf-element" ng-if="!clientConfig.emailUsernames">
+      <div class="pf-element" ng-if="!clientConfig.email_usernames">
         <label>
           <span class="pf-label">Username</span>
           <span class="pf-group pf-full-width">
@@ -232,5 +232,6 @@
   <div class="pf-element pf-full-width">
     <input class="btn btn-primary" type="submit" value="Save" />
     <span ng-if="success" class="label label-success">Successfully saved!</span>
+    <input class="btn btn-danger pull-right" type="button" value="Delete" ng-if="entity.guid" ng-click="deleteEntity()" />
   </div>
 </form>

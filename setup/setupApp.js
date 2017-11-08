@@ -31,17 +31,31 @@ angular.module('setupApp', ['ngRoute'])
     emailVerifiedMessage: null,
     success: null
   };
-  $scope.entity = new User();
-  $scope.currentUser = null;
   $scope.primaryGroups = [];
   $scope.secondaryGroups = [];
 
-  User.current().then(function(user){
-    if (user) {
-      $scope.currentUser = user;
-      $scope.$apply();
+  function setup() {
+    $scope.entity = new User();
+    $scope.currentUser = null;
+    $scope.avatar = '//secure.gravatar.com/avatar/?d=mm&s=40';
+    User.current().then(function(user){
+      if (user) {
+        $scope.currentUser = user;
+        $scope.$apply();
+      }
+    });
+  }
+  setup();
+
+  $scope.$watch('entity.data.email', function() {
+    if ($scope.entity) {
+      $scope.entity.getAvatar().then(function(avatar) {
+        $scope.avatar = avatar;
+        $scope.$apply();
+      });
     }
   });
+
   User.getClientConfig().then(function(config){
     if (config) {
       $scope.clientConfig = config;
@@ -147,6 +161,17 @@ angular.module('setupApp', ['ngRoute'])
     });
   };
 
+  $scope.deleteEntity = function(){
+    if (confirm('Are you sure you want to delete this?')) {
+      $scope.entity.delete().then(function(){
+        setup();
+        $scope.$apply();
+      }, function(err){
+        alert("An error occurred: "+err.textStatus);
+      });
+    }
+  };
+
   $scope.checkNewEntity = function(){
     if (!$scope.entity) {
       $scope.entity = new User();
@@ -168,7 +193,11 @@ angular.module('setupApp', ['ngRoute'])
     emailVerifiedMessage: null,
     success: null
   };
-  $scope.entity = new Group();
+
+  function setup() {
+    $scope.entity = new Group();
+  }
+  setup();
 
   User.getClientConfig().then(function(config){
     if (config) {
@@ -253,6 +282,17 @@ angular.module('setupApp', ['ngRoute'])
     }, function(){
       alert("Error communicating data.");
     });
+  };
+
+  $scope.deleteEntity = function(){
+    if (confirm('Are you sure you want to delete this?')) {
+      $scope.entity.delete().then(function(){
+        setup();
+        $scope.$apply();
+      }, function(err){
+        alert("An error occurred: "+err.textStatus);
+      });
+    }
   };
 
   $scope.checkNewEntity = function(){

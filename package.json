@@ -6,8 +6,10 @@
     "example": "examples"
   },
   "scripts": {
-    "build": "babel -d lib/ src/Entities/",
-    "watch": "babel --watch -d lib/ src/Entities/",
+    "build": "npm run build-components && npm run build-entities",
+    "build-components": "svelte compile --format iife src/Components/TilmeldLogin.html > lib/Components/TilmeldLogin.js",
+    "build-entities": "babel -d lib/Entities/ src/Entities/",
+    "watch-entities": "babel --watch -d lib/Entities/ src/Entities/",
     "prepare": "npm run build",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -33,14 +35,15 @@
   "homepage": "https://github.com/sciactive/tilmeld#readme",
   "dependencies": {
     "nymph-client": "^2.2.0",
-    "pform": "^3.2.2",
-    "umailphp": "^2.0.0"
+    "pform": "^3.2.2"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
     "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
     "babel-preset-env": "^1.6.1",
-    "babel-preset-stage-3": "^6.24.1"
+    "babel-preset-stage-3": "^6.24.1",
+    "svelte-cli": "^1.4.0",
+    "umailphp": "^2.1"
   }
 }

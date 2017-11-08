@@ -1,8 +1,8 @@
 <?php
 namespace Tilmeld;
 
-use Entities\User as User;
-use Entities\Group as Group;
+use Tilmeld\Entities\User as User;
+use Tilmeld\Entities\Group as Group;
 
 /**
  * Tilmeld class.
@@ -30,7 +30,7 @@ class Tilmeld {
   /**
    * A copy of the Tilmeld config.
    *
-   * @var stdClass
+   * @var array
    * @access public
    */
   public static $config;
@@ -139,8 +139,8 @@ class Tilmeld {
     if (is_a($entity, '\Tilmeld\Entities\User') || is_a($entity, '\Tilmeld\Entities\Group')) {
       return true;
     }
-    if ((!isset($entity->user) || !isset($entity->user->guid)) &&
-        (!isset($entity->group) || !isset($entity->group->guid))
+    if ((!isset($entity->user) || !isset($entity->user->guid))
+        && (!isset($entity->group) || !isset($entity->group->guid))
       ) {
       return true;
     }
@@ -156,8 +156,8 @@ class Tilmeld {
     if (is_callable([$entity->user, 'is']) && $entity->user->is(User::current())) {
       return ($ac_user >= $type);
     }
-    if (is_callable([$entity->group, 'is']) &&
-        (
+    if (is_callable([$entity->group, 'is'])
+        && (
           $entity->group->is(User::current(true)->group) ||
           $entity->group->inArray(User::current(true)->groups) ||
           $entity->group->inArray($_SESSION['tilmeld_descendants'])
@@ -177,8 +177,9 @@ class Tilmeld {
    */
   public static function fillSession() {
     self::session('write');
-    if ((object) $_SESSION['tilmeld_user'] === $_SESSION['tilmeld_user'] &&
-        $_SESSION['tilmeld_user']->guid === $_SESSION['tilmeld_user_id']
+    if (isset($_SESSION['tilmeld_user'])
+        && (object) $_SESSION['tilmeld_user'] === $_SESSION['tilmeld_user']
+        && $_SESSION['tilmeld_user']->guid === $_SESSION['tilmeld_user_id']
       ) {
       $tmp_user = \Nymph\Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\User'],
@@ -219,21 +220,6 @@ class Tilmeld {
   }
 
   /**
-   * Sort an array of groups hierarchically.
-   *
-   * An additional property of the groups can be used to sort them under their
-   * parents.
-   *
-   * @param array &$array The array of groups.
-   * @param string|null $property The name of the property to sort groups by. Null for no additional sorting.
-   * @param bool $caseSensitive Sort case sensitively.
-   * @param bool $reverse Reverse the sort order.
-   */
-  public static function groupSort(&$array, $property = null, $caseSensitive = false, $reverse = false) {
-    \Nymph\Nymph::hsort($array, $property, 'parent', $caseSensitive, $reverse);
-  }
-
-  /**
    * Logs the given user into the system.
    *
    * @param \Tilmeld\Entities\User $user The user.
@@ -259,8 +245,6 @@ class Tilmeld {
     self::session('write');
     unset($_SESSION['tilmeld_user_id']);
     unset($_SESSION['tilmeld_user']);
-    // We're changing users, so clear the gatekeeper cache.
-    self::$gatekeeperCache = [];
     self::session('destroy');
   }
 
@@ -290,28 +274,57 @@ class Tilmeld {
    * @param string $option The type of access or action requested.
    */
   public static function session($option = 'read') {
+    if (session_status() === PHP_SESSION_DISABLED) {
+      throw Exception('Sessions are disabled!');
+    }
     switch ($option) {
       case 'read':
       default:
-        if (isset($_SESSION['tilmeld_session_access'])) {
+        if ((
+              isset($_SESSION)
+              && isset($_SESSION['tilmeld_session_access'])
+              && $_SESSION['tilmeld_session_access']
+            )
+            || session_status() === PHP_SESSION_ACTIVE) {
           return;
         }
         if (session_start()) {
-          $_SESSION['tilmeld_session_access'] = true;
-          @session_write_close();
+          session_write_close();
         }
         break;
       case 'write':
-        session_start();
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+          session_start();
+        }
         $_SESSION['tilmeld_session_access'] = true;
         break;
       case 'close':
-        @session_write_close();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+          session_write_close();
+        }
         break;
       case 'destroy':
-        @session_unset();
-        @session_destroy();
+        if (session_status() === PHP_SESSION_ACTIVE) {
+          session_unset();
+          session_destroy();
+          session_write_close();
+        }
         break;
     }
+  }
+
+  /**
+   * Sort an array of groups hierarchically.
+   *
+   * An additional property of the groups can be used to sort them under their
+   * parents.
+   *
+   * @param array &$array The array of groups.
+   * @param string|null $property The name of the property to sort groups by. Null for no additional sorting.
+   * @param bool $caseSensitive Sort case sensitively.
+   * @param bool $reverse Reverse the sort order.
+   */
+  public static function groupSort(&$array, $property = null, $caseSensitive = false, $reverse = false) {
+    \Nymph\Nymph::hsort($array, $property, 'parent', $caseSensitive, $reverse);
   }
 }

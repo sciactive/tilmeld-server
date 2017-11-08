@@ -14,7 +14,7 @@
  *
  * @package Tilmeld
  */
-class UserRegistered extends \uMailPHP\Entities\Definition {
+class UserRegistered extends \uMailPHP\Definition {
   public static $cname = 'New User Registered';
   public static $description = 'This email is sent when a new user registers himself on the site.';
   public static $expectsRecipient = false;
@@ -36,6 +36,6 @@ class UserRegistered extends \uMailPHP\Entities\Definition {
   }
 
   public static function getHTML() {
-    return file_get_contents(__DIR__.'/html/Mail/UserRegistered.html');
+    return file_get_contents(__DIR__.'/html/UserRegistered.html');
   }
 }

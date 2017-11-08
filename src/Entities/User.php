@@ -1,7 +1,7 @@
 <?php
 namespace Tilmeld\Entities;
 
-use \Tilmeld\Tilmeld as Tilmeld;
+use Tilmeld\Tilmeld as Tilmeld;
 
 /**
  * User class.
@@ -42,11 +42,11 @@ class User extends AbleObject {
     'getAvatar',
     'register',
     'logout',
-    'login',
     'recover',
   ];
   public static $clientEnabledStaticMethods = [
     'current',
+    'loginUser',
     'getClientConfig',
   ];
   protected $privateData = [
@@ -75,7 +75,6 @@ class User extends AbleObject {
   ];
   protected $whitelistData = [];
   protected $whitelistTags = [];
-  protected $clientClassName = 'User';
 
   /**
    * Gatekeeper ability cache.
@@ -270,6 +269,8 @@ class User extends AbleObject {
     if (!isset($this->username)) {
       return false;
     }
+
+    $sendVerification = false;
 
     // Formatting.
     $this->username = trim($this->username);
@@ -772,13 +773,13 @@ class User extends AbleObject {
 
   public function register($data) {
     if (!Tilmeld::$config['allow_registration']) {
-      return ['result' => false, 'message' => 'Registration is not allowed.'];
+      return ['result' => false, 'loggedin' => false, 'message' => 'Registration is not allowed.'];
     }
     if (isset($this->guid)) {
-      return ['result' => false, 'message' => 'This is already a registered user.'];
+      return ['result' => false, 'loggedin' => false, 'message' => 'This is already a registered user.'];
     }
     if (empty($data['password'])) {
-      return ['result' => false, 'message' => 'Password is a required field.'];
+      return ['result' => false, 'loggedin' => false, 'message' => 'Password is a required field.'];
     }
     $unCheck = $this->checkUsername();
     if (!$unCheck['result']) {
@@ -788,6 +789,9 @@ class User extends AbleObject {
     $this->password($data['password']);
     if (in_array('name', Tilmeld::$config['reg_fields'])) {
       $this->name = $this->nameFirst.(!empty($this->nameMiddle) ? ' '.$this->nameMiddle : '').(!empty($this->nameLast) ? ' '.$this->nameLast : '');
+      if ($this->name === '') {
+        $this->name = $this->username;
+      }
     }
     if (Tilmeld::$config['email_usernames']) {
       $this->email = $this->username;
@@ -838,16 +842,19 @@ class User extends AbleObject {
       $mail->send();
       if (Tilmeld::$config['verify_email'] && !Tilmeld::$config['unverified_access']) {
         $message = "Almost there. An email has been sent to {$this->email} with a verification link for you to finish registration.";
+        $loggedin = false;
       } elseif (Tilmeld::$config['verify_email'] && Tilmeld::$config['unverified_access']) {
         Tilmeld::login($this);
         $message = "You're now logged in! An email has been sent to {$this->email} with a verification link for you to finish registration.";
+        $loggedin = true;
       } else {
         Tilmeld::login($this);
         $message = 'You\'re now registered and logged in!';
+        $loggedin = true;
       }
-      return ['result' => true, 'message' => $message];
+      return ['result' => true, 'loggedin' => $loggedin, 'message' => $message];
     } else {
-      return ['result' => false, 'message' => 'Error registering user.'];
+      return ['result' => false, 'loggedin' => false, 'message' => 'Error registering user.'];
     }
   }
 
@@ -860,9 +867,21 @@ class User extends AbleObject {
     return ['result' => true, 'message' => 'You have been logged out.'];
   }
 
+  public static function loginUser($data) {
+    if (!isset($data['username'])) {
+      return ['result' => false, 'message' => 'Incorrect login/password.'];
+    }
+    $user = User::factory($data['username']);
+    $result = $user->login($data);
+    if ($result['result']) {
+      $result['user'] = $user;
+    }
+    return $result;
+  }
+
   public function login($data) {
     if (!isset($this->guid)) {
-      return ['result' => false, 'message' => 'This is not a registered user.'];
+      return ['result' => false, 'message' => 'Incorrect login/password.'];
     }
     if (!$this->enabled) {
       return ['result' => false, 'message' => 'This user is disabled.'];
@@ -880,7 +899,7 @@ class User extends AbleObject {
     }
 
     // Login was successful.
-    return ['result' => true];
+    return ['result' => true, 'message' => 'Successfully logged in.'];
   }
 
   /**

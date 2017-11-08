@@ -14,7 +14,7 @@
  *
  * @package Tilmeld
  */
-class RecoverAccount extends \uMailPHP\Entities\Definition {
+class RecoverAccount extends \uMailPHP\Definition {
   public static $cname = 'Recover Account';
   public static $description = 'This email is sent when a user can\'t access their account so they can recover their username and/or password.';
   public static $expectsRecipient = true;
@@ -34,6 +34,6 @@ class RecoverAccount extends \uMailPHP\Entities\Definition {
   }
 
   public static function getHTML() {
-    return file_get_contents(__DIR__.'/html/Mail/RecoverAccount.html');
+    return file_get_contents(__DIR__.'/html/RecoverAccount.html');
   }
 }

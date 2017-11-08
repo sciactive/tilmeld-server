@@ -36,7 +36,7 @@
 		"sciactive/hookphp": "~2.0",
 		"sciactive/nymph-server": "~2.2",
 		"sciactive/nymph-pubsub": "~2.2",
-		"sciactive/umailphp": "~2.0"
+		"sciactive/umailphp": "~2.1"
 	},
 	"minimum-stability": "dev"
 }

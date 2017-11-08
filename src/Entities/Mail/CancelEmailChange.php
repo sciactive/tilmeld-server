@@ -14,7 +14,7 @@
  *
  * @package Tilmeld
  */
-class CancelEmailChange extends \uMailPHP\Entities\Definition {
+class CancelEmailChange extends \uMailPHP\Definition {
   public static $cname = 'Cancel Email Change';
   public static $description = 'This email is sent to a user\'s old email when they change their email to let them cancel their change.';
   public static $expectsRecipient = true;
@@ -34,6 +34,6 @@ class CancelEmailChange extends \uMailPHP\Entities\Definition {
   }
 
   public static function getHTML() {
-    return file_get_contents(__DIR__.'/html/Mail/CancelEmailChange.html');
+    return file_get_contents(__DIR__.'/html/CancelEmailChange.html');
   }
 }

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "ac06fcb9600bf5669116a08227237e80",
+    "content-hash": "20268a51bc8bce6a164baa6d53082156",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -966,16 +966,16 @@
         },
         {
             "name": "sciactive/umailphp",
-            "version": "2.0.0",
+            "version": "2.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/umailphp.git",
-                "reference": "0d0c69c2ccd7bd882aa7d053133aa48e6ca9d3f1"
+                "reference": "9119d26a36d0075e14b1ea1c6ec6a71d205c3a1a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/umailphp/zipball/0d0c69c2ccd7bd882aa7d053133aa48e6ca9d3f1",
-                "reference": "0d0c69c2ccd7bd882aa7d053133aa48e6ca9d3f1",
+                "url": "https://api.github.com/repos/sciactive/umailphp/zipball/9119d26a36d0075e14b1ea1c6ec6a71d205c3a1a",
+                "reference": "9119d26a36d0075e14b1ea1c6ec6a71d205c3a1a",
                 "shasum": ""
             },
             "require": {
@@ -1009,7 +1009,7 @@
                 "email",
                 "templating"
             ],
-            "time": "2017-11-03T00:00:00+00:00"
+            "time": "2017-11-07T00:00:00+00:00"
         },
         {
             "name": "symfony/http-foundation",
@@ -1017,12 +1017,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "27b79f3d0a21a56a0cea79dda47e49c544acfd65"
+                "reference": "24068b1c8b5f330654b4ef5a95646a1a658171ea"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/27b79f3d0a21a56a0cea79dda47e49c544acfd65",
-                "reference": "27b79f3d0a21a56a0cea79dda47e49c544acfd65",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/24068b1c8b5f330654b4ef5a95646a1a658171ea",
+                "reference": "24068b1c8b5f330654b4ef5a95646a1a658171ea",
                 "shasum": ""
             },
             "require": {
@@ -1063,7 +1063,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2017-10-31T15:19:40+00:00"
+            "time": "2017-11-05T19:07:09+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",
@@ -1189,12 +1189,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/routing.git",
-                "reference": "ea20b62d5586a4c83f31dffff7b206eaa65ef32f"
+                "reference": "78e46a29ea0a76f8a63b5aecde17270c36542d7b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/routing/zipball/ea20b62d5586a4c83f31dffff7b206eaa65ef32f",
-                "reference": "ea20b62d5586a4c83f31dffff7b206eaa65ef32f",
+                "url": "https://api.github.com/repos/symfony/routing/zipball/78e46a29ea0a76f8a63b5aecde17270c36542d7b",
+                "reference": "78e46a29ea0a76f8a63b5aecde17270c36542d7b",
                 "shasum": ""
             },
             "require": {
@@ -1259,7 +1259,7 @@
                 "uri",
                 "url"
             ],
-            "time": "2017-10-24T14:12:06+00:00"
+            "time": "2017-11-07T14:20:24+00:00"
         },
         {
             "name": "textalk/websocket",

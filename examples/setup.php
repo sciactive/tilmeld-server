@@ -6,8 +6,7 @@ date_default_timezone_set('America/Los_Angeles');
 
 include __DIR__.'/../vendor/autoload.php';
 include __DIR__.'/../src/autoload.php';
-
-\Tilmeld\Tilmeld::configure();
+require __DIR__.'/config.php';
 
 // This is how you enter the setup app.
 $tilmeldURL = '../'; // This is the URL of the Tilmeld root.
