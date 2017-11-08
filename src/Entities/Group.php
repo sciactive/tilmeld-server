@@ -109,7 +109,8 @@ class Group extends AbleObject {
       $this->whitelistData = false;
       return;
     }
-    if ($this->is(User::current())) {
+    $currentUser = User::current();
+    if ($this->is($currentUser)) {
       // Users can see their own data, and edit some of it.
       $this->whitelistData[] = 'username';
       if (in_array('name', Tilmeld::$config['user_fields'])) {

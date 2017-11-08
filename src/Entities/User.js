@@ -47,11 +47,11 @@ export default class User extends Entity {
   logout(...args) {
     return this.serverCall('logout', args).then((data) => {
       if (data.result) {
-        for (const callback in User.logoutCallbacks) {
+        for (const callback of User.logoutCallbacks) {
           callback();
         }
       }
-      return data;
+      return Promise.resolve(data);
     });
   }
 
@@ -65,18 +65,30 @@ export default class User extends Entity {
 
   // === Static Methods ===
 
-  static current(returnObjectIfNotExist) {
-    return User.serverCallStatic('current', [returnObjectIfNotExist]);
+  static current(...args) {
+    return User.serverCallStatic('current', args).then((data) => {
+      if (data) {
+        const user = new User();
+        user.init(data)
+        data = user;
+      }
+      return Promise.resolve(data);
+    });
   }
 
   static loginUser(...args) {
     return User.serverCallStatic('loginUser', args).then((data) => {
+      if (data.user) {
+        const user = new User();
+        user.init(data.user)
+        data.user = user;
+      }
       if (data.result) {
-        for (const callback in User.loginCallbacks) {
+        for (const callback of User.loginCallbacks) {
           callback(data.user);
         }
       }
-      return data;
+      return Promise.resolve(data);
     });
   }
 

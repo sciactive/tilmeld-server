@@ -176,6 +176,10 @@ class Tilmeld {
    * This must be called at the i11 position in the init script processing.
    */
   public static function fillSession() {
+    // First load the hook classes for user and group.
+    $user = User::factory();
+    $group = Group::factory();
+
     self::session('write');
     if (isset($_SESSION['tilmeld_user'])
         && (object) $_SESSION['tilmeld_user'] === $_SESSION['tilmeld_user']
@@ -215,7 +219,7 @@ class Tilmeld {
         $_SESSION['tilmeld_inherited_abilities'] = array_merge($_SESSION['tilmeld_inherited_abilities'], $tmp_user->group->abilities);
       }
     }
-    $_SESSION['tilmeld_user'] = $tmp_user;
+    $_SESSION['tilmeld_user'] = is_a($tmp_user, 'SciActive\\HookOverride') ? $tmp_user->_hookObject() : $tmp_user;
     self::session('close');
   }
 

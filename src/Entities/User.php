@@ -106,6 +106,7 @@ class User extends AbleObject {
         if (!isset($this->secret) && (!isset($this->emailChangeDate) || $this->emailChangeDate < strtotime('-'.Tilmeld::$config['email_rate_limit']))) {
           $this->originalEmail = $this->email;
         }
+        $this->updateDataProtection();
         return;
       }
     }

@@ -46,7 +46,7 @@ function is_secure() {
 </head>
 <body>
   <div>
-    Currently logged in user: <pre class="currentuser"></pre>
+    Currently logged in user: <button onclick="logout()">Logout</button> <pre class="currentuser"></pre>
   </div>
   <div class="login-container">
     <div class="login">
@@ -88,7 +88,8 @@ function is_secure() {
   </div>
 
   <script>
-    const currentUser = document.querySelector('.currentuser');
+    let currentUser = null;
+    const currentUserEl = document.querySelector('.currentuser');
     const logins = document.getElementsByTagName('login');
     const User = window.User.default;
 
@@ -115,18 +116,27 @@ function is_secure() {
 
     User.current().then(user => {
       if (user) {
-        currentUser.innerText = JSON.stringify(user);
+        currentUser = user;
+        currentUserEl.innerText = JSON.stringify(user);
       } else {
-        currentUser.innerText = 'none';
+        currentUserEl.innerText = 'none';
       }
     });
 
     User.on('login', user => {
-      currentUser.innerText = JSON.stringify(user);
+      currentUser = user;
+      currentUserEl.innerText = JSON.stringify(user);
     });
     User.on('logout', () => {
-      currentUser.innerText = 'none';
-    })
+      currentUser = null;
+      currentUserEl.innerText = 'none';
+    });
+
+    function logout() {
+      if (currentUser) {
+        currentUser.logout();
+      }
+    }
   </script>
 
   <style>
@@ -136,7 +146,7 @@ function is_secure() {
       justify-content: space-around;
     }
 
-    .registerevent, .loginevent {
+    .currentuser, .registerevent, .loginevent {
       max-width: 200px;
       overflow: auto;
     }
