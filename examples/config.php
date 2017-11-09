@@ -57,4 +57,6 @@ if (getenv('NYMPH_PRODUCTION')) {
 
 // Tilmeld's configuration.
 
-\Tilmeld\Tilmeld::configure();
+\Tilmeld\Tilmeld::configure([
+  'email_usernames' => false
+]);

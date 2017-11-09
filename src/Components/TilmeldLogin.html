@@ -35,7 +35,7 @@
       </div>
     {{else}}
       <form ref:form onsubmit="return false;" class="login-dialog pf-form {{layout === 'small' ? 'pf-layout-block' : ''}}">
-        {{#if __clientConfig.allow_registration}}
+        {{#if __clientConfig.allow_registration && showExistingUserCheckbox}}
           <div class="pf-element">
             <span class="{{layout !== 'small' ? 'pf-group' : ''}}" style="display: {{layout !== 'small' ? 'block' : 'in-line'}};">
               <label><input class="pf-field" type="checkbox" bind:checked="existingUser" /> I have an account.</label>
@@ -87,7 +87,7 @@
           {{#if !__clientConfig.email_usernames && __clientConfig.reg_fields.indexOf('email') !== -1}}
             <div class="pf-element">
               <label>
-                <span class="pf-label">Email <span class="pf-required">*</span></span>
+                <span class="pf-label">Email</span>
                 <input class="pf-field" bind:value="email" type="email" name="email" size="24" />
               </label>
             </div>
@@ -183,7 +183,7 @@
             {{#if layout !== 'small'}}
               <span class="pf-label" style="height: 1px;">&nbsp;</span>
             {{/if}}
-            <a class="pf-field" href="javascript:void(0);" on:click="openAccountRecovery()">I can&apos;t access my account.</a>
+            <TilmeldRecover account="{{username}}"></TilmeldRecover>
           </div>
         {{/if}}
       </form>
@@ -194,6 +194,7 @@
 <script>
   import Nymph from 'Nymph';
   import User from 'User';
+  import TilmeldRecover from './TilmeldRecover.html';
 
   export default {
     oncreate () {
@@ -207,7 +208,7 @@
         }
       });
 
-      this.observe('username', (newValue, oldValue) => {
+      const checkUsername = (newValue, oldValue) => {
         if (newValue === oldValue) {
           return;
         }
@@ -232,7 +233,7 @@
           user.checkUsername().then((data) => {
             this.set({
               __usernameVerified: data.result,
-              __usernameVerifiedMessage: data.message
+              __usernameVerifiedMessage: data.result ? '' : data.message
             });
           }, () => {
             this.set({
@@ -242,16 +243,25 @@
           });
         }, 400);
         this.set({__usernameTimer});
+      };
+
+      this.observe('existingUser', value => {
+        if (!value) {
+          checkUsername(this.get('username'));
+        }
       });
+
+      this.observe('username', checkUsername);
     },
 
     data () {
       return {
         layout: 'normal', // 'normal', 'small', or 'compact'
-        compactText: 'Login/Register', // The text used to toggle the dialog when 'compact' layout is selected.
+        compactText: 'Log in/Sign up', // The text used to toggle the dialog when 'compact' layout is selected.
         hideRecovery: false, // Hide the recovery link that only appears if password recovery is on.
         autofocus: true, // Give focus to the username box (or email box) when the form is ready.
-        existingUser: false, // This determines whether the 'I have an account.' box is checked and the registration form is shown.
+        existingUser: true, // This determines whether the 'I have an account.' box is checked and the registration form is shown.
+        showExistingUserCheckbox: true, // Whether to show the 'I have an account.' box.
         states: [ // The states available when address type is US.
           ['AL', 'Alabama'],
           ['AK', 'Alaska'],
@@ -437,12 +447,11 @@
           alert('An error occurred.');
           this.set({'__registering': false});
         });
-      },
-
-      openAccountRecovery() {
-        // TODO(hperrin): Implement an AJAX account recovery.
-        console.log('not implemented.');
       }
+    },
+
+    components: {
+      TilmeldRecover
     }
   }
 </script>

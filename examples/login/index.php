@@ -40,49 +40,68 @@ function is_secure() {
   <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib-umd/PubSub.js"></script>
   <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Entities/User.js"></script>
   <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Entities/Group.js"></script>
+  <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Components/TilmeldRecover.js"></script>
   <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Components/TilmeldLogin.js"></script>
 
   <link rel="stylesheet" href="<?php echo htmlspecialchars($sciactiveBaseURL); ?>pform/css/pform.css">
 </head>
 <body>
-  <div>
-    Currently logged in user: <button onclick="logout()">Logout</button> <pre class="currentuser"></pre>
-  </div>
-  <div class="login-container">
-    <div class="login">
-      <h2>Login (Normal Layout)</h2>
-      <hr />
-      <login data-layout="normal"></login>
-      <hr />
-      <div>
-        Register event: <pre class="registerevent"></pre>
+  <section class="container">
+    <div>
+      Currently logged in user: <button onclick="logout()">Logout</button> <pre class="currentuser"></pre>
+    </div>
+    <div class="login-row">
+      <div class="login-container">
+        <h2>Login (Normal Layout)</h2>
+        <login data-layout="normal" data-show-existing-user-checkbox="true" data-existing-user="true" data-compact-text="Log in/Sign up"></login>
+        <div>
+          Register event: <pre class="registerevent"></pre>
+        </div>
+        <div>
+          Login event: <pre class="loginevent"></pre>
+        </div>
       </div>
-      <div>
-        Login event: <pre class="loginevent"></pre>
+      <div class="login-container">
+        <h2>Login (Small Layout)</h2>
+        <login data-layout="small" data-show-existing-user-checkbox="true" data-existing-user="true" data-compact-text="Log in/Sign up"></login>
+        <div>
+          Register event: <pre class="registerevent"></pre>
+        </div>
+        <div>
+          Login event: <pre class="loginevent"></pre>
+        </div>
       </div>
     </div>
-    <div class="login">
-      <h2>Login (Small Layout)</h2>
-      <hr />
-      <login data-layout="small"></login>
-      <hr />
-      <div>
-        Register event: <pre class="registerevent"></pre>
+    <div class="login-row">
+      <div class="login-container">
+        <h2>Login (Compact Layout)</h2>
+        <login data-layout="compact" data-show-existing-user-checkbox="true" data-existing-user="true" data-compact-text="Log in/Sign up"></login>
+        <div>
+          Register event: <pre class="registerevent"></pre>
+        </div>
+        <div>
+          Login event: <pre class="loginevent"></pre>
+        </div>
       </div>
-      <div>
-        Login event: <pre class="loginevent"></pre>
+      <div class="login-container">
+        <h2>Login (Compact Layout, Only Login)</h2>
+        <login data-layout="compact" data-show-existing-user-checkbox="false" data-existing-user="true" data-compact-text="Log in"></login>
+        <div>
+          Register event: <pre class="registerevent"></pre>
+        </div>
+        <div>
+          Login event: <pre class="loginevent"></pre>
+        </div>
       </div>
-    </div>
-    <div class="login">
-      <h2>Login (Compact Layout)</h2>
-      <hr />
-      <login data-layout="compact"></login>
-      <hr />
-      <div>
-        Register event: <pre class="registerevent"></pre>
-      </div>
-      <div>
-        Login event: <pre class="loginevent"></pre>
+      <div class="login-container">
+        <h2>Login (Compact Layout, Only Register)</h2>
+        <login data-layout="compact" data-show-existing-user-checkbox="false" data-existing-user="false" data-compact-text="Sign up"></login>
+        <div>
+          Register event: <pre class="registerevent"></pre>
+        </div>
+        <div>
+          Login event: <pre class="loginevent"></pre>
+        </div>
       </div>
     </div>
   </div>
@@ -98,7 +117,9 @@ function is_secure() {
         target: login,
         data: {
           autofocus: false,
-          existingUser: true,
+          compactText: login.dataset.compactText,
+          existingUser: login.dataset.existingUser === "true",
+          showExistingUserCheckbox: login.dataset.showExistingUserCheckbox === "true",
           layout: login.dataset.layout
         }
       });
@@ -140,10 +161,34 @@ function is_secure() {
   </script>
 
   <style>
-    .login-container {
+    .container {
+      width: 100%;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .login-row {
       display: flex;
       align-items: flex-start;
-      justify-content: space-around;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .login-container {
+      flex-grow: 1;
+      padding: 20px;
+    }
+
+    login {
+      border-top: 1px solid black;
+      border-bottom: 1px solid black;
+      display: flex;
+      padding-top: 2em;
+    }
+
+    login[data-layout="compact"] {
+      padding-top: 1em;
+      padding-bottom: 1em;
     }
 
     .currentuser, .registerevent, .loginevent {

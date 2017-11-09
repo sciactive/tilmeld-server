@@ -7,7 +7,9 @@
   },
   "scripts": {
     "build": "npm run build-components && npm run build-entities",
-    "build-components": "svelte compile --format iife src/Components/TilmeldLogin.html > lib/Components/TilmeldLogin.js",
+    "build-components": "npm run build-login && npm run build-recover",
+    "build-login": "svelte compile --format iife src/Components/TilmeldLogin.html > lib/Components/TilmeldLogin.js",
+    "build-recover": "svelte compile --format iife src/Components/TilmeldRecover.html > lib/Components/TilmeldRecover.js",
     "build-entities": "babel -d lib/Entities/ src/Entities/",
     "watch-entities": "babel --watch -d lib/Entities/ src/Entities/",
     "prepare": "npm run build",
@@ -35,7 +37,7 @@
   "homepage": "https://github.com/sciactive/tilmeld#readme",
   "dependencies": {
     "nymph-client": "^2.2.0",
-    "pform": "^3.2.2"
+    "pform": "^3.3.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

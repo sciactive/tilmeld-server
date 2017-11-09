@@ -43,6 +43,7 @@ class User extends AbleObject {
     'register',
     'logout',
     'recover',
+    'sendEmailVerification',
   ];
   public static $clientEnabledStaticMethods = [
     'current',
@@ -305,12 +306,20 @@ class User extends AbleObject {
           $sendVerification = true;
         } elseif ($this->email !== $this->originalEmail) {
           // The user already has an old email address.
-          if (Tilmeld::$config['email_rate_limit'] !== '' && isset($this->emailChangeDate) && $this->emailChangeDate > strtotime('-'.Tilmeld::$config['email_rate_limit'])) {
-            throw new Exceptions\EmailChangeRateLimitExceededException('You already changed your email address recently. Please wait until '.\uMailPHP\Mail::formatDate(strtotime('+'.Tilmeld::$config['email_rate_limit'], $this->emailChangeDate), 'full_short').' to change your email address again.');
+          if (
+              Tilmeld::$config['email_rate_limit'] !== ''
+              && isset($this->emailChangeDate)
+              && $this->emailChangeDate > strtotime('-'.Tilmeld::$config['email_rate_limit'])
+            ) {
+            throw new Exceptions\EmailChangeRateLimitExceededException(
+                'You already changed your email address recently. Please wait until ' .
+                \uMailPHP\Mail::formatDate(strtotime('+'.Tilmeld::$config['email_rate_limit'], $this->emailChangeDate), 'full_short') .
+                ' to change your email address again.'
+            );
             //$this->email = $this->originalEmail;
           } else {
-            if (!isset($this->secret) &&
-                (
+            if (!isset($this->secret)
+                && (
                   // Make sure the user has at least the rate
                   // limit time to cancel an email change.
                   !isset($this->emailChangeDate) ||
@@ -719,7 +728,11 @@ class User extends AbleObject {
    */
   public function checkEmail() {
     if (empty($this->email)) {
-      return ['result' => false, 'message' => 'Please specify an email.'];
+      if (Tilmeld::$config['verify_email']) {
+        return ['result' => false, 'message' => 'Please specify an email.'];
+      } else {
+        return ['result' => true, 'message' => ''];
+      }
     }
     if (!preg_match('/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i', $this->email)) {
       return ['result' => false, 'message' => 'Email must be a correctly formatted address.'];

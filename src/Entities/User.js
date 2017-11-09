@@ -8,6 +8,7 @@ export default class User extends Entity {
   static etype = "tilmeld_user";
   // The name of the server class
   static class = "Tilmeld\\Entities\\User";
+  static registerCallbacks = [];
   static loginCallbacks = [];
   static logoutCallbacks = [];
 
@@ -41,7 +42,19 @@ export default class User extends Entity {
   }
 
   register(...args) {
-    return this.serverCall('register', args);
+    return this.serverCall('register', args).then((data) => {
+      if (data.result) {
+        for (const callback of User.registerCallbacks) {
+          callback(this);
+        }
+      }
+      if (data.loggedin) {
+        for (const callback of User.loginCallbacks) {
+          callback(this);
+        }
+      }
+      return Promise.resolve(data);
+    });
   }
 
   logout(...args) {
@@ -97,7 +110,9 @@ export default class User extends Entity {
   }
 
   static on(eventType, callback) {
-    if (eventType === 'login') {
+    if (eventType === 'register') {
+      User.registerCallbacks.push(callback);
+    } else if (eventType === 'login') {
       User.loginCallbacks.push(callback);
     } else if (eventType === 'logout') {
       User.logoutCallbacks.push(callback);
