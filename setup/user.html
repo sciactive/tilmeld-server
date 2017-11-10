@@ -96,7 +96,8 @@
       <div class="pf-element">
         <label>
           <span class="pf-label">Primary Group</span>
-          <select class="pf-field form-control" name="group" ng-options="group as group.name+' ('+group.groupname+')' for group in primaryGroups track by group.guid" ng-model="entity.data.group">
+          <!-- TODO(hperrin): This isn't working. Fix it. -->
+          <select class="pf-field form-control" name="group" ng-options="group as group.data.name+' ('+group.data.groupname+')' for group in primaryGroups track by group.guid" ng-model="entity.data.group">
             <option value="">- No Primary Group -</option>
           </select>
         </label>
@@ -105,7 +106,7 @@
         <label>
           <span class="pf-label">Groups
             <span class="pf-note">Use CTRL (CMD on Mac) to select multiple.</span></span>
-          <select class="pf-field form-control" name="groups" multiple="true" size="12" ng-options="group as group.name+' ('+group.groupname+')' for group in secondaryGroups track by group.guid" ng-model="entity.data.groups" style="min-width: 200px;"></select>
+          <select class="pf-field form-control" name="groups" multiple="true" size="12" ng-options="group as group.data.name+' ('+group.data.groupname+')' for group in secondaryGroups track by group.guid" ng-model="entity.data.groups" style="min-width: 200px;"></select>
         </label>
       </div>
       <br class="pf-clearing" />

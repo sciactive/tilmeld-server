@@ -56,6 +56,7 @@ class Group extends AbleObject {
     'addressZip',
     'addressInternational',
     'abilities',
+    'user',
   ];
   protected $whitelistData = [];
   protected $whitelistTags = [];
@@ -64,8 +65,9 @@ class Group extends AbleObject {
    * Load a group.
    *
    * @param int $id The ID of the group to load, 0 for a new group.
+   * @param bool $skipUpdateDataProtectionOnNewEntity Used to load the session.
    */
-  public function __construct($id = 0) {
+  public function __construct($id = 0, $skipUpdateDataProtectionOnNewEntity = false) {
     if ($id > 0 || (string) $id === $id) {
       if ((int) $id === $id) {
         $entity = \Nymph\Nymph::getEntity(['class' => get_class($this)], ['&', 'guid' => $id]);
@@ -83,7 +85,9 @@ class Group extends AbleObject {
     $this->enabled = true;
     $this->abilities = [];
     $this->addressType = 'us';
-    $this->updateDataProtection();
+    if (!$skipUpdateDataProtectionOnNewEntity) {
+      $this->updateDataProtection();
+    }
   }
 
   /**
@@ -133,6 +137,7 @@ class Group extends AbleObject {
         }
       }
     }
+    return $secondaryGroups;
   }
 
   public function getAvatar() {
@@ -153,40 +158,14 @@ class Group extends AbleObject {
     if (Tilmeld::$config['email_usernames']) {
       $this->privateData[] = 'groupname';
     }
-    if (User::current(true)->gatekeeper('tilmeld/editgroups')) {
+    if (User::current(true)->gatekeeper('tilmeld/admin')) {
       // Users who can edit groups can see their data.
       $this->privateData = [];
       $this->whitelistData = false;
       return;
     }
-    $currentUser = User::current();
-    if ($this->is($currentUser)) {
-      // Users can see their own data, and edit some of it.
-      $this->whitelistData[] = 'username';
-      if (in_array('name', Tilmeld::$config['user_fields'])) {
-        $this->whitelistData[] = 'nameFirst';
-        $this->whitelistData[] = 'nameMiddle';
-        $this->whitelistData[] = 'nameLast';
-        $this->whitelistData[] = 'name';
-      }
-      if (in_array('email', Tilmeld::$config['user_fields'])) {
-        $this->whitelistData[] = 'email';
-      }
-      if (in_array('phone', Tilmeld::$config['user_fields'])) {
-        $this->whitelistData[] = 'phone';
-      }
-      if (in_array('timezone', Tilmeld::$config['user_fields'])) {
-        $this->whitelistData[] = 'timezone';
-      }
-      if (in_array('address', Tilmeld::$config['user_fields'])) {
-        $this->whitelistData[] = 'addressType';
-        $this->whitelistData[] = 'addressStreet';
-        $this->whitelistData[] = 'addressStreet2';
-        $this->whitelistData[] = 'addressCity';
-        $this->whitelistData[] = 'addressState';
-        $this->whitelistData[] = 'addressZip';
-        $this->whitelistData[] = 'addressInternational';
-      }
+    if (isset($this->user) && User::current(true)->is($this->user)) {
+      // Users can see their group's data.
       $this->privateData = [];
     }
   }
@@ -331,8 +310,8 @@ class Group extends AbleObject {
         return ['result' => false, 'message' => Tilmeld::$config['valid_regex_notice']];
       }
       $selector = ['&',
-          'ilike' => ['groupname', str_replace(['%', '_'], ['\%', '\_'], $this->groupname)]
-        ];
+        'ilike' => ['groupname', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $this->groupname)]
+      ];
       if (isset($this->guid)) {
         $selector['!guid'] = $this->guid;
       }
@@ -370,8 +349,8 @@ class Group extends AbleObject {
       return ['result' => false, 'message' => 'Email must be a correctly formatted address.'];
     }
     $selector = ['&',
-        'ilike' => ['email', str_replace(['%', '_'], ['\%', '\_'], $this->email)]
-      ];
+      'ilike' => ['email', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $this->email)]
+    ];
     if (isset($this->guid)) {
       $selector['!guid'] = $this->guid;
     }
@@ -400,12 +379,12 @@ class Group extends AbleObject {
     // Verification.
     $unCheck = $this->checkGroupname();
     if (!$unCheck['result']) {
-      throw new Exceptions\BadUsernameException($unCheck['message']);
+      throw new \Tilmeld\Exceptions\BadUsernameException($unCheck['message']);
     }
     if (!Tilmeld::$config['email_usernames']) {
       $emCheck = $this->checkEmail();
       if (!$emCheck['result']) {
-        throw new Exceptions\BadEmailException($emCheck['message']);
+        throw new \Tilmeld\Exceptions\BadEmailException($emCheck['message']);
       }
     }
 
@@ -426,7 +405,7 @@ class Group extends AbleObject {
       if (isset($currentPrimary) && !$this->is($currentPrimary)) {
         unset($currentPrimary->defaultPrimary);
         if (!$currentPrimary->save()) {
-          throw new Exceptions\CouldNotChangeDefaultPrimaryGroupException("Could not change new user primary group from {$currentPrimary->groupname}.");
+          throw new \Tilmeld\Exceptions\CouldNotChangeDefaultPrimaryGroupException("Could not change new user primary group from {$currentPrimary->groupname}.");
         }
       }
     }
@@ -435,7 +414,7 @@ class Group extends AbleObject {
   }
 
   public function delete() {
-    if (!User::current(true)->gatekeeper('tilmeld/editgroups')) {
+    if (!User::current(true)->gatekeeper('tilmeld/admin')) {
       return false;
     }
     $entities = \Nymph\Nymph::getEntities(

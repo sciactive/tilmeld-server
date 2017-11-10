@@ -3,7 +3,7 @@
     Select a Group to edit.
   </div>
   <div class="panel-body">
-    <select class="form-control" ng-model="entity" ng-options="ent as ent.data.name+(ent.hasTag('enabled') ? '' : ' (Disabled)') for ent in uiState.entities track by ent.guid" ng-change="checkNewEntity()">
+    <select class="form-control" ng-model="entity" ng-options="ent as ent.data.name+(ent.data.enabled ? '' : ' (Disabled)') for ent in uiState.entities track by ent.guid" ng-change="checkNewEntity()">
       <option value="" ng-value="null">- New Group -</option>
     </select>
   </div>

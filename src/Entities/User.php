@@ -93,8 +93,9 @@ class User extends AbleObject {
    * Load a user.
    *
    * @param int|string $id The ID or username of the user to load, 0 for a new user.
+   * @param bool $skipUpdateDataProtectionOnNewEntity Used to load the session.
    */
-  public function __construct($id = 0) {
+  public function __construct($id = 0, $skipUpdateDataProtectionOnNewEntity = false) {
     if ($id > 0 || (string) $id === $id) {
       if ((int) $id === $id) {
         $entity = \Nymph\Nymph::getEntity(['class' => get_class($this)], ['&', 'guid' => (int) $id]);
@@ -117,7 +118,9 @@ class User extends AbleObject {
     $this->groups = [];
     $this->inheritAbilities = true;
     $this->addressType = 'us';
-    $this->updateDataProtection();
+    if (!$skipUpdateDataProtectionOnNewEntity) {
+      $this->updateDataProtection();
+    }
   }
 
   /**
@@ -203,7 +206,7 @@ class User extends AbleObject {
       $user = \Nymph\Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
           ['&',
-            'strict' => ['email', $data['account']]
+            'ilike' => ['email', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $data['account'])]
           ]
       );
 
@@ -394,22 +397,25 @@ class User extends AbleObject {
     if (Tilmeld::$config['email_usernames']) {
       $this->privateData[] = 'username';
     }
-    if (Tilmeld::gatekeeper('tilmeld/manage')) {
+
+    $isCurrentUser = self::current() !== null && self::current(true)->is($this);
+
+    if ($isCurrentUser) {
+      // Users can check to see what abilities they have.
+      $this->clientEnabledMethods[] = 'gatekeeper';
+      $this->clientEnabledMethods[] = 'changePassword';
+      $this->clientEnabledMethods[] = 'logout';
+      $this->clientEnabledMethods[] = 'sendEmailVerification';
+    }
+
+    if (Tilmeld::gatekeeper('tilmeld/admin')) {
       // Users who can edit other users can see most of their data.
       $this->privateData = [
         'password',
         'salt'
       ];
       $this->whitelistData = false;
-      return;
-    }
-    if (self::current() !== null && self::current(true)->is($this)) {
-      // Users can check to see what abilities they have.
-      $this->clientEnabledMethods[] = 'gatekeeper';
-      $this->clientEnabledMethods[] = 'changePassword';
-      $this->clientEnabledMethods[] = 'logout';
-      $this->clientEnabledMethods[] = 'sendEmailVerification';
-
+    } elseif ($isCurrentUser) {
       // Users can see their own data, and edit some of it.
       $this->whitelistData[] = 'username';
       if (in_array('name', Tilmeld::$config['user_fields'])) {
@@ -720,8 +726,8 @@ class User extends AbleObject {
         return ['result' => false, 'message' => Tilmeld::$config['valid_regex_notice']];
       }
       $selector = ['&',
-          'ilike' => ['username', str_replace(['%', '_'], ['\%', '\_'], $this->username)]
-        ];
+        'ilike' => ['username', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $this->username)]
+      ];
       if (isset($this->guid)) {
         $selector['!guid'] = $this->guid;
       }
@@ -763,8 +769,8 @@ class User extends AbleObject {
       return ['result' => false, 'message' => 'Email must be a correctly formatted address.'];
     }
     $selector = ['&',
-        'ilike' => ['email', str_replace(['%', '_'], ['\%', '\_'], $this->email)]
-      ];
+      'ilike' => ['email', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $this->email)]
+    ];
     if (isset($this->guid)) {
       $selector['!guid'] = $this->guid;
     }
@@ -836,8 +842,10 @@ class User extends AbleObject {
       $this->email = $this->username;
     }
 
+    // Add groups.
     $primaryGroup = null;
     if (Tilmeld::$config['generate_primary']) {
+      // Generate a new primary group for the user.
       $primaryGroup = Group::factory();
       $primaryGroup->groupname = $this->username;
       $primaryGroup->name = $this->name;
@@ -856,6 +864,7 @@ class User extends AbleObject {
       }
       $this->group = $primaryGroup;
     } else {
+      // Add the default primary.
       $this->group = \Nymph\Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
@@ -867,6 +876,7 @@ class User extends AbleObject {
       }
     }
     if (Tilmeld::$config['verify_email'] && Tilmeld::$config['unverified_access']) {
+      // Add the default secondaries for unverified users.
       $this->groups = (array) \Nymph\Nymph::getEntities(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
@@ -874,6 +884,7 @@ class User extends AbleObject {
           ]
       );
     } else {
+      // Add the default secondaries.
       $this->groups = (array) \Nymph\Nymph::getEntities(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
@@ -961,12 +972,12 @@ class User extends AbleObject {
     // Verification.
     $unCheck = $this->checkUsername();
     if (!$unCheck['result']) {
-      throw new Exceptions\BadUsernameException($unCheck['message']);
+      throw new \Tilmeld\Exceptions\BadUsernameException($unCheck['message']);
     }
     if (!Tilmeld::$config['email_usernames']) {
       $emCheck = $this->checkEmail();
       if (!$emCheck['result']) {
-        throw new Exceptions\BadEmailException($emCheck['message']);
+        throw new \Tilmeld\Exceptions\BadEmailException($emCheck['message']);
       }
     }
 
@@ -986,7 +997,7 @@ class User extends AbleObject {
               && isset($this->emailChangeDate)
               && $this->emailChangeDate > strtotime('-'.Tilmeld::$config['email_rate_limit'])
             ) {
-            throw new Exceptions\EmailChangeRateLimitExceededException(
+            throw new \Tilmeld\Exceptions\EmailChangeRateLimitExceededException(
                 'You already changed your email address recently. Please wait until ' .
                 \uMailPHP\Mail::formatDate(strtotime('+'.Tilmeld::$config['email_rate_limit'], $this->emailChangeDate), 'full_short') .
                 ' to change your email address again.'
@@ -1030,7 +1041,7 @@ class User extends AbleObject {
     }
 
     if (!isset($this->password) && !isset($this->passwordTemp)) {
-      throw new Exceptions\BadDataException('A password is required.');
+      throw new \Tilmeld\Exceptions\BadDataException('A password is required.');
     }
 
     if (isset($this->passwordTemp) && $this->passwordTemp !== '') {
@@ -1047,7 +1058,7 @@ class User extends AbleObject {
   }
 
   public function delete() {
-    if (!self::current(true)->gatekeeper('tilmeld/manage')) {
+    if (!self::current(true)->gatekeeper('tilmeld/admin')) {
       return false;
     }
     return parent::delete();

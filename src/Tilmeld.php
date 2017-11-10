@@ -113,7 +113,7 @@ class Tilmeld {
    * whether the check passes:
    *
    * - The user has the "system/admin" ability. (Always true.)
-   * - It is a user or group. (Always true for read or Tilmeld managers.)
+   * - It is a user or group. (Always true for read or Tilmeld admins.)
    * - The entity has no "user" and no "group". (Always true.)
    * - No user is logged in. (Check other AC.)
    * - The entity is the user. (Always true.)
@@ -143,7 +143,7 @@ class Tilmeld {
         )
         && (
           $type === Tilmeld::READ_ACCESS
-          || Tilmeld::gatekeeper('tilmeld/manage')
+          || Tilmeld::gatekeeper('tilmeld/admin')
         )
       ) {
       return true;
@@ -196,10 +196,6 @@ class Tilmeld {
    * This must be called at the i11 position in the init script processing.
    */
   public static function fillSession() {
-    // First load the hook classes for user and group.
-    $user = User::factory();
-    $group = Group::factory();
-
     self::session('write');
     if (isset($_SESSION['tilmeld_user'])
         && (object) $_SESSION['tilmeld_user'] === $_SESSION['tilmeld_user']
@@ -239,7 +235,7 @@ class Tilmeld {
         $_SESSION['tilmeld_inherited_abilities'] = array_merge($_SESSION['tilmeld_inherited_abilities'], $tmp_user->group->abilities);
       }
     }
-    $_SESSION['tilmeld_user'] = is_a($tmp_user, 'SciActive\\HookOverride') ? $tmp_user->_hookObject() : $tmp_user;
+    $_SESSION['tilmeld_user'] = $tmp_user;
     self::session('close');
   }
 
@@ -300,6 +296,19 @@ class Tilmeld {
   public static function session($option = 'read') {
     if (session_status() === PHP_SESSION_DISABLED) {
       throw Exception('Sessions are disabled!');
+    }
+    // First load the hook classes for user and group.
+    if ($option === 'read' || $option === 'write') {
+      if (class_exists('\SciActive\Hook') && !class_exists('HookOverride_Tilmeld_Entities_User')) {
+        $entity = new User(0, true);
+        \SciActive\Hook::hookObject($entity, 'Tilmeld\Entities\User->', false);
+        unset($entity);
+      }
+      if (class_exists('\SciActive\Hook') && !class_exists('HookOverride_Tilmeld_Entities_Group')) {
+        $entity = new Group(0, true);
+        \SciActive\Hook::hookObject($entity, 'Tilmeld\Entities\Group->', false);
+        unset($entity);
+      }
     }
     switch ($option) {
       case 'read':
