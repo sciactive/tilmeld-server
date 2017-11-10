@@ -672,11 +672,11 @@ class User extends AbleObject {
    * @return array An associative array with a boolean 'result' entry and a 'message' entry.
    */
   public function changePassword($data) {
-    if ($data['password']) {
+    if (!isset($data['password']) || (string) $data['password'] === '') {
       return ['result' => false, 'message' => 'Please specify a password.'];
     }
     if ($this->checkPassword($data['oldPassword'])) {
-      $this->passwordTemp = $data['password'];
+      $this->passwordTemp = (string) $data['password'];
     }
     if ($this->save()) {
       return ['result' => true, 'message' => 'Your password has been changed.'];
@@ -823,7 +823,7 @@ class User extends AbleObject {
     if (isset($this->guid)) {
       return ['result' => false, 'loggedin' => false, 'message' => 'This is already a registered user.'];
     }
-    if (empty($data['password'])) {
+    if (!isset($data['password']) || (string) $data['password'] === '') {
       return ['result' => false, 'loggedin' => false, 'message' => 'Password is a required field.'];
     }
     $unCheck = $this->checkUsername();
@@ -831,7 +831,7 @@ class User extends AbleObject {
       return $unCheck;
     }
 
-    $this->password($data['password']);
+    $this->password((string) $data['password']);
     if (in_array('name', Tilmeld::$config['reg_fields'])) {
       $this->name = $this->nameFirst.(!empty($this->nameMiddle) ? ' '.$this->nameMiddle : '').(!empty($this->nameLast) ? ' '.$this->nameLast : '');
       if ($this->name === '') {
@@ -1049,6 +1049,14 @@ class User extends AbleObject {
     }
     unset($this->passwordTemp);
 
+    if (isset($this->group->user) && $this->is($this->group->user)) {
+      // Update the user's generated primary group.
+      $this->group->groupname = $this->username;
+      $this->group->email = $this->email;
+      $this->group->name = $this->name;
+      $this->group->save();
+    }
+
     $return = parent::save();
     if ($return && $sendVerification) {
       // The email has changed, so send a new verification email.
@@ -1060,6 +1068,9 @@ class User extends AbleObject {
   public function delete() {
     if (!self::current(true)->gatekeeper('tilmeld/admin')) {
       return false;
+    }
+    if (self::current(true)->is($this)) {
+      $this->logout();
     }
     return parent::delete();
   }

@@ -42,66 +42,61 @@ function is_secure() {
   <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Entities/Group.js"></script>
   <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Components/TilmeldRecover.js"></script>
   <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Components/TilmeldLogin.js"></script>
+  <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Components/TilmeldChangePassword.js"></script>
 
   <link rel="stylesheet" href="<?php echo htmlspecialchars($sciactiveBaseURL); ?>pform/css/pform.css">
 </head>
 <body>
   <section class="container">
-    <div>
-      Currently logged in user: <button onclick="logout()">Logout</button> <pre class="currentuser"></pre>
+    <div style="display: flex; flex-direction: row;">
+      <div style="width: 50%; padding-right: 1em; box-sizing: border-box;">
+        Currently logged in user: <button onclick="logout()">Logout</button> <div class="currentuser"></div>
+      </div>
+      <div style="width: 50%; padding-left: 1em; box-sizing: border-box;">
+        <div>
+          Register event: <div class="registerevent"></div>
+        </div>
+        <div>
+          Login event: <div class="loginevent"></div>
+        </div>
+      </div>
     </div>
     <div class="login-row">
       <div class="login-container">
         <h2>Login (Normal Layout)</h2>
         <login data-layout="normal" data-show-existing-user-checkbox="true" data-existing-user="true" data-compact-text="Log in/Sign up"></login>
-        <div>
-          Register event: <pre class="registerevent"></pre>
-        </div>
-        <div>
-          Login event: <pre class="loginevent"></pre>
-        </div>
       </div>
       <div class="login-container">
         <h2>Login (Small Layout)</h2>
         <login data-layout="small" data-show-existing-user-checkbox="true" data-existing-user="true" data-compact-text="Log in/Sign up"></login>
-        <div>
-          Register event: <pre class="registerevent"></pre>
-        </div>
-        <div>
-          Login event: <pre class="loginevent"></pre>
-        </div>
       </div>
     </div>
     <div class="login-row">
       <div class="login-container">
         <h2>Login (Compact Layout)</h2>
         <login data-layout="compact" data-show-existing-user-checkbox="true" data-existing-user="true" data-compact-text="Log in/Sign up"></login>
-        <div>
-          Register event: <pre class="registerevent"></pre>
-        </div>
-        <div>
-          Login event: <pre class="loginevent"></pre>
-        </div>
       </div>
       <div class="login-container">
         <h2>Login (Compact Layout, Only Login)</h2>
         <login data-layout="compact" data-show-existing-user-checkbox="false" data-existing-user="true" data-compact-text="Log in"></login>
-        <div>
-          Register event: <pre class="registerevent"></pre>
-        </div>
-        <div>
-          Login event: <pre class="loginevent"></pre>
-        </div>
       </div>
       <div class="login-container">
         <h2>Login (Compact Layout, Only Register)</h2>
         <login data-layout="compact" data-show-existing-user-checkbox="false" data-existing-user="false" data-compact-text="Sign up"></login>
-        <div>
-          Register event: <pre class="registerevent"></pre>
-        </div>
-        <div>
-          Login event: <pre class="loginevent"></pre>
-        </div>
+      </div>
+    </div>
+    <div class="change-password-row">
+      <div class="change-password-container">
+        <h2>Change Password (Normal Layout)</h2>
+        <change-password data-layout="normal"></change-password>
+      </div>
+      <div class="change-password-container">
+        <h2>Change Password (Small Layout)</h2>
+        <change-password data-layout="small"></change-password>
+      </div>
+      <div class="change-password-container">
+        <h2>Change Password (Compact Layout)</h2>
+        <change-password data-layout="compact"></change-password>
       </div>
     </div>
   </div>
@@ -110,6 +105,7 @@ function is_secure() {
     let currentUser = null;
     const currentUserEl = document.querySelector('.currentuser');
     const logins = document.getElementsByTagName('login');
+    const changePasswords = document.getElementsByTagName('change-password');
     const User = window.User.default;
 
     for (const login of logins) {
@@ -125,13 +121,21 @@ function is_secure() {
       });
 
       component.on('register', e => {
-        const el = login.parentNode.querySelector('.registerevent');
-        el.innerText = 'Fired: - '+JSON.stringify(e);
+        const el = document.querySelector('.registerevent');
+        el.innerText = 'Fired: '+JSON.stringify(e);
       });
 
       component.on('login', e => {
-        const el = login.parentNode.querySelector('.loginevent');
-        el.innerText = 'Fired: - '+JSON.stringify(e);
+        const el = document.querySelector('.loginevent');
+        el.innerText = 'Fired: '+JSON.stringify(e);
+      });
+    }
+    for (const changePassword of changePasswords) {
+      const component = new TilmeldChangePassword({
+        target: changePassword,
+        data: {
+          layout: changePassword.dataset.layout
+        }
       });
     }
 
@@ -167,33 +171,32 @@ function is_secure() {
       box-sizing: border-box;
     }
 
-    .login-row {
+    .login-row, .change-password-row {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       flex-wrap: wrap;
     }
 
-    .login-container {
+    .login-container, .change-password-container {
       flex-grow: 1;
       padding: 20px;
     }
 
-    login {
-      border-top: 1px solid black;
-      border-bottom: 1px solid black;
+    login, change-password {
       display: flex;
-      padding-top: 2em;
-    }
-
-    login[data-layout="compact"] {
-      padding-top: 1em;
       padding-bottom: 1em;
     }
 
     .currentuser, .registerevent, .loginevent {
-      max-width: 200px;
+      padding: 1em;
+      background: #eee;
+      border: 1px solid #333;
+      font-family: monospace;
+      max-width: 100%;
       overflow: auto;
+      word-break: break-word;
+      word-wrap: break-word;
     }
   </style>
 </body>

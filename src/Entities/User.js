@@ -72,6 +72,10 @@ export default class User extends Entity {
     return this.serverCall('gatekeeper', args);
   }
 
+  changePassword(...args) {
+    return this.serverCall('changePassword', args);
+  }
+
   // === Static Methods ===
 
   static current(...args) {

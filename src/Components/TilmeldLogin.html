@@ -31,7 +31,7 @@
           {{__successRegisteredMessage}}
         </div>
         {{#if layout === 'compact'}}
-          <div style="text-align: right;">
+          <div class="close-button-container">
             <button class="pf-button" type="button" on:click="set({__showDialog: false})">Close</button>
           </div>
         {{/if}}
@@ -44,6 +44,12 @@
       </div>
     {{else}}
       <form ref:form onsubmit="return false;" class="login-dialog pf-form {{layout === 'small' ? 'pf-layout-block' : ''}}">
+        {{#if layout === 'compact'}}
+          <div class="pf-element pf-heading">
+            <h2 class="login-dialog-title">{{compactText}}</h2>
+          </div>
+        {{/if}}
+
         {{#if __clientConfig.allow_registration && showExistingUserCheckbox}}
           <div class="pf-element">
             <span class="{{layout !== 'small' ? 'pf-group' : ''}}" style="display: {{layout !== 'small' ? 'block' : 'in-line'}};">
@@ -536,5 +542,13 @@
     max-height: 100px;
     justify-content: center;
     align-items: center;
+  }
+  .login-dialog-title {
+    padding-top: 0;
+    margin-top: 0;
+  }
+  .close-button-container {
+    text-align: right;
+    margin-top: 1em;
   }
 </style>
