@@ -1,9 +1,119 @@
 <?php
 
-//if (!\Tilmeld\Entities\User::current(true)->gatekeeper('tilmeld/admin')) {
-//	header('HTTP/1.1 403 Forbidden');
-//	die('You are not authorized to access this page.');
-//}
+if (isset($_REQUEST['action']) && \Tilmeld\Tilmeld::$config['verify_email']) {
+  // Verify user email addresses.
+  $printPage = function ($notice) {
+    echo "<!DOCTYPE html>\n";
+    echo '<html>';
+    echo '<head>';
+    echo '<title>Email Verification</title>';
+    echo '<meta charset="utf-8">';
+    echo '<meta name="viewport" content="width=device-width, initial-scale=1">';
+    echo '<meta http-equiv="refresh" content="4; url='.htmlspecialchars(\Tilmeld\Tilmeld::$config['verify_redirect']).'">';
+    echo '<style> body {padding: 2em; font-family: Arial, sans-serif; } </style>';
+    echo '</head>';
+    echo '<body>';
+    echo htmlspecialchars($notice);
+    echo '<br />';
+    echo 'You will now be redirected.';
+    echo '</body>';
+    echo '</html>';
+  };
+
+  $user = \Tilmeld\Entities\User::factory((int) $_REQUEST['id']);
+
+  if (!isset($user->guid)) {
+    $printPage('An error occurred.');
+    return;
+  }
+
+  switch ($_REQUEST['action']) {
+    case 'verifyemail':
+    default:
+      // Verify new user's email address.
+      if (!isset($user->secret) || $_REQUEST['secret'] !== $user->secret) {
+        $printPage('The secret code given does not match this user.');
+        return;
+      }
+
+      if (\Tilmeld\Tilmeld::$config['unverified_access']) {
+        $user->groups = (array) \Nymph\Nymph::getEntities(
+            ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
+            ['&',
+              'data' => ['defaultSecondary', true]
+            ]
+        );
+      }
+      $user->enabled = true;
+      unset($user->secret);
+      break;
+    case 'verifyemailchange':
+      // Email address change.
+      if (!isset($user->newEmailSecret) || $_REQUEST['secret'] !== $user->newEmailSecret) {
+        $printPage('The secret code given does not match this user.');
+        return;
+      }
+
+      $user->email = $user->newEmailAddress;
+
+      if (\Tilmeld\Tilmeld::$config['email_usernames']) {
+        $unCheck = $user->checkUsername();
+        if (!$unCheck['result']) {
+          $printPage($unCheck['message']);
+          return;
+        }
+      }
+
+      $test = \Nymph\Nymph::getEntity(
+          ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
+          ['&',
+            'ilike' => ['email', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $user->newEmailAddress)],
+            '!guid' => $user->guid
+          ]
+      );
+      if (isset($test)) {
+        $printPage('There is already a user with that email address. Please use a different email.');
+        return;
+      }
+
+      unset($user->newEmailAddress, $user->newEmailSecret);
+      break;
+    case 'cancelemailchange':
+      // Cancel an email address change.
+      if (!isset($user->cancelEmailSecret) || $_REQUEST['secret'] !== $user->cancelEmailSecret) {
+        $printPage('The secret code given does not match this user.');
+        return;
+      }
+
+      $user->email = $user->cancelEmailAddress;
+      unset($user->newEmailAddress, $user->newEmailSecret, $user->cancelEmailAddress, $user->cancelEmailSecret);
+      break;
+  }
+
+  if ($user->save()) {
+    switch ($_REQUEST['action']) {
+      case 'verifyemail':
+      default:
+        $printPage('Your account has been verified.');
+        break;
+      case 'verifyemailchange':
+        $printPage('Your new email address has been verified.');
+        break;
+      case 'cancelemailchange':
+        $printPage('The email address change has been canceled.');
+        break;
+    }
+  } else {
+    $printPage('An error occurred.');
+  }
+
+  return;
+}
+
+if (!\Tilmeld\Entities\User::current(true)->gatekeeper('tilmeld/admin')) {
+  header('HTTP/1.1 403 Forbidden');
+  die('Forbidden');
+}
 
 function is_secure() {
   // Always assume secure on production.

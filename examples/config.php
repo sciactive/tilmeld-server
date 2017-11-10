@@ -1,9 +1,7 @@
 <?php
 
 // Nymph's configuration.
-
 $nymphConfig = [];
-
 // Check for production postgres var.
 if (getenv('NYMPH_PRODUCTION')) {
   $dbopts = parse_url(getenv('DATABASE_URL'));
@@ -40,12 +38,23 @@ if (getenv('NYMPH_PRODUCTION')) {
     ];
   }
 }
-
 \Nymph\Nymph::configure($nymphConfig);
+
+// Nymph PubSub's configuration.
+if (getenv('NYMPH_PRODUCTION')) {
+  // If we're on Heroku, the entry is the pubsub demo.
+  $entry = 'wss://nymph-pubsub-demo.herokuapp.com:443/';
+} elseif (getenv('PUBSUB_HOST')) {
+  // If we're in Docker, the entry is provided by Docker.
+  $entry = 'ws://'.getenv('PUBSUB_HOST').'/';
+} else {
+  // If we're not in either, it's probaby on the same host.
+  $entry = 'ws://localhost:8081/';
+}
+\Nymph\PubSub\Server::configure(['entries' => [$entry]]);
 
 
 // uMailPHP's configuration.
-
 \uMailPHP\Mail::configure([
   'site_name' => 'Tilmeld Example Site',
   'site_link' => 'http://localhost/tilmeld/',
@@ -56,7 +65,6 @@ if (getenv('NYMPH_PRODUCTION')) {
 
 
 // Tilmeld's configuration.
-
 \Tilmeld\Tilmeld::configure([
   'email_usernames' => true
 ]);

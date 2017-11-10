@@ -13,9 +13,9 @@ return (object) [
   /*
    * Setup URL
    * The URL where the setup utility is accessible. This is also used for
-   * account verification and password recovery.
+   * email address verification.
    */
-  'setup_url' => 'http://localhost/tilmeld/',
+  'setup_url' => 'http://localhost/tilmeld/examples/setup.php',
   /*
    * Create Admin
    * Allow the creation of an admin user. When a user is created, if there are
@@ -56,6 +56,11 @@ return (object) [
    * allowing them to log in/change it.
    */
   'verify_email' => true,
+  /*
+   * Verify Redirect URL
+   * After the user verifies their address, redirect them to this URL.
+   */
+  'verify_redirect' => 'http://localhost/',
   /*
    * Unverified User Access
    * Unverified users will be able to log in, but will only have the "unverified

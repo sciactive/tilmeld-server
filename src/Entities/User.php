@@ -316,6 +316,7 @@ class User extends AbleObject {
     $user = User::factory($data['username']);
     $result = $user->login($data);
     if ($result['result']) {
+      $user->updateDataProtection();
       $result['user'] = $user;
     }
     return $result;
@@ -399,6 +400,7 @@ class User extends AbleObject {
     }
 
     $isCurrentUser = self::current() !== null && self::current(true)->is($this);
+    $isNewUser = !isset($this->guid);
 
     if ($isCurrentUser) {
       // Users can check to see what abilities they have.
@@ -415,7 +417,7 @@ class User extends AbleObject {
         'salt'
       ];
       $this->whitelistData = false;
-    } elseif ($isCurrentUser) {
+    } elseif ($isCurrentUser || $isNewUser) {
       // Users can see their own data, and edit some of it.
       $this->whitelistData[] = 'username';
       if (in_array('name', Tilmeld::$config['user_fields'])) {
@@ -842,7 +844,7 @@ class User extends AbleObject {
       $this->email = $this->username;
     }
 
-    // Add groups.
+    // Add primary group.
     $primaryGroup = null;
     if (Tilmeld::$config['generate_primary']) {
       // Generate a new primary group for the user.
@@ -875,6 +877,8 @@ class User extends AbleObject {
         unset($this->group);
       }
     }
+
+    // Add secondary groups.
     if (Tilmeld::$config['verify_email'] && Tilmeld::$config['unverified_access']) {
       // Add the default secondaries for unverified users.
       $this->groups = (array) \Nymph\Nymph::getEntities(
@@ -931,10 +935,12 @@ class User extends AbleObject {
         $loggedin = false;
       } elseif (Tilmeld::$config['verify_email'] && Tilmeld::$config['unverified_access']) {
         Tilmeld::login($this);
+        $this->updateDataProtection();
         $message = "You're now logged in! An email has been sent to {$this->email} with a verification link for you to finish registration.";
         $loggedin = true;
       } else {
         Tilmeld::login($this);
+        $this->updateDataProtection();
         $message = 'You\'re now registered and logged in!';
         $loggedin = true;
       }
@@ -990,7 +996,10 @@ class User extends AbleObject {
         if (!isset($this->guid)) {
           $this->secret = self::generateSecret($this);
           $sendVerification = true;
-        } elseif ($this->email !== $this->originalEmail) {
+        } elseif (
+            !empty($this->originalEmail)
+            && $this->originalEmail !== $this->email
+          ) {
           // The user already has an old email address.
           if (
               Tilmeld::$config['email_rate_limit'] !== ''
@@ -1003,7 +1012,8 @@ class User extends AbleObject {
                 ' to change your email address again.'
             );
           } else {
-            if (!isset($this->secret)
+            if (
+                !isset($this->secret)
                 && (
                   // Make sure the user has at least the rate
                   // limit time to cancel an email change.
@@ -1021,10 +1031,11 @@ class User extends AbleObject {
             $sendVerification = true;
           }
         }
-      } elseif (isset($this->guid) &&
-          !empty($this->originalEmail) &&
-          $this->originalEmail !== $this->email &&
-          (
+      } elseif (
+          isset($this->guid)
+          && !empty($this->originalEmail)
+          && $this->originalEmail !== $this->email
+          && (
             // Make sure the user has at least the rate limit time
             // to cancel an email change.
             !isset($this->emailChangeDate) ||

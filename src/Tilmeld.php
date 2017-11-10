@@ -45,13 +45,6 @@ class Tilmeld {
    * @return bool True or false.
    */
   public static function gatekeeper($ability = null) {
-    /*******
-     * TODO: REMOVE THIS DEV CODE!!!
-     */
-    return true;
-    /*******
-     * YOU BETTER REMOVE IT!
-     */
     if (User::current() === null) {
       return false;
     }
@@ -236,6 +229,7 @@ class Tilmeld {
       }
     }
     $_SESSION['tilmeld_user'] = $tmp_user;
+    $_SESSION['tilmeld_user']->updateDataProtection();
     self::session('close');
   }
 
