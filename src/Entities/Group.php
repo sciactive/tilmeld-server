@@ -27,6 +27,7 @@ use Tilmeld\Tilmeld as Tilmeld;
  * @property string $addressZip The group's ZIP code for US addresses.
  * @property string $addressInternational The group's full address for international addresses.
  * @property Group $parent The group's parent.
+ * @property User|null $user If generate_primary is on, this will be the user who generated this group.
  */
 class Group extends AbleObject {
   const ETYPE = 'tilmeld_group';
@@ -83,6 +84,55 @@ class Group extends AbleObject {
     $this->abilities = [];
     $this->addressType = 'us';
     $this->updateDataProtection();
+  }
+
+  /**
+   * Get all the groups that can be assigned as primary groups.
+   * @return array An array of the assignable primary groups.
+   */
+  public static function getPrimaryGroups() {
+    $highestPrimaryParent = Tilmeld::$config['highest_primary'];
+    $primaryGroups = [];
+    if ($highestPrimaryParent == 0) {
+      $primaryGroups = \Nymph\Nymph::getEntities(
+          ['class' => '\Tilmeld\Entities\Group'],
+          ['&',
+            'data' => ['enabled', true]
+          ]
+      );
+    } else {
+      if ($highestPrimaryParent > 0) {
+        $highestPrimaryParent = Group::factory($highestPrimaryParent);
+        if (isset($highestPrimaryParent->guid)) {
+          $primaryGroups = $highestPrimaryParent->getDescendants();
+        }
+      }
+    }
+    return $primaryGroups;
+  }
+
+  /**
+   * Get all the groups that can be assigned as secondary groups.
+   * @return array An array of the assignable secondary groups.
+   */
+  public static function getSecondaryGroups() {
+    $highestSecondaryParent = Tilmeld::$config['highest_secondary'];
+    $secondaryGroups = [];
+    if ($highestSecondaryParent == 0) {
+      $secondaryGroups = \Nymph\Nymph::getEntities(
+          ['class' => '\Tilmeld\Entities\Group'],
+          ['&',
+            'data' => ['enabled', true]
+          ]
+      );
+    } else {
+      if ($highestSecondaryParent > 0) {
+        $highestSecondaryParent = Group::factory($highestSecondaryParent);
+        if (isset($highestSecondaryParent->guid)) {
+          $secondaryGroups = $highestSecondaryParent->getDescendants();
+        }
+      }
+    }
   }
 
   public function getAvatar() {
@@ -167,72 +217,6 @@ class Group extends AbleObject {
     return false;
   }
 
-  public function delete() {
-    if (!User::current(true)->gatekeeper('tilmeld/editgroups')) {
-      return false;
-    }
-    $entities = \Nymph\Nymph::getEntities(
-        ['class' => '\Tilmeld\Entities\Group'],
-        ['&',
-          'ref' => ['parent', $this]
-        ]
-    );
-    foreach ($entities as $cur_group) {
-      if (!$cur_group->delete()) {
-        return false;
-      }
-    }
-    return parent::delete();
-  }
-
-  public function save() {
-    if (!isset($this->groupname)) {
-      return false;
-    }
-
-    // Formatting.
-    $this->groupname = trim($this->groupname);
-    $this->email = trim($this->email);
-    $this->name = trim($this->name);
-    $this->phone = preg_replace('/\D/', '', $this->phone);
-
-    // Verification.
-    $unCheck = $this->checkGroupname();
-    if (!$unCheck['result']) {
-      throw new Exceptions\BadUsernameException($unCheck['message']);
-    }
-    if (!Tilmeld::$config['email_usernames']) {
-      $emCheck = $this->checkEmail();
-      if (!$emCheck['result']) {
-        throw new Exceptions\BadEmailException($emCheck['message']);
-      }
-    }
-
-    // Validate group parent. Make sure it's not a descendant of this group.
-    if (isset($this->parent) &&
-        (
-          !isset($this->parent->guid) ||
-          $this->is($this->parent) ||
-          $this->parent->isDescendant($this)
-        )
-      ) {
-      $this->parent = null;
-    }
-
-    // Only one default primary group is allowed.
-    if ($this->defaultPrimary) {
-      $currentPrimary = \Nymph\Nymph::getEntity(['class' => '\Tilmeld\Entities\Group'], ['&', 'data' => ['defaultPrimary', true]]);
-      if (isset($currentPrimary) && !$this->is($currentPrimary)) {
-        unset($currentPrimary->defaultPrimary);
-        if (!$currentPrimary->save()) {
-          throw new Exceptions\CouldNotChangeDefaultPrimaryGroupException("Could not change new user primary group from {$currentPrimary->groupname}.");
-        }
-      }
-    }
-
-    return parent::save();
-  }
-
   /**
    * Gets an array of the group's child groups.
    *
@@ -296,45 +280,6 @@ class Group extends AbleObject {
       $group = $group->parent;
     }
     return $level;
-  }
-
-  /**
-   * Get all the groups that can be assigned as primary groups.
-   * @return array An array of the assignable primary groups.
-   */
-  public static function getPrimaryGroups() {
-    $highestPrimaryParent = Tilmeld::$config['highest_primary'];
-    $primaryGroups = [];
-    if ($highestPrimaryParent == 0) {
-      $primaryGroups = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Entities\Group']);
-    } else {
-      if ($highestPrimaryParent > 0) {
-        $highestPrimaryParent = Group::factory($highestPrimaryParent);
-        if (isset($highestPrimaryParent->guid)) {
-          $primaryGroups = $highestPrimaryParent->getDescendants();
-        }
-      }
-    }
-    return $primaryGroups;
-  }
-
-  /**
-   * Get all the groups that can be assigned as secondary groups.
-   * @return array An array of the assignable secondary groups.
-   */
-  public static function getSecondaryGroups() {
-    $highestSecondaryParent = Tilmeld::$config['highest_secondary'];
-    $secondaryGroups = [];
-    if ($highestSecondaryParent == 0) {
-      $secondaryGroups = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Entities\Group']);
-    } else {
-      if ($highestSecondaryParent > 0) {
-        $highestSecondaryParent = Group::factory($highestSecondaryParent);
-        if (isset($highestSecondaryParent->guid)) {
-          $secondaryGroups = $highestSecondaryParent->getDescendants();
-        }
-      }
-    }
   }
 
   /**
@@ -441,24 +386,69 @@ class Group extends AbleObject {
     return ['result' => true, 'message' => (isset($this->guid) ? 'Email is valid.' : 'Email address is valid!')];
   }
 
-  /**
-   * Print a form to edit the group.
-   *
-   * @return module The form's module.
-   */
-  public function printForm() {
-    $module = new module('com_user', 'form_group', 'content');
-    $module->entity = $this;
-    $module->display_username = gatekeeper('com_user/usernames');
-    $module->display_enable = gatekeeper('com_user/enabling');
-    $module->display_default = gatekeeper('com_user/defaultgroups');
-    $module->display_abilities = gatekeeper('com_user/abilities');
-    $module->sections = ['system'];
-    $module->group_array = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Entities\Group'], ['&', 'data' => ['enabled', true]]);
-    foreach ($_->components as $cur_component) {
-      $module->sections[] = $cur_component;
+  public function save() {
+    if (!isset($this->groupname)) {
+      return false;
     }
 
-    return $module;
+    // Formatting.
+    $this->groupname = trim($this->groupname);
+    $this->email = trim($this->email);
+    $this->name = trim($this->name);
+    $this->phone = preg_replace('/\D/', '', $this->phone);
+
+    // Verification.
+    $unCheck = $this->checkGroupname();
+    if (!$unCheck['result']) {
+      throw new Exceptions\BadUsernameException($unCheck['message']);
+    }
+    if (!Tilmeld::$config['email_usernames']) {
+      $emCheck = $this->checkEmail();
+      if (!$emCheck['result']) {
+        throw new Exceptions\BadEmailException($emCheck['message']);
+      }
+    }
+
+    // Validate group parent. Make sure it's not a descendant of this group.
+    if (isset($this->parent) &&
+        (
+          !isset($this->parent->guid) ||
+          $this->is($this->parent) ||
+          $this->parent->isDescendant($this)
+        )
+      ) {
+      $this->parent = null;
+    }
+
+    // Only one default primary group is allowed.
+    if ($this->defaultPrimary) {
+      $currentPrimary = \Nymph\Nymph::getEntity(['class' => '\Tilmeld\Entities\Group'], ['&', 'data' => ['defaultPrimary', true]]);
+      if (isset($currentPrimary) && !$this->is($currentPrimary)) {
+        unset($currentPrimary->defaultPrimary);
+        if (!$currentPrimary->save()) {
+          throw new Exceptions\CouldNotChangeDefaultPrimaryGroupException("Could not change new user primary group from {$currentPrimary->groupname}.");
+        }
+      }
+    }
+
+    return parent::save();
+  }
+
+  public function delete() {
+    if (!User::current(true)->gatekeeper('tilmeld/editgroups')) {
+      return false;
+    }
+    $entities = \Nymph\Nymph::getEntities(
+        ['class' => '\Tilmeld\Entities\Group'],
+        ['&',
+          'ref' => ['parent', $this]
+        ]
+    );
+    foreach ($entities as $cur_group) {
+      if (!$cur_group->delete()) {
+        return false;
+      }
+    }
+    return parent::delete();
   }
 }

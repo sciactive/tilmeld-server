@@ -92,6 +92,15 @@ return (object) [
    */
   'pw_method' => 'digest',
   /*
+   * Generate a Primary Group
+   * Whether to create a new primary group for every user who registers. This
+   * can be useful for providing access to entities the user creates.
+   *
+   * In the case this is set, the default primary group, rather than being
+   * assigned to the user, is assigned as the parent of the generated group.
+   */
+  'generate_primary' => true,
+  /*
    * Highest Assignable Primary Group Parent
    * The GUID of the group above the highest groups allowed to be assigned as
    * primary groups. Zero means all groups, and -1 means no groups.
