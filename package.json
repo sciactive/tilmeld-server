@@ -8,9 +8,9 @@
   "scripts": {
     "build": "npm run build-components && npm run build-entities",
     "build-components": "npm run build-login && npm run build-recover && npm run build-change-password",
-    "build-login": "svelte compile --format iife src/Components/TilmeldLogin.html > lib/Components/TilmeldLogin.js",
-    "build-recover": "svelte compile --format iife src/Components/TilmeldRecover.html > lib/Components/TilmeldRecover.js",
-    "build-change-password": "svelte compile --format iife src/Components/TilmeldChangePassword.html > lib/Components/TilmeldChangePassword.js",
+    "build-login": "svelte compile --format es src/Components/TilmeldLogin.html > lib/Components/TilmeldLogin.js && babel lib/Components/TilmeldLogin.js -o lib/Components/TilmeldLogin.js",
+    "build-recover": "svelte compile --format es src/Components/TilmeldRecover.html > lib/Components/TilmeldRecover.js && babel lib/Components/TilmeldRecover.js -o lib/Components/TilmeldRecover.js",
+    "build-change-password": "svelte compile --format es src/Components/TilmeldChangePassword.html > lib/Components/TilmeldChangePassword.js && babel lib/Components/TilmeldChangePassword.js -o lib/Components/TilmeldChangePassword.js",
     "build-entities": "babel -d lib/Entities/ src/Entities/",
     "watch-entities": "babel --watch -d lib/Entities/ src/Entities/",
     "prepare": "npm run build",

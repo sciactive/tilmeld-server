@@ -1,9 +1,9 @@
 <?php
 
 // This is how you enter the setup app.
-$tilmeldURL = '../../'; // This is the URL of the Tilmeld root.
-$sciactiveBaseURL = '../../node_modules/'; // This is the URL of the SciActive libraries.
-$restEndpoint = '../rest.php'; // This is the URL of the Nymph endpoint.
+$tilmeldURL = '../'; // This is the URL of the Tilmeld root.
+$sciactiveBaseURL = '../node_modules/'; // This is the URL of the SciActive libraries.
+$restEndpoint = 'rest.php'; // This is the URL of the Nymph endpoint.
 
 function is_secure() {
   // Always assume secure on production.
@@ -19,7 +19,7 @@ function is_secure() {
 ?><!DOCTYPE html>
 <html>
 <head>
-  <title>Login Component Example</title>
+  <title>Tilmeld Component Example</title>
   <meta charset="utf-8">
   <script type="text/javascript">
     (function(){
@@ -47,6 +47,9 @@ function is_secure() {
   <link rel="stylesheet" href="<?php echo htmlspecialchars($sciactiveBaseURL); ?>pform/css/pform.css">
 </head>
 <body>
+  <header>
+    <h1>Tilmeld Component Examples</h1>
+  </header>
   <section class="container">
     <div style="display: flex; flex-direction: row;">
       <div style="width: 50%; padding-right: 1em; box-sizing: border-box;">
@@ -102,66 +105,70 @@ function is_secure() {
   </div>
 
   <script>
-    let currentUser = null;
-    const currentUserEl = document.querySelector('.currentuser');
-    const logins = document.getElementsByTagName('login');
-    const changePasswords = document.getElementsByTagName('change-password');
-    const User = window.User.default;
+    ((global, User, TilmeldLogin, TilmeldChangePassword) => {
+      let currentUser = null;
+      const currentUserEl = document.querySelector('.currentuser');
+      const logins = document.getElementsByTagName('login');
+      const changePasswords = document.getElementsByTagName('change-password');
+      User = (User && User.__esModule) ? User["default"] : User;
+      TilmeldLogin = (TilmeldLogin && TilmeldLogin.__esModule) ? TilmeldLogin["default"] : TilmeldLogin;
+      TilmeldChangePassword = (TilmeldChangePassword && TilmeldChangePassword.__esModule) ? TilmeldChangePassword["default"] : TilmeldChangePassword;
 
-    for (const login of logins) {
-      const component = new TilmeldLogin({
-        target: login,
-        data: {
-          autofocus: false,
-          compactText: login.dataset.compactText,
-          existingUser: login.dataset.existingUser === "true",
-          showExistingUserCheckbox: login.dataset.showExistingUserCheckbox === "true",
-          layout: login.dataset.layout
+      for (const login of logins) {
+        const component = new TilmeldLogin({
+          target: login,
+          data: {
+            autofocus: false,
+            compactText: login.dataset.compactText,
+            existingUser: login.dataset.existingUser === "true",
+            showExistingUserCheckbox: login.dataset.showExistingUserCheckbox === "true",
+            layout: login.dataset.layout
+          }
+        });
+
+        component.on('register', e => {
+          const el = document.querySelector('.registerevent');
+          el.innerText = 'Fired: '+JSON.stringify(e);
+        });
+
+        component.on('login', e => {
+          const el = document.querySelector('.loginevent');
+          el.innerText = 'Fired: '+JSON.stringify(e);
+        });
+      }
+      for (const changePassword of changePasswords) {
+        const component = new TilmeldChangePassword({
+          target: changePassword,
+          data: {
+            layout: changePassword.dataset.layout
+          }
+        });
+      }
+
+      User.current().then(user => {
+        if (user) {
+          currentUser = user;
+          currentUserEl.innerText = JSON.stringify(user);
+        } else {
+          currentUserEl.innerText = 'none';
         }
       });
 
-      component.on('register', e => {
-        const el = document.querySelector('.registerevent');
-        el.innerText = 'Fired: '+JSON.stringify(e);
-      });
-
-      component.on('login', e => {
-        const el = document.querySelector('.loginevent');
-        el.innerText = 'Fired: '+JSON.stringify(e);
-      });
-    }
-    for (const changePassword of changePasswords) {
-      const component = new TilmeldChangePassword({
-        target: changePassword,
-        data: {
-          layout: changePassword.dataset.layout
-        }
-      });
-    }
-
-    User.current().then(user => {
-      if (user) {
+      User.on('login', user => {
         currentUser = user;
         currentUserEl.innerText = JSON.stringify(user);
-      } else {
+      });
+      User.on('logout', () => {
+        currentUser = null;
         currentUserEl.innerText = 'none';
-      }
-    });
+      });
 
-    User.on('login', user => {
-      currentUser = user;
-      currentUserEl.innerText = JSON.stringify(user);
-    });
-    User.on('logout', () => {
-      currentUser = null;
-      currentUserEl.innerText = 'none';
-    });
-
-    function logout() {
-      if (currentUser) {
-        currentUser.logout();
+      global.logout = () => {
+        if (currentUser) {
+          currentUser.logout();
+        }
       }
-    }
+    })(this, User, TilmeldLogin, TilmeldChangePassword);
   </script>
 
   <style>
