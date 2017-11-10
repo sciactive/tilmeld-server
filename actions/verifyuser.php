@@ -29,7 +29,12 @@ switch ($_REQUEST['type']) {
     }
 
     if (Tilmeld::$config['unverified_access'])
-      $user->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Entities\Group', 'skip_ac' => true), array('&', 'data' => array('defaultSecondary', true)));
+      $user->groups = (array) \Nymph\Nymph::getEntities(
+          ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
+          ['&',
+            'data' => ['defaultSecondary', true]
+          ]
+      );
     $user->enable();
     unset($user->secret);
     break;
@@ -47,12 +52,12 @@ switch ($_REQUEST['type']) {
       }
     }
     $test = \Nymph\Nymph::getEntity(
-        array('class' => '\Tilmeld\Entities\User', 'skip_ac' => true),
-        array('&',
-          'match' => array('email', '/^'.preg_quote($user->newEmailAddress, '/').'$/i'),
+        ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
+        ['&',
+          'match' => ['email', '/^'.preg_quote($user->newEmailAddress, '/').'$/i'],
           '!guid' => $user->guid
-        )
-      );
+        ]
+    );
     if (isset($test)) {
       $user->print_form();
       pines_notice('There is already a user with that email address. Please use a different email.');
@@ -79,7 +84,7 @@ if ($user->save()) {
       pines_log('Validated user ['.$user->username.']');
       Tilmeld::login($user);
       $notice = new module('com_user', 'note_welcome', 'content');
-      if ( !empty($_REQUEST['url']) ) {
+      if (!empty($_REQUEST['url'])) {
         pines_notice('Thank you. Your account has been verified.');
         pines_redirect(urldecode($_REQUEST['url']));
         return;

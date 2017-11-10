@@ -49,29 +49,52 @@
               {{#if recoveryType === 'username'}}
                 <span class="pf-label">Email Address</span>
               {{/if}}
-              <input class="pf-field" type="text" ref:account bind:value="account" size="24" value="" />
+              <input class="pf-field" type="text" ref:account bind:value="account" size="24" />
             </label>
           </div>
         {{else}}
           <div class="pf-element">
+            <p>
+              A code has been sent to you by email. Enter that code here, and a new password for your account.
+            </p>
+          </div>
+          <div class="pf-element">
+            <label>
+              <span class="pf-label">Recovery Code</span>
+              <input class="pf-field" bind:value="secret" type="text" size="24" />
+            </label>
+          </div>
+          <div class="pf-element">
             <label>
               <span class="pf-label">Password</span>
-              <input class="pf-field" bind:value="password" type="password" name="password" size="24" />
+              <input class="pf-field" bind:value="password" type="password" size="24" />
             </label>
           </div>
           <div class="pf-element">
             <label>
               <span class="pf-label">Re-enter Password</span>
-              <input class="pf-field" bind:value="password2" type="password" name="password2" size="24" />
+              <input class="pf-field" bind:value="password2" type="password" size="24" />
             </label>
           </div>
         {{/if}}
 
-        <div class="pf-element {{layout === 'small' ? '' : 'pf-buttons'}}">
+        {{#if __failureMessage}}
+          <div class="pf-element pf-full-width">
+            <span class="pf-group pf-full-width">
+              <span class="pf-field" style="display: block;">
+                {{__failureMessage}}
+              </span>
+            </span>
+          </div>
+        {{/if}}
+
+        <div class="pf-element pf-buttons">
           {{#if !__hasSentSecret}}
             <button class="pf-button" type="submit" on:click="sendRecoveryLink()">Send Recovery Link</button>
+          {{else}}
+            <button class="pf-button" type="submit" on:click="recover()">Reset Password</button>
           {{/if}}
-          <button class="pf-button" on:click="set({__showDialog: false})">Close</button>
+          <button class="pf-button" type="button" on:click="set({__showDialog: false})">Close</button>
         </div>
       </form>
     {{/if}}
@@ -122,34 +145,63 @@
     methods: {
       sendRecoveryLink() {
         if (this.get('account') === '') {
-          alert('You need to enter '+(this.get('__clientConfig').email_usernames ? 'an email address' : 'a username')+'.');
+          this.set({__failureMessage: 'You need to enter '+((this.get('__clientConfig').email_usernames || this.get('recoveryType') === 'username') ? 'an email address' : 'a username')+'.'});
+          return;
+        }
+
+        this.set({
+          __failureMessage: null,
+          __recovering: true
+        });
+        User.sendRecoveryLink({'recoveryType': this.get('recoveryType'), 'account': this.get('account')}).then((data) => {
+          if (!data.result) {
+            this.set({__failureMessage: data.message});
+          } else {
+            if (this.get('recoveryType') === 'username') {
+              this.set({__successRecoveredMessage: data.message});
+            } else if (this.get('recoveryType') === 'password') {
+              this.set({__hasSentSecret: true});
+            }
+          }
+          this.set({__recovering: false});
+        }, () => {
+          this.set({
+            __failureMessage: 'An error occurred.',
+            __recovering: false
+          });
+        });
+      },
+
+      recover() {
+        if (this.get('account') === '') {
+          this.set({__failureMessage: 'You need to enter '+((this.get('__clientConfig').email_usernames || this.get('recoveryType') === 'username') ? 'an email address' : 'a username')+'.'});
           return;
         }
         if (this.get('password') != this.get('password2')) {
-          alert('Your passwords do not match.');
+          this.set({__failureMessage: 'Your passwords do not match.'});
           return;
         }
         if (this.get('password') === '') {
-          alert('You need to enter a password');
+          this.set({__failureMessage: 'You need to enter a password.'});
           return;
         }
 
-        // Create a new user.
-        let user = new User();
-
-        this.set({'__recovering': true});
-        user.sendRecoveryLink({'password': this.get('password')}).then((data) => {
+        this.set({
+          __failureMessage: null,
+          __recovering: true
+        });
+        User.recover({'username': this.get('account'), 'secret': this.get('secret'), 'password': this.get('password')}).then((data) => {
           if (!data.result) {
-            alert(data.message);
+            this.set({__failureMessage: data.message});
           } else {
-            this.set({
-              __successRegisteredMessage: data.message
-            });
+            this.set({__successRecoveredMessage: data.message});
           }
-          this.set({'__recovering': false});
+          this.set({__recovering: false});
         }, () => {
-          alert('An error occurred.');
-          this.set({'__recovering': false});
+          this.set({
+            __failureMessage: 'An error occurred.',
+            __recovering: false
+          });
         });
       }
     }
@@ -180,7 +232,7 @@
     left: 0;
     bottom: 0;
     right: 0;
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.1);
     z-index: 1;
   }
   .recovery-dialog {

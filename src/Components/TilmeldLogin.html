@@ -1,5 +1,9 @@
 {{#if layout === 'compact'}}
-  <a href="javascript:void(0);" on:click="set({__showDialog: true})">{{compactText}}</a>
+  {{#if __successLoginMessage}}
+    {{__successLoginMessage}}
+  {{else}}
+    <a href="javascript:void(0);" on:click="set({__showDialog: true})">{{compactText}}</a>
+  {{/if}}
 {{/if}}
 
 {{#if layout !== 'compact' || __showDialog}}
@@ -26,6 +30,11 @@
         <div>
           {{__successRegisteredMessage}}
         </div>
+        {{#if layout === 'compact'}}
+          <div style="text-align: right;">
+            <button class="pf-button" type="button" on:click="set({__showDialog: false})">Close</button>
+          </div>
+        {{/if}}
       </div>
     {{elseif __successLoginMessage}}
       <div class="login-dialog">
@@ -167,6 +176,16 @@
           {{/if}}
         {{/if}}
 
+        {{#if __failureMessage}}
+          <div class="pf-element pf-full-width">
+            <span class="pf-group pf-full-width">
+              <span class="pf-field" style="display: block;">
+                {{__failureMessage}}
+              </span>
+            </span>
+          </div>
+        {{/if}}
+
         <div class="pf-element {{layout === 'small' ? '' : 'pf-buttons'}}">
           {{#if existingUser}}
             <button class="pf-button" type="submit" on:click="login()">Log In</button>
@@ -174,16 +193,17 @@
             <button class="pf-button" type="submit" on:click="register()">Create Account</button>
           {{/if}}
           {{#if layout === 'compact'}}
-            <button class="pf-button" on:click="set({__showDialog: false})">Close</button>
+            <button class="pf-button" type="button" on:click="set({__showDialog: false})">Close</button>
           {{/if}}
         </div>
 
         {{#if !hideRecovery && __clientConfig.pw_recovery && existingUser}}
-          <div class="pf-element">
-            {{#if layout !== 'small'}}
-              <span class="pf-label" style="height: 1px;">&nbsp;</span>
-            {{/if}}
-            <TilmeldRecover account="{{username}}"></TilmeldRecover>
+          <div class="pf-element pf-full-width">
+            <span class="pf-group pf-full-width">
+              <span class="pf-field" style="display: block;">
+                <TilmeldRecover account="{{username}}"></TilmeldRecover>
+              </span>
+            </span>
           </div>
         {{/if}}
       </form>
@@ -354,46 +374,52 @@
     methods: {
       login() {
         if (this.get('username') === '') {
-          alert('You need to enter a username.');
+          this.set({__failureMessage: 'You need to enter a username.'});
           return;
         }
         if (this.get('password') === '') {
-          alert('You need to enter a password');
+          this.set({__failureMessage: 'You need to enter a password'});
           return;
         }
 
-        this.set({'__loggingin': true});
+        this.set({
+          __failureMessage: null,
+          __loggingin: true
+        });
         User.loginUser({username: this.get('username'), password: this.get('password')}).then((data) => {
           if (!data.result) {
-            alert(data.message);
+            this.set({__failureMessage: data.message});
           } else {
             this.set({
-              __successLoginMessage: data.message
+              __successLoginMessage: data.message,
+              __showDialog: false
             });
             this.fire('login', {user: data.user});
           }
-          this.set({'__loggingin': false});
+          this.set({__loggingin: false});
         }, () => {
-          alert('An error occurred.');
-          this.set({'__loggingin': false});
+          this.set({
+            __failureMessage: 'An error occurred.',
+            __loggingin: false
+          });
         });
       },
 
       register() {
         if (this.get('username') === '') {
-          alert('You need to enter a username.');
+          this.set({__failureMessage: 'You need to enter a username.'});
           return;
         }
         if (!this.get('__usernameVerified')) {
-          alert('The username you entered is not valid.');
+          this.set({__failureMessage: 'The username you entered is not valid.'});
           return;
         }
         if (this.get('password') != this.get('password2')) {
-          alert('Your passwords do not match.');
+          this.set({__failureMessage: 'Your passwords do not match.'});
           return;
         }
         if (this.get('password') === '') {
-          alert('You need to enter a password');
+          this.set({__failureMessage: 'You need to enter a password'});
           return;
         }
 
@@ -429,23 +455,30 @@
           });
         }
 
-        this.set({'__registering': true});
+        this.set({
+          __failureMessage: null,
+          __registering: true
+        });
         user.register({'password': this.get('password')}).then((data) => {
           if (!data.result) {
-            alert(data.message);
+            this.set({__failureMessage: data.message});
           } else {
-            this.set({
-              __successRegisteredMessage: data.message
-            });
+            this.set({__successRegisteredMessage: data.message});
             this.fire('register', {user});
           }
           if (data.loggedin) {
+            this.set({
+              __successLoginMessage: data.message,
+              __showDialog: false
+            });
             this.fire('login', {user});
           }
-          this.set({'__registering': false});
+          this.set({__registering: false});
         }, () => {
-          alert('An error occurred.');
-          this.set({'__registering': false});
+          this.set({
+            __failureMessage: 'An error occurred.',
+            __registering: false
+          });
         });
       }
     },
@@ -480,7 +513,7 @@
     left: 0;
     bottom: 0;
     right: 0;
-    background-color: rgba(0, 0, 0, 0.3);
+    background-color: rgba(0, 0, 0, 0.1);
     z-index: 1;
   }
   .login-dialog {

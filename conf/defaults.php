@@ -77,10 +77,10 @@ return (object) [
    */
   'pw_recovery' => true,
   /*
-   * Recovery Request Duration
-   * How many minutes a recovery request is valid.
+   * Recovery Request Time Limit
+   * How long a recovery request is valid.
    */
-  'pw_recovery_minutes' => 240,
+  'pw_recovery_time_limit' => '12 hours',
   /*
    * Password Storage Method
    * Method used to store passwords. Salt is more secure if the database is

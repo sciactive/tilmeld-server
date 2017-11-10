@@ -72,10 +72,6 @@ export default class User extends Entity {
     return this.serverCall('gatekeeper', args);
   }
 
-  recover(...args) {
-    return this.serverCall('recover', args);
-  }
-
   // === Static Methods ===
 
   static current(...args) {
@@ -103,6 +99,14 @@ export default class User extends Entity {
       }
       return Promise.resolve(data);
     });
+  }
+
+  static sendRecoveryLink(...args) {
+    return User.serverCallStatic('sendRecoveryLink', args);
+  }
+
+  static recover(...args) {
+    return User.serverCallStatic('recover', args);
   }
 
   static getClientConfig(...args) {

@@ -65,8 +65,8 @@ class Tilmeld {
    * following form:
    *
    * [
-   *     'setup_url' => 'http://example.com/tilmeld/',
-   *     'create_admin' => false
+   *   'setup_url' => 'http://example.com/tilmeld/',
+   *   'create_admin' => false
    * ]
    *
    * @param array $config An associative array of Tilmeld's configuration.
@@ -112,12 +112,12 @@ class Tilmeld {
    * The following conditions will result in different checks, which determine
    * whether the check passes:
    *
-   * - No user is logged in. (Check other AC.)
-   * - The entity has no "user" and no "group". (Always true.)
    * - The user has the "system/admin" ability. (Always true.)
+   * - It is a user or group. (Always true for read or Tilmeld managers.)
+   * - The entity has no "user" and no "group". (Always true.)
+   * - No user is logged in. (Check other AC.)
    * - The entity is the user. (Always true.)
-   * - It is the user's primary group. (Always true.)
-   * - It is a user or group. (Always true.)
+   * - It is the user's primary group. (Always true for read.)
    * - Its "user" is the user. (It is owned by the user.) (Check user AC.)
    * - Its "group" is the user's primary group. (Check group AC.)
    * - Its "group" is one of the user's secondary groups. (Check group AC.)
@@ -129,14 +129,23 @@ class Tilmeld {
    * @param int $type The lowest level of permission to consider a pass. One of Tilmeld::READ_ACCESS, Tilmeld::WRITE_ACCESS, or Tilmeld::DELETE_ACCESS.
    * @return bool Whether the current user has at least $type permission for the entity.
    */
-  public static function checkPermissions(&$entity, $type = Tilmeld::READ) {
-    if ((object) $entity !== $entity) {
+  public static function checkPermissions(&$entity, $type = Tilmeld::READ_ACCESS) {
+    if ((object) $entity !== $entity || !is_callable([$entity, 'is'])) {
       return false;
     }
     if (User::current(true)->gatekeeper('system/admin')) {
       return true;
     }
-    if (is_a($entity, '\Tilmeld\Entities\User') || is_a($entity, '\Tilmeld\Entities\Group')) {
+    if (
+        (
+          is_a($entity, '\Tilmeld\Entities\User')
+          || is_a($entity, '\Tilmeld\Entities\Group')
+        )
+        && (
+          $type === Tilmeld::READ_ACCESS
+          || Tilmeld::gatekeeper('tilmeld/manage')
+        )
+      ) {
       return true;
     }
     if ((!isset($entity->user) || !isset($entity->user->guid))
@@ -152,6 +161,17 @@ class Tilmeld {
 
     if (User::current() === null) {
       return ($ac_other >= $type);
+    }
+    if (User::current(true)->is($entity)) {
+      return true;
+    }
+    if (
+        isset(User::current(true)->group)
+        && is_callable([User::current(true)->group, 'is'])
+        && User::current(true)->group->is($entity)
+        && $type === Tilmeld::READ_ACCESS
+      ) {
+      return true;
     }
     if (is_callable([$entity->user, 'is']) && $entity->user->is(User::current())) {
       return ($ac_user >= $type);

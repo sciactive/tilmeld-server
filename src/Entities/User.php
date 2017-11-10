@@ -42,12 +42,13 @@ class User extends AbleObject {
     'getAvatar',
     'register',
     'logout',
-    'recover',
     'sendEmailVerification',
   ];
   public static $clientEnabledStaticMethods = [
     'current',
     'loginUser',
+    'sendRecoveryLink',
+    'recover',
     'getClientConfig',
   ];
   protected $privateData = [
@@ -61,6 +62,8 @@ class User extends AbleObject {
     'addressState',
     'addressZip',
     'addressInternational',
+    'group',
+    'groups',
     'abilities',
     'inheritAbilities',
     'timezone',
@@ -107,7 +110,6 @@ class User extends AbleObject {
         if (!isset($this->secret) && (!isset($this->emailChangeDate) || $this->emailChangeDate < strtotime('-'.Tilmeld::$config['email_rate_limit']))) {
           $this->originalEmail = $this->email;
         }
-        $this->updateDataProtection();
         return;
       }
     }
@@ -143,8 +145,6 @@ class User extends AbleObject {
     if (Tilmeld::gatekeeper('tilmeld/manage')) {
       // Users who can edit other users can see most of their data.
       $this->privateData = [
-        'recoverSecret',
-        'recoverSecretTime',
         'password',
         'salt'
       ];
@@ -187,6 +187,7 @@ class User extends AbleObject {
         'secret',
         'cancelEmailAddress',
         'cancelEmailSecret',
+        'emailChangeDate',
         'recoverSecret',
         'recoverSecretTime',
         'password',
@@ -276,7 +277,10 @@ class User extends AbleObject {
 
     // Formatting.
     $this->username = trim($this->username);
-    $this->email = trim($this->email);
+    // Setting username sets both username and email if email_usernames is on.
+    if (!Tilmeld::$config['email_usernames']) {
+      $this->email = trim($this->email);
+    }
     $this->nameFirst = trim($this->nameFirst);
     $this->nameMiddle = trim($this->nameMiddle);
     $this->nameLast = trim($this->nameLast);
@@ -302,7 +306,7 @@ class User extends AbleObject {
       if (Tilmeld::$config['verify_email']) {
         // The user needs to verify this new email address.
         if (!isset($this->guid)) {
-          $this->secret = uniqid('', true);
+          $this->secret = self::generateSecret($this);
           $sendVerification = true;
         } elseif ($this->email !== $this->originalEmail) {
           // The user already has an old email address.
@@ -316,7 +320,6 @@ class User extends AbleObject {
                 \uMailPHP\Mail::formatDate(strtotime('+'.Tilmeld::$config['email_rate_limit'], $this->emailChangeDate), 'full_short') .
                 ' to change your email address again.'
             );
-            //$this->email = $this->originalEmail;
           } else {
             if (!isset($this->secret)
                 && (
@@ -329,10 +332,10 @@ class User extends AbleObject {
               // Save the old email in case the cancel change
               // link is clicked.
               $this->cancelEmailAddress = $this->originalEmail;
-              $this->cancelEmailSecret = uniqid('', true);
+              $this->cancelEmailSecret = self::generateSecret($this);
               $this->emailChangeDate = time();
             }
-            $this->secret = uniqid('', true);
+            $this->secret = self::generateSecret($this);
             $sendVerification = true;
           }
         }
@@ -350,7 +353,7 @@ class User extends AbleObject {
         // should be able to cancel the email change from their old
         // address.
         $this->cancelEmailAddress = $this->originalEmail;
-        $this->cancelEmailSecret = uniqid('', true);
+        $this->cancelEmailSecret = self::generateSecret($this);
         $sendVerification = true;
       }
     }
@@ -361,8 +364,8 @@ class User extends AbleObject {
 
     if (isset($this->passwordTemp) && $this->passwordTemp !== '') {
       $this->password($this->passwordTemp);
-      unset($this->passwordTemp);
     }
+    unset($this->passwordTemp);
 
     $return = parent::save();
     if ($return && $sendVerification) {
@@ -811,14 +814,29 @@ class User extends AbleObject {
       $this->email = $this->username;
     }
 
-    $this->group = \Nymph\Nymph::getEntity(array('class' => '\Tilmeld\Entities\Group'), array('&', 'data' => array('defaultPrimary', true)));
+    $this->group = \Nymph\Nymph::getEntity(
+        ['class' => '\Tilmeld\Entities\Group'],
+        ['&',
+          'data' => ['defaultPrimary', true]
+        ]
+    );
     if (!isset($this->group->guid)) {
       unset($this->group);
     }
     if (Tilmeld::$config['verify_email'] && Tilmeld::$config['unverified_access']) {
-      $this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Entities\Group'), array('&', 'data' => array('unverifiedSecondary', true)));
+      $this->groups = (array) \Nymph\Nymph::getEntities(
+          ['class' => '\Tilmeld\Entities\Group'],
+          ['&',
+            'data' => ['unverifiedSecondary', true]
+          ]
+      );
     } else {
-      $this->groups = (array) \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Entities\Group'), array('&', 'data' => array('defaultSecondary', true)));
+      $this->groups = (array) \Nymph\Nymph::getEntities(
+          ['class' => '\Tilmeld\Entities\Group'],
+          ['&',
+            'data' => ['defaultSecondary', true]
+          ]
+      );
     }
 
     if (Tilmeld::$config['verify_email']) {
@@ -832,9 +850,9 @@ class User extends AbleObject {
 
     // If create_admin is true and there are no other users, grant "system/admin".
     if (Tilmeld::$config['create_admin']) {
-      $otherUsers = \Nymph\Nymph::getEntities(array('class' => '\Tilmeld\Entities\User', 'skip_ac' => true, 'limit' => 1));
+      $otherUsers = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Entities\User', 'skip_ac' => true, 'limit' => 1]);
       // Make sure it's not just null, cause that means an error.
-      if ($otherUsers === array()) {
+      if ($otherUsers === []) {
         $this->grant('system/admin');
         $this->enabled = true;
       }
@@ -842,7 +860,7 @@ class User extends AbleObject {
 
     if ($this->save()) {
       // Send the new user registered email.
-      $macros = array(
+      $macros = [
         'user_username' => htmlspecialchars($this->username),
         'user_name' => htmlspecialchars($this->name),
         'user_first_name' => htmlspecialchars($this->nameFirst),
@@ -851,7 +869,7 @@ class User extends AbleObject {
         'user_phone' => htmlspecialchars(\uMailPHP\Mail::formatPhone($this->phone)),
         'user_timezone' => htmlspecialchars($this->timezone),
         'user_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
-      );
+      ];
       $mail = new \uMailPHP\Mail('\Tilmeld\Entities\Mail\UserRegistered', null, $macros);
       $mail->send();
       if (Tilmeld::$config['verify_email'] && !Tilmeld::$config['unverified_access']) {
@@ -913,7 +931,75 @@ class User extends AbleObject {
     }
 
     // Login was successful.
-    return ['result' => true, 'message' => 'Successfully logged in.'];
+    return ['result' => true, 'message' => 'You are logged in.'];
+  }
+
+  /**
+   * Send an account recovery link.
+   *
+   * @return array An associative array with a boolean 'result' entry and a 'message' entry.
+   */
+  public static function sendRecoveryLink($data) {
+    if (!Tilmeld::$config['pw_recovery']) {
+      return ['result' => false, 'message' => 'Account recovery is not allowed.'];
+    }
+
+    if (!Tilmeld::$config['email_usernames'] && $data['recoveryType'] === 'username') {
+      // Create a username recovery email.
+
+      $user = \Nymph\Nymph::getEntity(
+          ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
+          ['&',
+            'strict' => ['email', $data['account']]
+          ]
+      );
+
+      if (!isset($user)) {
+        return ['result' => false, 'message' => 'Requested account is not accessible.'];
+      }
+
+      // Send the recovery email.
+      $macros = [
+        'to_phone' => htmlspecialchars(\uMailPHP\Mail::formatPhone($user->phone)),
+        'to_timezone' => htmlspecialchars($user->timezone),
+        'to_address' => $user->addressType == 'us' ? htmlspecialchars("{$user->addressStreet} {$user->addressStreet2}").'<br />'.htmlspecialchars("{$user->addressCity}, {$user->addressState} {$user->addressZip}") : '<pre>'.htmlspecialchars($user->addressInternational).'</pre>'
+      ];
+      $mail = new \uMailPHP\Mail('\Tilmeld\Entities\Mail\RecoverUsername', $user, $macros);
+    } elseif ($data['recoveryType'] === 'password') {
+      // Create a password recovery email.
+
+      $user = User::factory($data['account']);
+
+      if (!isset($user->guid)) {
+        return ['result' => false, 'message' => 'Requested account is not accessible.'];
+      }
+
+      // Create a unique secret.
+      $user->recoverSecret = self::generateSecret($user);
+      $user->recoverSecretTime = time();
+      if (!$user->save()) {
+        return ['result' => false, 'message' => 'Couldn\'t save user secret.'];
+      }
+
+      // Send the recovery email.
+      $macros = [
+        'recover_code' => $user->recoverSecret,
+        'time_limit' => htmlspecialchars(Tilmeld::$config['pw_recovery_time_limit']),
+        'to_phone' => htmlspecialchars(\uMailPHP\Mail::formatPhone($user->phone)),
+        'to_timezone' => htmlspecialchars($user->timezone),
+        'to_address' => $user->addressType == 'us' ? htmlspecialchars("{$user->addressStreet} {$user->addressStreet2}").'<br />'.htmlspecialchars("{$user->addressCity}, {$user->addressState} {$user->addressZip}") : '<pre>'.htmlspecialchars($user->addressInternational).'</pre>'
+      ];
+      $mail = new \uMailPHP\Mail('\Tilmeld\Entities\Mail\RecoverPassword', $user, $macros);
+    } else {
+      return ['result' => false, 'message' => 'Invalid recovery type.'];
+    }
+
+    // Send the email.
+    if ($mail->send()) {
+      return ['result' => true, 'message' => 'We\'ve sent an email to your registered address. Please check your email to continue with account recovery.'];
+    } else {
+      return ['result' => false, 'message' => 'Couldn\'t send recovery email.'];
+    }
   }
 
   /**
@@ -921,36 +1007,33 @@ class User extends AbleObject {
    *
    * @return array An associative array with a boolean 'result' entry and a 'message' entry.
    */
-  public function recover() {
+  public static function recover($data) {
     if (!Tilmeld::$config['pw_recovery']) {
       return ['result' => false, 'message' => 'Account recovery is not allowed.'];
     }
 
-    if (!isset($this->guid) || !$this->enabled) {
-      return ['result' => false, 'message' => 'Requested account is not accessible.'];
+    $user = User::factory($data['username']);
+
+    if (
+        !isset($user->guid)
+        || !isset($user->recoverSecret)
+        || $data['secret'] !== $user->recoverSecret
+        || strtotime('+'.Tilmeld::$config['pw_recovery_time_limit'], $user->recoverSecretTime) < time()
+      ) {
+      return ['result' => false, 'message' => 'The secret code does not match.'];
     }
 
-    // Create a unique secret.
-    $this->recoverSecret = uniqid('', true);
-    $this->recoverSecretTime = time();
-    if (!$this->save()) {
-      return ['result' => false, 'message' => 'Couldn\'t save user secret.'];
+    if (empty($data['password'])) {
+      return ['result' => false, 'message' => 'Password cannot be empty.'];
     }
 
-    // Send the recovery email.
-    $link = htmlspecialchars(Tilmeld::$config['setup_url'].(strpos(Tilmeld::$config['setup_url'], '?') ? '&' : '?').'action=recover&id='.$this->guid.'&secret='.$this->recoverSecret);
-    $macros = array(
-      'recover_link' => $link,
-      'minutes' => htmlspecialchars(Tilmeld::$config['pw_recovery_minutes']),
-      'to_phone' => htmlspecialchars(\uMailPHP\Mail::formatPhone($this->phone)),
-      'to_timezone' => htmlspecialchars($this->timezone),
-      'to_address' => $this->addressType == 'us' ? htmlspecialchars("{$this->addressStreet} {$this->addressStreet2}").'<br />'.htmlspecialchars("{$this->addressCity}, {$this->addressState} {$this->addressZip}") : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
-    );
-    $mail = new \uMailPHP\Mail('\Tilmeld\Entities\Mail\RecoverAccount', $this, $macros);
-    if ($mail->send()) {
-      return ['result' => true, 'message' => 'We\'ve sent an email to your registered address. Please check your email to continue with account recovery.'];
+    $user->password($data['password']);
+    unset($user->recoverSecret);
+    unset($user->recoverSecretTime);
+    if ($user->save()) {
+      return ['result' => true, 'message' => 'Your password has been reset. You can now log in using your new password.'];
     } else {
-      return ['result' => false, 'message' => 'Couldn\'t send recovery email.'];
+      return ['result' => false, 'message' => 'Error saving new password.'];
     }
   }
 
@@ -964,5 +1047,9 @@ class User extends AbleObject {
       'pw_recovery' => Tilmeld::$config['pw_recovery'],
       'timezones' => $timezones,
     ];
+  }
+
+  public static function generateSecret($user) {
+    return substr(hash('sha256', uniqid($user->username, true)), 0, rand(12, 18));
   }
 }
