@@ -74,6 +74,87 @@ class Tilmeld {
       return array_replace($tilmeldConfig, $config);
     });
     self::$config = \SciActive\RequirePHP::_('TilmeldConfig');
+
+    // Set up access control hooks.
+    require __DIR__.'/accesscontrolhooks.php';
+  }
+
+  /**
+   * Add selectors to a list of options and selectors which will limit results
+   * to only entities the currently logged in user has access to.
+   */
+  public static function addAccessControlSelectors(&$optionsAndSelectors) {
+    $user = User::current();
+
+    if ($user !== null && $user->gatekeeper('system/admin')) {
+      // The user is a system admin, so they can see everything.
+      return;
+    }
+
+    if (!isset($optionsAndSelectors[0])) {
+      throw new Exception('No options in argument.');
+    } elseif (
+        isset($optionsAndSelectors[0]['class'])
+        && (
+          $optionsAndSelectors[0]['class'] === '\Tilmeld\Entities\User'
+          || $optionsAndSelectors[0]['class'] === '\Tilmeld\Entities\Group'
+        )
+      ) {
+      // They are requesting a user/group. Always accessible for reading.
+      return;
+    }
+
+    if ($user === null) {
+      $optionsAndSelectors[] = ['|',
+        // Other access control is sufficient.
+        'gte' => ['ac_other', Tilmeld::READ_ACCESS],
+        // The user and group are not set.
+        ['&',
+          '!isset' => ['user', 'group']
+        ]
+      ];
+    } else {
+      $selector = ['|',
+        // Other access control is sufficient.
+        'gte' => ['ac_other', Tilmeld::READ_ACCESS],
+        // The user and group are not set.
+        ['&',
+          '!isset' => ['user', 'group']
+        ],
+        // It is owned by the user.
+        ['&',
+          'ref' => ['user', $user],
+          'gte' => ['ac_user', Tilmeld::READ_ACCESS]
+        ]
+      ];
+      $groupRefs = [];
+      if (isset($user->group) && isset($user->group->guid)) {
+        // It belongs to the user's primary group.
+        $groupRefs[] = ['group', $user->group];
+      }
+      foreach ($user->groups as $curSecondaryGroup) {
+        if (isset($curSecondaryGroup) && isset($curSecondaryGroup->guid)) {
+          // It belongs to the user's secondary group.
+          $groupRefs[] = ['group', $curSecondaryGroup];
+        }
+      }
+      foreach ($_SESSION['tilmeld_descendants'] as $curDescendantGroup) {
+        if (isset($curDescendantGroup) && isset($curDescendantGroup->guid)) {
+          // It belongs to the user's secondary group.
+          $groupRefs[] = ['group', $curDescendantGroup];
+        }
+      }
+      // All the group refs.
+      if (!empty($groupRefs)) {
+        $selector[] = ['&',
+          'gte' => ['ac_group', Tilmeld::READ_ACCESS],
+          ['|',
+            'ref' => $groupRefs
+          ]
+        ];
+      }
+      $optionsAndSelectors[] = $selector;
+    }
   }
 
   /**
@@ -133,6 +214,8 @@ class Tilmeld {
         (
           is_a($entity, '\Tilmeld\Entities\User')
           || is_a($entity, '\Tilmeld\Entities\Group')
+          || is_a($entity, '\SciActive\HookOverride_Tilmeld_Entities_User')
+          || is_a($entity, '\SciActive\HookOverride_Tilmeld_Entities_Group')
         )
         && (
           $type === Tilmeld::READ_ACCESS
