@@ -1,18 +1,14 @@
-<?php namespace Tilmeld\Entities\Mail;
+<?php
+namespace Tilmeld\Entities\Mail;
+
 /**
- * UserRegistered class.
+ * New User Registered
  *
  * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
- */
-
-/**
- * New User Registered
- *
- * @package Tilmeld
  */
 class UserRegistered extends \uMailPHP\Definition {
   public static $cname = 'New User Registered';

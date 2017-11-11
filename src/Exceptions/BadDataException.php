@@ -1,4 +1,5 @@
-<?php namespace Tilmeld\Exceptions;
+<?php
+namespace Tilmeld\Exceptions;
 
 /**
  * BadDataException exception.
@@ -12,4 +13,6 @@
  * @copyright SciActive.com
  * @link http://sciactive.com/
  */
-class BadDataException extends \Exception {}
+class BadDataException extends \Exception {
+
+}

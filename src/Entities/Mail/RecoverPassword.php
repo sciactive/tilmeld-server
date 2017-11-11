@@ -1,18 +1,14 @@
-<?php namespace Tilmeld\Entities\Mail;
+<?php
+namespace Tilmeld\Entities\Mail;
+
 /**
- * RecoverPassword class.
+ * Recover Account Password
  *
  * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
- */
-
-/**
- * Recover Account
- *
- * @package Tilmeld
  */
 class RecoverPassword extends \uMailPHP\Definition {
   public static $cname = 'Recover Password';

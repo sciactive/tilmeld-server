@@ -1,18 +1,14 @@
-<?php namespace Tilmeld\Entities\Mail;
+<?php
+namespace Tilmeld\Entities\Mail;
+
 /**
- * VerifyEmailChange class.
+ * Verify Email Change
  *
  * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
- */
-
-/**
- * Verify Email Change
- *
- * @package Tilmeld
  */
 class VerifyEmailChange extends \uMailPHP\Definition {
   public static $cname = 'Verify Email Change';

@@ -1,18 +1,14 @@
-<?php namespace Tilmeld\Entities\Mail;
+<?php
+namespace Tilmeld\Entities\Mail;
+
 /**
- * RecoverUsername class.
+ * Recover Account Username
  *
  * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
- */
-
-/**
- * Recover Account
- *
- * @package Tilmeld
  */
 class RecoverUsername extends \uMailPHP\Definition {
   public static $cname = 'Recover Username';
