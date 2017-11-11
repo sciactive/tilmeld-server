@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "20268a51bc8bce6a164baa6d53082156",
+    "content-hash": "69d9c233a73025d430bdd1cb4f36b9da",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -1017,12 +1017,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/http-foundation.git",
-                "reference": "24068b1c8b5f330654b4ef5a95646a1a658171ea"
+                "reference": "ce3c40e528a2786453fa4154c85480ee6e9b8500"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/24068b1c8b5f330654b4ef5a95646a1a658171ea",
-                "reference": "24068b1c8b5f330654b4ef5a95646a1a658171ea",
+                "url": "https://api.github.com/repos/symfony/http-foundation/zipball/ce3c40e528a2786453fa4154c85480ee6e9b8500",
+                "reference": "ce3c40e528a2786453fa4154c85480ee6e9b8500",
                 "shasum": ""
             },
             "require": {
@@ -1063,7 +1063,7 @@
             ],
             "description": "Symfony HttpFoundation Component",
             "homepage": "https://symfony.com",
-            "time": "2017-11-05T19:07:09+00:00"
+            "time": "2017-11-10T07:36:19+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",

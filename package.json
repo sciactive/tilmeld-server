@@ -1,6 +1,6 @@
 {
   "name": "tilmeld",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0-alpha.2",
   "description": "Nymph user and group management with access controls.",
   "directories": {
     "example": "examples"
