@@ -1,7 +1,8 @@
 <?php
 namespace Tilmeld\Entities;
 
-use Tilmeld\Tilmeld as Tilmeld;
+use Tilmeld\Tilmeld;
+use Nymph\Nymph;
 
 /**
  * User class.
@@ -90,6 +91,14 @@ class User extends AbleObject {
   private $gatekeeperCache = [];
 
   /**
+   * This is explicitly used only during the registration proccess.
+   *
+   * @var bool
+   * @access private
+   */
+  private $skipAcWhenSaving = false;
+
+  /**
    * Load a user.
    *
    * @param int|string $id The ID or username of the user to load, 0 for a new user.
@@ -98,9 +107,9 @@ class User extends AbleObject {
   public function __construct($id = 0, $skipUpdateDataProtectionOnNewEntity = false) {
     if ($id > 0 || (string) $id === $id) {
       if ((int) $id === $id) {
-        $entity = \Nymph\Nymph::getEntity(['class' => get_class($this)], ['&', 'guid' => (int) $id]);
+        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'guid' => (int) $id]);
       } else {
-        $entity = \Nymph\Nymph::getEntity(['class' => get_class($this)], ['&', 'strict' => ['username', (string) $id]]);
+        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'strict' => ['username', (string) $id]]);
       }
       if (isset($entity)) {
         $this->guid = $entity->guid;
@@ -203,7 +212,7 @@ class User extends AbleObject {
     if (!Tilmeld::$config['email_usernames'] && $data['recoveryType'] === 'username') {
       // Create a username recovery email.
 
-      $user = \Nymph\Nymph::getEntity(
+      $user = Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
           ['&',
             'ilike' => ['email', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $data['account'])]
@@ -733,7 +742,7 @@ class User extends AbleObject {
       if (isset($this->guid)) {
         $selector['!guid'] = $this->guid;
       }
-      $test = \Nymph\Nymph::getEntity(
+      $test = Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
           $selector
       );
@@ -776,7 +785,7 @@ class User extends AbleObject {
     if (isset($this->guid)) {
       $selector['!guid'] = $this->guid;
     }
-    $test = \Nymph\Nymph::getEntity(
+    $test = Nymph::getEntity(
         ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
         $selector
     );
@@ -807,7 +816,7 @@ class User extends AbleObject {
     if (isset($this->guid)) {
       $selector['!guid'] = $this->guid;
     }
-    $test = \Nymph\Nymph::getEntity(
+    $test = Nymph::getEntity(
         ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
         $selector
     );
@@ -852,7 +861,7 @@ class User extends AbleObject {
       $primaryGroup->groupname = $this->username;
       $primaryGroup->name = $this->name;
       $primaryGroup->email = $this->email;
-      $primaryGroup->group = \Nymph\Nymph::getEntity(
+      $primaryGroup->group = Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
             'data' => ['defaultPrimary', true]
@@ -861,13 +870,13 @@ class User extends AbleObject {
       if (!isset($primaryGroup->group) || !isset($primaryGroup->group->guid)) {
         unset($primaryGroup->group);
       }
-      if (!$primaryGroup->save()) {
+      if (!Nymph::saveEntity($primaryGroup, 'skip_ac')) {
         return ['result' => false, 'loggedin' => false, 'message' => 'Error creating primary group for user.'];
       }
       $this->group = $primaryGroup;
     } else {
       // Add the default primary.
-      $this->group = \Nymph\Nymph::getEntity(
+      $this->group = Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
             'data' => ['defaultPrimary', true]
@@ -881,7 +890,7 @@ class User extends AbleObject {
     // Add secondary groups.
     if (Tilmeld::$config['verify_email'] && Tilmeld::$config['unverified_access']) {
       // Add the default secondaries for unverified users.
-      $this->groups = (array) \Nymph\Nymph::getEntities(
+      $this->groups = (array) Nymph::getEntities(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
             'data' => ['unverifiedSecondary', true]
@@ -889,7 +898,7 @@ class User extends AbleObject {
       );
     } else {
       // Add the default secondaries.
-      $this->groups = (array) \Nymph\Nymph::getEntities(
+      $this->groups = (array) Nymph::getEntities(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
             'data' => ['defaultSecondary', true]
@@ -908,7 +917,7 @@ class User extends AbleObject {
 
     // If create_admin is true and there are no other users, grant "system/admin".
     if (Tilmeld::$config['create_admin']) {
-      $otherUsers = \Nymph\Nymph::getEntities(['class' => '\Tilmeld\Entities\User', 'skip_ac' => true, 'limit' => 1]);
+      $otherUsers = Nymph::getEntities(['class' => '\Tilmeld\Entities\User', 'skip_ac' => true, 'limit' => 1]);
       // Make sure it's not just null, cause that means an error.
       if ($otherUsers === []) {
         $this->grant('system/admin');
@@ -916,6 +925,7 @@ class User extends AbleObject {
       }
     }
 
+    $this->skipAcWhenSaving = true;
     if ($this->save()) {
       // Send the new user registered email.
       $macros = [
@@ -930,25 +940,31 @@ class User extends AbleObject {
       ];
       $mail = new \uMailPHP\Mail('\Tilmeld\Entities\Mail\UserRegistered', null, $macros);
       $mail->send();
+
+      $message = "";
+
+      // Save the primary group.
+      if ($primaryGroup) {
+        $primaryGroup->user = $this;
+        if (!Nymph::saveEntity($primaryGroup, 'skip_ac')) {
+          $message .= "Your account was created, but your primary group couldn't be assigned to you. You should ask an administrator to fix this. ";
+        }
+      }
+
+      // Finish up.
       if (Tilmeld::$config['verify_email'] && !Tilmeld::$config['unverified_access']) {
-        $message = "Almost there. An email has been sent to {$this->email} with a verification link for you to finish registration.";
+        $message .= "Almost there. An email has been sent to {$this->email} with a verification link for you to finish registration.";
         $loggedin = false;
       } elseif (Tilmeld::$config['verify_email'] && Tilmeld::$config['unverified_access']) {
         Tilmeld::login($this);
         $this->updateDataProtection();
-        $message = "You're now logged in! An email has been sent to {$this->email} with a verification link for you to finish registration.";
+        $message .= "You're now logged in! An email has been sent to {$this->email} with a verification link for you to finish registration.";
         $loggedin = true;
       } else {
         Tilmeld::login($this);
         $this->updateDataProtection();
-        $message = 'You\'re now registered and logged in!';
+        $message .= 'You\'re now registered and logged in!';
         $loggedin = true;
-      }
-      if ($primaryGroup) {
-        $primaryGroup->user = $this;
-        if (!$primaryGroup->save()) {
-          $message = "Your account was created, but your primary group couldn't be assigned to you. You should ask an administrator to fix this.";
-        }
       }
       return ['result' => true, 'loggedin' => $loggedin, 'message' => $message];
     } else {
@@ -1065,10 +1081,18 @@ class User extends AbleObject {
       $this->group->groupname = $this->username;
       $this->group->email = $this->email;
       $this->group->name = $this->name;
-      $this->group->save();
+      Nymph::saveEntity($this->group, 'skip_ac');
     }
 
-    $return = parent::save();
+    if ($this->skipAcWhenSaving) {
+      try {
+        $return = Nymph::saveEntity($this, 'skip_ac');
+      } finally {
+        $this->skipAcWhenSaving = false;
+      }
+    } else {
+      $return = parent::save();
+    }
     if ($return && $sendVerification) {
       // The email has changed, so send a new verification email.
       $this->sendEmailVerification();

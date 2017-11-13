@@ -1,8 +1,8 @@
 <?php
 namespace Tilmeld;
 
-use Tilmeld\Entities\User as User;
-use Tilmeld\Entities\Group as Group;
+use Tilmeld\Entities\User;
+use Tilmeld\Entities\Group;
 
 /**
  * Tilmeld class.
@@ -204,10 +204,13 @@ class Tilmeld {
    * @return bool Whether the current user has at least $type permission for the entity.
    */
   public static function checkPermissions(&$entity, $type = Tilmeld::READ_ACCESS) {
+    $currentUserOrNull = User::current();
+    $currentUserOrEmpty = User::current(true);
+
     if ((object) $entity !== $entity || !is_callable([$entity, 'is'])) {
       return false;
     }
-    if (User::current(true)->gatekeeper('system/admin')) {
+    if ($currentUserOrEmpty->gatekeeper('system/admin')) {
       return true;
     }
     if (
@@ -235,27 +238,27 @@ class Tilmeld {
     $ac_group = $entity->ac_group ?? Tilmeld::READ_ACCESS;
     $ac_other = $entity->ac_other ?? Tilmeld::NO_ACCESS;
 
-    if (User::current() === null) {
+    if ($currentUserOrNull === null) {
       return ($ac_other >= $type);
     }
-    if (User::current(true)->is($entity)) {
+    if ($currentUserOrEmpty->is($entity)) {
       return true;
     }
     if (
-        isset(User::current(true)->group)
-        && is_callable([User::current(true)->group, 'is'])
-        && User::current(true)->group->is($entity)
+        isset($currentUserOrEmpty->group)
+        && is_callable([$currentUserOrEmpty->group, 'is'])
+        && $currentUserOrEmpty->group->is($entity)
         && $type === Tilmeld::READ_ACCESS
       ) {
       return true;
     }
-    if (is_callable([$entity->user, 'is']) && $entity->user->is(User::current())) {
+    if (is_callable([$entity->user, 'is']) && $entity->user->is($currentUserOrNull)) {
       return ($ac_user >= $type);
     }
     if (is_callable([$entity->group, 'is'])
         && (
-          $entity->group->is(User::current(true)->group) ||
-          $entity->group->inArray(User::current(true)->groups) ||
+          $entity->group->is($currentUserOrEmpty->group) ||
+          $entity->group->inArray($currentUserOrEmpty->groups) ||
           $entity->group->inArray($_SESSION['tilmeld_descendants'])
         )
       ) {
@@ -296,6 +299,7 @@ class Tilmeld {
     }
     $_SESSION['tilmeld_user_timezone'] = $tmp_user->getTimezone();
     date_default_timezone_set($_SESSION['tilmeld_user_timezone']);
+    $_SESSION['tilmeld_descendants'] = [];
     if (isset($tmp_user->group)) {
       $_SESSION['tilmeld_descendants'] = (array) $tmp_user->group->getDescendants();
     }

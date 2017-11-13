@@ -49,10 +49,10 @@ function TilmeldCheckPermissionsDeleteHook(&$array) {
  * @param array &$data The callback data array.
  */
 function TilmeldCheckPermissionsReturnHook(&$array, $name, &$object, &$function, &$data) {
-  if (isset($data['Tilmeld_skip_ac']) && $data['Tilmeld_skip_ac']) {
-    return;
-  }
   // TODO(hperrin): Is this necessary, after adding AC selectors?
+  // if (isset($data['Tilmeld_skip_ac']) && $data['Tilmeld_skip_ac']) {
+  //   return;
+  // }
   // if (is_array($array[0])) {
   //   $is_array = true;
   //   $entities = &$array[0];
@@ -78,6 +78,10 @@ function TilmeldCheckPermissionsSaveHook(&$array) {
   $entity = $array[0];
   if ((object) $entity !== $entity) {
     $array = false;
+    return;
+  }
+  if (isset($array[1]) && $array[1] === 'skip_ac') {
+    unset($array[1]);
     return;
   }
   // Test for permissions.
@@ -106,7 +110,7 @@ function TilmeldCheckPermissionsSaveHook(&$array) {
  * @param array &$array An array of either an entity or another array of entities.
  */
 function TilmeldAddAccessHook(&$array) {
-  $user = Entities\User::curent();
+  $user = Entities\User::current();
   if (
       $user !== null
       && !isset($array[0]->guid)
@@ -133,7 +137,7 @@ function TilmeldAddAccessHook(&$array) {
 
 foreach (array('Nymph->getEntity', 'Nymph->getEntities') as $curHook) {
   \SciActive\Hook::addCallback($curHook, -10, '\Tilmeld\TilmeldGetEntitiesHook');
-  \SciActive\Hook::addCallback($curHook, 10, '\Tilmeld\TilmeldCheckPermissionsReturnHook');
+  // \SciActive\Hook::addCallback($curHook, 10, '\Tilmeld\TilmeldCheckPermissionsReturnHook');
 }
 unset($curHook);
 

@@ -60,7 +60,7 @@ if (getenv('NYMPH_PRODUCTION')) {
   'site_link' => 'http://localhost/tilmeld/',
   'master_address' => 'someone@example.com',
   'testing_mode' => true,
-  'testing_email' => 'hunter@sciactive.com',
+  'testing_email' => 'hperrin@localhost',
 ]);
 
 

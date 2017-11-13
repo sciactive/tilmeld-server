@@ -1,7 +1,8 @@
 <?php
 namespace Tilmeld\Entities;
 
-use Tilmeld\Tilmeld as Tilmeld;
+use Tilmeld\Tilmeld;
+use Nymph\Nymph;
 
 /**
  * Group class.
@@ -70,9 +71,9 @@ class Group extends AbleObject {
   public function __construct($id = 0, $skipUpdateDataProtectionOnNewEntity = false) {
     if ($id > 0 || (string) $id === $id) {
       if ((int) $id === $id) {
-        $entity = \Nymph\Nymph::getEntity(['class' => get_class($this)], ['&', 'guid' => $id]);
+        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'guid' => $id]);
       } else {
-        $entity = \Nymph\Nymph::getEntity(['class' => get_class($this)], ['&', 'data' => ['groupname', $id]]);
+        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'data' => ['groupname', $id]]);
       }
       if (isset($entity)) {
         $this->guid = $entity->guid;
@@ -98,7 +99,7 @@ class Group extends AbleObject {
     $highestPrimaryParent = Tilmeld::$config['highest_primary'];
     $primaryGroups = [];
     if ($highestPrimaryParent == 0) {
-      $primaryGroups = \Nymph\Nymph::getEntities(
+      $primaryGroups = Nymph::getEntities(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
             'data' => ['enabled', true]
@@ -123,7 +124,7 @@ class Group extends AbleObject {
     $highestSecondaryParent = Tilmeld::$config['highest_secondary'];
     $secondaryGroups = [];
     if ($highestSecondaryParent == 0) {
-      $secondaryGroups = \Nymph\Nymph::getEntities(
+      $secondaryGroups = Nymph::getEntities(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
             'data' => ['enabled', true]
@@ -202,7 +203,7 @@ class Group extends AbleObject {
    * @return array An array of groups.
    */
   public function getChildren() {
-    $return = (array) \Nymph\Nymph::getEntities(
+    $return = (array) Nymph::getEntities(
         ['class' => '\Tilmeld\Entities\Group'],
         ['&',
           'data' => ['enabled', true],
@@ -220,7 +221,7 @@ class Group extends AbleObject {
    */
   public function getDescendants($andSelf = false) {
     $return = [];
-    $entities = \Nymph\Nymph::getEntities(
+    $entities = Nymph::getEntities(
         ['class' => '\Tilmeld\Entities\Group'],
         ['&',
           'data' => ['enabled', true],
@@ -280,7 +281,7 @@ class Group extends AbleObject {
       $or = null;
     }
     $groups[] = $this;
-    $return = \Nymph\Nymph::getEntities(
+    $return = Nymph::getEntities(
         ['class' => '\Tilmeld\Entities\User'],
         ['&',
           'data' => ['enabled', true]
@@ -315,7 +316,7 @@ class Group extends AbleObject {
       if (isset($this->guid)) {
         $selector['!guid'] = $this->guid;
       }
-      $test = \Nymph\Nymph::getEntity(
+      $test = Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
           $selector
       );
@@ -354,7 +355,7 @@ class Group extends AbleObject {
     if (isset($this->guid)) {
       $selector['!guid'] = $this->guid;
     }
-    $test = \Nymph\Nymph::getEntity(
+    $test = Nymph::getEntity(
         ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
         $selector
     );
@@ -401,7 +402,7 @@ class Group extends AbleObject {
 
     // Only one default primary group is allowed.
     if ($this->defaultPrimary) {
-      $currentPrimary = \Nymph\Nymph::getEntity(['class' => '\Tilmeld\Entities\Group'], ['&', 'data' => ['defaultPrimary', true]]);
+      $currentPrimary = Nymph::getEntity(['class' => '\Tilmeld\Entities\Group'], ['&', 'data' => ['defaultPrimary', true]]);
       if (isset($currentPrimary) && !$this->is($currentPrimary)) {
         unset($currentPrimary->defaultPrimary);
         if (!$currentPrimary->save()) {
@@ -417,7 +418,7 @@ class Group extends AbleObject {
     if (!User::current(true)->gatekeeper('tilmeld/admin')) {
       return false;
     }
-    $entities = \Nymph\Nymph::getEntities(
+    $entities = Nymph::getEntities(
         ['class' => '\Tilmeld\Entities\Group'],
         ['&',
           'ref' => ['parent', $this]
