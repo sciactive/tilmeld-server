@@ -63,6 +63,14 @@ class Group extends AbleObject {
   protected $whitelistTags = [];
 
   /**
+   * This is explicitly used only during the registration proccess.
+   *
+   * @var bool
+   * @access private
+   */
+  private $skipAcWhenSaving = false;
+
+  /**
    * Load a group.
    *
    * @param int $id The ID of the group to load, 0 for a new group.
@@ -412,6 +420,22 @@ class Group extends AbleObject {
     }
 
     return parent::save();
+  }
+
+  /*
+   * This should *never* be accessible on the client.
+   */
+  public function saveSkipAC() {
+    $this->skipAcWhenSaving = true;
+    return $this->save();
+  }
+
+  public function tilmeldSaveSkipAC() {
+    if ($this->skipAcWhenSaving) {
+      $this->skipAcWhenSaving = false;
+      return true;
+    }
+    return false;
   }
 
   public function delete() {

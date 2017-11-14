@@ -1,6 +1,7 @@
 <?php
 namespace Tilmeld;
 
+use SciActive\RequirePHP;
 use Tilmeld\Entities\User;
 use Tilmeld\Entities\Group;
 
@@ -65,7 +66,7 @@ class Tilmeld {
    * @param array $config An associative array of Tilmeld's configuration.
    */
   public static function configure($config = []) {
-    \SciActive\RequirePHP::_('TilmeldConfig', [], function () use ($config) {
+    RequirePHP::_('TilmeldConfig', [], function () use ($config) {
       $defaults = include dirname(__DIR__).'/conf/defaults.php';
       $tilmeldConfig = [];
       foreach ($defaults as $curName => $curOption) {
@@ -73,10 +74,12 @@ class Tilmeld {
       }
       return array_replace($tilmeldConfig, $config);
     });
-    self::$config = \SciActive\RequirePHP::_('TilmeldConfig');
+    self::$config = RequirePHP::_('TilmeldConfig');
 
-    // Set up access control hooks.
-    require __DIR__.'/accesscontrolhooks.php';
+    // Set up access control hooks when Nymph is called.
+    RequirePHP::_(['Nymph'], function($nymph) {
+      HookMethods::setup();
+    });
   }
 
   /**
@@ -98,6 +101,8 @@ class Tilmeld {
         && (
           $optionsAndSelectors[0]['class'] === '\Tilmeld\Entities\User'
           || $optionsAndSelectors[0]['class'] === '\Tilmeld\Entities\Group'
+          || $optionsAndSelectors[0]['class'] === 'Tilmeld\Entities\User'
+          || $optionsAndSelectors[0]['class'] === 'Tilmeld\Entities\Group'
         )
       ) {
       // They are requesting a user/group. Always accessible for reading.

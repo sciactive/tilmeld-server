@@ -870,7 +870,7 @@ class User extends AbleObject {
       if (!isset($primaryGroup->group) || !isset($primaryGroup->group->guid)) {
         unset($primaryGroup->group);
       }
-      if (!Nymph::saveEntity($primaryGroup, 'skip_ac')) {
+      if (!$primaryGroup->saveSkipAC()) {
         return ['result' => false, 'loggedin' => false, 'message' => 'Error creating primary group for user.'];
       }
       $this->group = $primaryGroup;
@@ -946,7 +946,7 @@ class User extends AbleObject {
       // Save the primary group.
       if ($primaryGroup) {
         $primaryGroup->user = $this;
-        if (!Nymph::saveEntity($primaryGroup, 'skip_ac')) {
+        if (!$primaryGroup->saveSkipAC()) {
           $message .= "Your account was created, but your primary group couldn't be assigned to you. You should ask an administrator to fix this. ";
         }
       }
@@ -1081,23 +1081,23 @@ class User extends AbleObject {
       $this->group->groupname = $this->username;
       $this->group->email = $this->email;
       $this->group->name = $this->name;
-      Nymph::saveEntity($this->group, 'skip_ac');
+      $this->group->saveSkipAC();
     }
 
-    if ($this->skipAcWhenSaving) {
-      try {
-        $return = Nymph::saveEntity($this, 'skip_ac');
-      } finally {
-        $this->skipAcWhenSaving = false;
-      }
-    } else {
-      $return = parent::save();
-    }
+    $return = parent::save();
     if ($return && $sendVerification) {
       // The email has changed, so send a new verification email.
       $this->sendEmailVerification();
     }
     return $return;
+  }
+
+  public function tilmeldSaveSkipAC() {
+    if ($this->skipAcWhenSaving) {
+      $this->skipAcWhenSaving = false;
+      return true;
+    }
+    return false;
   }
 
   public function delete() {
