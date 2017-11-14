@@ -6,21 +6,15 @@ use Tilmeld\Entities\User;
 use Tilmeld\Entities\Group;
 
 /**
- * Tilmeld class.
+ * Tilmeld main class.
+ *
+ * Provides an Nymph based user and group manager.
  *
  * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @link http://sciactive.com/
- */
-
-/**
- * com_user main class.
- *
- * Provides an Nymph based user and group manager.
- *
- * @package Tilmeld
  */
 class Tilmeld {
   const NO_ACCESS = 0;

@@ -1,6 +1,6 @@
 <?php
 /**
- * com_user's configuration defaults.
+ * Tilmeld's configuration defaults.
  *
  * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0

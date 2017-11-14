@@ -3,6 +3,15 @@ namespace Tilmeld;
 
 use SciActive\Hook;
 
+/**
+ * Hook Nymph methods.
+ *
+ * @package Tilmeld
+ * @license https://www.apache.org/licenses/LICENSE-2.0
+ * @author Hunter Perrin <hperrin@gmail.com>
+ * @copyright SciActive.com
+ * @link http://sciactive.com/
+ */
 class HookMethods {
   public static function setup() {
     // Check for the skip access control option and add AC selectors.
