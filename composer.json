@@ -1,7 +1,7 @@
 {
   "name": "sciactive/tilmeld",
   "description": "Nymph user and group management with access controls.",
-  "version": "1.0.0-beta.2",
+  "version": "1.0.0-beta.3",
   "time": "2017-11-14",
   "type": "library",
   "keywords": [
