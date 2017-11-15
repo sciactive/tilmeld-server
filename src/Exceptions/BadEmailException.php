@@ -1,5 +1,4 @@
-<?php
-namespace Tilmeld\Exceptions;
+<?php namespace Tilmeld\Exceptions;
 
 /**
  * BadEmailException exception.
@@ -14,5 +13,4 @@ namespace Tilmeld\Exceptions;
  * @link http://sciactive.com/
  */
 class BadEmailException extends \Exception {
-
 }

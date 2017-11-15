@@ -1,5 +1,4 @@
-<?php
-namespace Tilmeld\Entities;
+<?php namespace Tilmeld\Entities;
 
 /**
  * AbleObject class.

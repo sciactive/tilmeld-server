@@ -1,5 +1,4 @@
-<?php
-namespace Tilmeld\Entities;
+<?php namespace Tilmeld\Entities;
 
 use Tilmeld\Tilmeld;
 use Nymph\Nymph;

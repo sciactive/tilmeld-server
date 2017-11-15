@@ -145,9 +145,9 @@ function is_secure() {
         tilmeldURL: <?php echo json_encode($tilmeldURL); ?>
       };
     </script>
-    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib-umd/Nymph.js"></script>
-    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib-umd/Entity.js"></script>
-    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib-umd/PubSub.js"></script>
+    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib/Nymph.js"></script>
+    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib/Entity.js"></script>
+    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib/PubSub.js"></script>
     <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Entities/User.js"></script>
     <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Entities/Group.js"></script>
 

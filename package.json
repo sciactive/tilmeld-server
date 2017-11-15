@@ -1,10 +1,8 @@
 {
   "name": "tilmeld",
-  "version": "1.0.0-beta.1",
+  "version": "1.0.0-beta.2",
   "description": "Nymph user and group management with access controls.",
-  "directories": {
-    "example": "examples"
-  },
+  "main": "lib/Entities/User.js",
   "scripts": {
     "build": "npm run build-components && npm run build-entities",
     "build-components": "npm run build-login && npm run build-recover && npm run build-change-password",
@@ -37,7 +35,7 @@
   },
   "homepage": "https://github.com/sciactive/tilmeld#readme",
   "dependencies": {
-    "nymph-client": "^2.2.0",
+    "nymph-client": "^3.0.0",
     "pform": "^3.3.0"
   },
   "devDependencies": {

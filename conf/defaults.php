@@ -15,7 +15,7 @@ return (object) [
    * The URL where the setup utility is accessible. This is also used for
    * email address verification.
    */
-  'setup_url' => 'http://localhost/tilmeld/examples/setup.php',
+  'setup_url' => 'http://localhost/nymph/examples/examples/tilmeld/setup.php',
   /*
    * Create Admin
    * Allow the creation of an admin user. When a user is created, if there are
@@ -35,10 +35,11 @@ return (object) [
    */
   'allow_registration' => true,
   /*
-   * User Search Limit
-   * Limit the user search to this many results.
+   * Enable User Search
+   * Whether frontend can search users. (Probably not a good idea if privacy is
+   * a concern.)
    */
-  'user_search_limit' => 20,
+  'enable_user_search' => 20,
   /*
    * User Account Fields
    * These will be the available fields for users. (Some fields, like username,
@@ -90,12 +91,14 @@ return (object) [
    * Password Storage Method
    * Method used to store passwords. Salt is more secure if the database is
    * compromised. Plain: store the password in plaintext. Digest: store the
-   * password's digest using a simple salt. Salt: store the password's digest
-   * using a complex, unique salt.
+   * password's digest. Salt: store the password's digest using a complex,
+   * unique salt.
+   *
+   * Digests are SHA-256, so a salt probably won't ever be necessary.
    *
    * Options are: "plain", "digest", "salt"
    */
-  'pw_method' => 'digest',
+  'pw_method' => 'salt',
   /*
    * Generate a Primary Group
    * Whether to create a new primary group for every user who registers. This

@@ -1,5 +1,4 @@
-<?php
-namespace Tilmeld\Entities\Mail;
+<?php namespace Tilmeld\Entities\Mail;
 
 /**
  * New User Registered

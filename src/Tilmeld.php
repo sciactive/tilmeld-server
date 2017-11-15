@@ -1,5 +1,4 @@
-<?php
-namespace Tilmeld;
+<?php namespace Tilmeld;
 
 use SciActive\RequirePHP;
 use Tilmeld\Entities\User;
@@ -17,6 +16,8 @@ use Tilmeld\Entities\Group;
  * @link http://sciactive.com/
  */
 class Tilmeld {
+  const VERSION = '1.0.0-beta.1';
+
   const NO_ACCESS = 0;
   const READ_ACCESS = 1;
   const WRITE_ACCESS = 2;

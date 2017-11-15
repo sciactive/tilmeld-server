@@ -1,5 +1,4 @@
-<?php
-namespace Tilmeld;
+<?php namespace Tilmeld;
 
 use SciActive\Hook;
 
@@ -16,6 +15,7 @@ class HookMethods {
   public static function setup() {
     // Check for the skip access control option and add AC selectors.
     $GetEntitiesHook = function (&$array, $name, &$object, &$function, &$data) {
+      // TODO(hperrin): enable_user_search
       if (isset($array[0]['skip_ac']) && $array[0]['skip_ac']) {
         $data['Tilmeld_skip_ac'] = true;
       } else {
@@ -107,7 +107,7 @@ class HookMethods {
         ) {
         $array[0]->user = $user;
         if (isset($user->group) && isset($user->group->guid)) {
-      		$array[0]->group = $user->group;
+          $array[0]->group = $user->group;
         }
         if (!isset($array[0]->ac_user)) {
           $array[0]->ac_user = Tilmeld::DELETE_ACCESS;

@@ -1,5 +1,4 @@
-<?php
-namespace Tilmeld\Entities;
+<?php namespace Tilmeld\Entities;
 
 use Tilmeld\Tilmeld;
 use Nymph\Nymph;
@@ -587,35 +586,15 @@ class User extends AbleObject {
    * @return bool True if the passwords match, otherwise false.
    */
   public function checkPassword($password) {
-    if (!isset($this->salt)) {
-      $pass = ($this->password == $password);
-      $cur_type = 'salt';
-    } elseif ($this->salt == '7d5bc9dc81c200444e53d1d10ecc420a') {
-      $pass = ($this->password == hash('sha256', $password.$this->salt));
-      $cur_type = 'digest';
-    } else {
-      $pass = ($this->password == hash('sha256', $password.$this->salt));
-      $cur_type = 'salt';
+    switch (Tilmeld::$config['pw_method']) {
+      case 'plain':
+        return ($this->password == $password);
+      case 'digest':
+        return ($this->password == hash('sha256', $password));
+      case 'salt':
+      default:
+        return ($this->password == hash('sha256', $password.$this->salt));
     }
-    if ($pass && $cur_type != Tilmeld::$config['pw_method']) {
-      switch (Tilmeld::$config['pw_method']) {
-        case 'plain':
-          unset($this->salt);
-          $this->password = $password;
-          break;
-        case 'salt':
-          $this->salt = hash('sha256', rand());
-          $this->password = hash('sha256', $password.$this->salt);
-          break;
-        case 'digest':
-        default:
-          $this->salt = '7d5bc9dc81c200444e53d1d10ecc420a';
-          $this->password = hash('sha256', $password.$this->salt);
-          break;
-      }
-      $this->save();
-    }
-    return $pass;
   }
 
   /**
@@ -707,12 +686,12 @@ class User extends AbleObject {
       case 'plain':
         unset($this->salt);
         return $this->password = $password;
-      case 'salt':
-        $this->salt = hash('sha256', rand());
-        return $this->password = hash('sha256', $password.$this->salt);
       case 'digest':
+        unset($this->salt);
+        return $this->password = hash('sha256', $password);
+      case 'salt':
       default:
-        $this->salt = '7d5bc9dc81c200444e53d1d10ecc420a';
+        $this->salt = hash('sha256', rand());
         return $this->password = hash('sha256', $password.$this->salt);
     }
   }
