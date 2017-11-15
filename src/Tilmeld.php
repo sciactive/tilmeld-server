@@ -24,7 +24,7 @@ class Tilmeld {
   const DELETE_ACCESS = 4;
 
   /**
-   * A copy of the Tilmeld config.
+   * The Tilmeld config array.
    *
    * @var array
    * @access public
@@ -61,15 +61,8 @@ class Tilmeld {
    * @param array $config An associative array of Tilmeld's configuration.
    */
   public static function configure($config = []) {
-    RequirePHP::_('TilmeldConfig', [], function () use ($config) {
-      $defaults = include dirname(__DIR__).'/conf/defaults.php';
-      $tilmeldConfig = [];
-      foreach ($defaults as $curName => $curOption) {
-        $tilmeldConfig[$curName] = $curOption;
-      }
-      return array_replace($tilmeldConfig, $config);
-    });
-    self::$config = RequirePHP::_('TilmeldConfig');
+    $defaults = include dirname(__DIR__).'/conf/defaults.php';
+    self::$config = array_replace($defaults, $config);
 
     // Set up access control hooks when Nymph is called.
     RequirePHP::_(['Nymph'], function($nymph) {

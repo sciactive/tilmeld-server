@@ -9,7 +9,7 @@
  * @link http://sciactive.com/
  */
 
-return (object) [
+return [
   /*
    * Setup URL
    * The URL where the setup utility is accessible. This is also used for
@@ -94,7 +94,7 @@ return (object) [
    * password's digest. Salt: store the password's digest using a complex,
    * unique salt.
    *
-   * Digests are SHA-256, so a salt probably won't ever be necessary.
+   * Digests are SHA-256, so a salt probably isn't necessary, but who knows.
    *
    * Options are: "plain", "digest", "salt"
    */

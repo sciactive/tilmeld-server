@@ -497,7 +497,7 @@ class User extends AbleObject {
           $abilities = array_merge($abilities, $cur_group->abilities);
         }
         unset($cur_group);
-        if (isset($this->group)) {
+        if (isset($this->group) && isset($this->group->guid)) {
           $abilities = array_merge($abilities, $this->group->abilities);
         }
       }
