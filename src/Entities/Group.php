@@ -60,6 +60,7 @@ class Group extends AbleObject {
     'getSecondaryGroups',
   ];
   protected $privateData = Group::DEFAULT_PRIVATE_DATA;
+  public static $searchRestrictedData = Group::DEFAULT_PRIVATE_DATA;
   protected $whitelistData = Group::DEFAULT_WHITELIST_DATA;
   protected $whitelistTags = [];
 

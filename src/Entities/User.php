@@ -78,6 +78,7 @@ class User extends AbleObject {
     'getClientConfig',
   ];
   protected $privateData = User::DEFAULT_PRIVATE_DATA;
+  public static $searchRestrictedData = User::DEFAULT_PRIVATE_DATA;
   protected $whitelistData = User::DEFAULT_WHITELIST_DATA;
   protected $whitelistTags = [];
 
