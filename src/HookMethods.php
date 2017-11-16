@@ -15,10 +15,55 @@ class HookMethods {
   public static function setup() {
     // Check for the skip access control option and add AC selectors.
     $GetEntitiesHook = function (&$array, $name, &$object, &$function, &$data) {
-      // TODO(hperrin): enable_user_search
       if (isset($array[0]['skip_ac']) && $array[0]['skip_ac']) {
         $data['Tilmeld_skip_ac'] = true;
       } else {
+        if (
+            isset($array[0]['source'])
+            && $array[0]['source'] === 'client'
+            && !Tilmeld::gatekeeper('tilmeld/admin')
+            && (
+              (
+                !Tilmeld::$config['enable_user_search']
+                && (
+                  $array[0]['class'] === '\Tilmeld\Entities\User'
+                  || $array[0]['class'] === 'Tilmeld\Entities\User'
+                )
+              )
+              || (
+                !Tilmeld::$config['enable_group_search']
+                && (
+                  $array[0]['class'] === '\Tilmeld\Entities\Group'
+                  || $array[0]['class'] === 'Tilmeld\Entities\Group'
+                )
+              )
+            )
+            && (
+              !isset($array[1])
+              || !isset($array[1][0])
+              || $array[1][0] !== '&'
+              || (
+                !isset($array[1]['guid'])
+                && !isset($array[1]['strict'])
+              )
+              || (
+                isset($array[1]['guid'])
+                && !is_int($array[1]['guid'])
+              )
+              || (
+                isset($array[1]['strict'])
+                && (
+                  !isset($array[1]['strict'][0])
+                  || $array[1]['strict'][0] !== 'username'
+                )
+              )
+            )
+          ) {
+          // If the user is not specifically searching for a GUID or username,
+          // and they're not allowed to search, it should fail.
+          $array = false;
+          return;
+        }
         // Add access control selectors
         Tilmeld::addAccessControlSelectors($array);
       }

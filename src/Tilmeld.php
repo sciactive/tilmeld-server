@@ -1,6 +1,7 @@
 <?php namespace Tilmeld;
 
-use SciActive\RequirePHP;
+use SciActive\Hook;
+use Nymph\Nymph;
 use Tilmeld\Entities\User;
 use Tilmeld\Entities\Group;
 
@@ -65,9 +66,10 @@ class Tilmeld {
     self::$config = array_replace($defaults, $config);
 
     // Set up access control hooks when Nymph is called.
-    RequirePHP::_(['Nymph'], function($nymph) {
-      HookMethods::setup();
-    });
+    if (!isset(Nymph::$driver)) {
+      throw new Exception('Tilmeld can\'t be configured before Nymph.');
+    }
+    HookMethods::setup();
   }
 
   /**
@@ -273,7 +275,7 @@ class Tilmeld {
         && (object) $_SESSION['tilmeld_user'] === $_SESSION['tilmeld_user']
         && $_SESSION['tilmeld_user']->guid === $_SESSION['tilmeld_user_id']
       ) {
-      $tmp_user = \Nymph\Nymph::getEntity(
+      $tmp_user = Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\User'],
           ['&',
             'guid' => [$_SESSION['tilmeld_user']->guid],
@@ -375,12 +377,12 @@ class Tilmeld {
     if ($option === 'read' || $option === 'write') {
       if (class_exists('\SciActive\Hook') && !class_exists('HookOverride_Tilmeld_Entities_User')) {
         $entity = new User(0, true);
-        \SciActive\Hook::hookObject($entity, 'Tilmeld\Entities\User->', false);
+        Hook::hookObject($entity, 'Tilmeld\Entities\User->', false);
         unset($entity);
       }
       if (class_exists('\SciActive\Hook') && !class_exists('HookOverride_Tilmeld_Entities_Group')) {
         $entity = new Group(0, true);
-        \SciActive\Hook::hookObject($entity, 'Tilmeld\Entities\Group->', false);
+        Hook::hookObject($entity, 'Tilmeld\Entities\Group->', false);
         unset($entity);
       }
     }
@@ -432,6 +434,6 @@ class Tilmeld {
    * @param bool $reverse Reverse the sort order.
    */
   public static function groupSort(&$array, $property = null, $caseSensitive = false, $reverse = false) {
-    \Nymph\Nymph::hsort($array, $property, 'parent', $caseSensitive, $reverse);
+    Nymph::hsort($array, $property, 'parent', $caseSensitive, $reverse);
   }
 }

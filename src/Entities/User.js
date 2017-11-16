@@ -78,6 +78,15 @@ export default class User extends Entity {
 
   // === Static Methods ===
 
+  static byUsername(username) {
+    return Nymph.getEntity(
+      {'class': User.class},
+      {'type': '&',
+        'strict': ['username', username]
+      }
+    );
+  }
+
   static current(...args) {
     return User.serverCallStatic('current', args).then((data) => {
       if (data) {

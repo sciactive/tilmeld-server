@@ -39,7 +39,13 @@ return [
    * Whether frontend can search users. (Probably not a good idea if privacy is
    * a concern.)
    */
-  'enable_user_search' => 20,
+  'enable_user_search' => false,
+  /*
+   * Enable Group Search
+   * Whether frontend can search groups. (Probably not a good idea if privacy is
+   * a concern. Same risks as user search if generate_primary is true.)
+   */
+  'enable_group_search' => false,
   /*
    * User Account Fields
    * These will be the available fields for users. (Some fields, like username,

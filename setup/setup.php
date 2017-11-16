@@ -110,7 +110,7 @@ if (isset($_REQUEST['action']) && \Tilmeld\Tilmeld::$config['verify_email']) {
   return;
 }
 
-if (!\Tilmeld\Entities\User::current(true)->gatekeeper('tilmeld/admin')) {
+if (!\Tilmeld\Tilmeld::gatekeeper('tilmeld/admin')) {
   header('HTTP/1.1 403 Forbidden');
   die('Forbidden');
 }

@@ -34,22 +34,14 @@ use Nymph\Nymph;
  */
 class User extends AbleObject {
   const ETYPE = 'tilmeld_user';
-  protected $tags = [];
-  protected $clientEnabledMethods = [
+  const DEFAULT_CLIENT_ENABLED_METHODS = [
     'checkUsername',
     'checkEmail',
     'checkPhone',
     'getAvatar',
     'register',
   ];
-  public static $clientEnabledStaticMethods = [
-    'current',
-    'loginUser',
-    'sendRecoveryLink',
-    'recover',
-    'getClientConfig',
-  ];
-  protected $privateData = [
+  const DEFAULT_PRIVATE_DATA = [
     'email',
     'originalEmail',
     'phone',
@@ -75,7 +67,18 @@ class User extends AbleObject {
     'cancelEmailSecret',
     'emailChangeDate',
   ];
-  protected $whitelistData = [];
+  const DEFAULT_WHITELIST_DATA = [];
+  protected $tags = [];
+  protected $clientEnabledMethods = User::DEFAULT_CLIENT_ENABLED_METHODS;
+  public static $clientEnabledStaticMethods = [
+    'current',
+    'loginUser',
+    'sendRecoveryLink',
+    'recover',
+    'getClientConfig',
+  ];
+  protected $privateData = User::DEFAULT_PRIVATE_DATA;
+  protected $whitelistData = User::DEFAULT_WHITELIST_DATA;
   protected $whitelistTags = [];
 
   /**
@@ -403,6 +406,10 @@ class User extends AbleObject {
   }
 
   public function updateDataProtection() {
+    $this->clientEnabledMethods = self::DEFAULT_CLIENT_ENABLED_METHODS;
+    $this->privateData = self::DEFAULT_PRIVATE_DATA;
+    $this->whitelistData = self::DEFAULT_WHITELIST_DATA;
+
     if (Tilmeld::$config['email_usernames']) {
       $this->privateData[] = 'username';
     }
@@ -1080,7 +1087,7 @@ class User extends AbleObject {
   }
 
   public function delete() {
-    if (!self::current(true)->gatekeeper('tilmeld/admin')) {
+    if (!Tilmeld::gatekeeper('tilmeld/admin')) {
       return false;
     }
     if (self::current(true)->is($this)) {

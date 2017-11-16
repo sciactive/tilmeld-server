@@ -31,6 +31,20 @@ use Nymph\Nymph;
  */
 class Group extends AbleObject {
   const ETYPE = 'tilmeld_group';
+  const DEFAULT_PRIVATE_DATA = [
+    'email',
+    'phone',
+    'addressType',
+    'addressStreet',
+    'addressStreet2',
+    'addressCity',
+    'addressState',
+    'addressZip',
+    'addressInternational',
+    'abilities',
+    'user',
+  ];
+  const DEFAULT_WHITELIST_DATA = [];
   protected $tags = [];
   public $clientEnabledMethods = [
     'checkGroupname',
@@ -45,20 +59,8 @@ class Group extends AbleObject {
     'getPrimaryGroups',
     'getSecondaryGroups',
   ];
-  protected $privateData = [
-    'email',
-    'phone',
-    'addressType',
-    'addressStreet',
-    'addressStreet2',
-    'addressCity',
-    'addressState',
-    'addressZip',
-    'addressInternational',
-    'abilities',
-    'user',
-  ];
-  protected $whitelistData = [];
+  protected $privateData = Group::DEFAULT_PRIVATE_DATA;
+  protected $whitelistData = Group::DEFAULT_WHITELIST_DATA;
   protected $whitelistTags = [];
 
   /**
@@ -163,10 +165,13 @@ class Group extends AbleObject {
   }
 
   public function updateDataProtection() {
+    $this->privateData = self::DEFAULT_PRIVATE_DATA;
+    $this->whitelistData = self::DEFAULT_WHITELIST_DATA;
+
     if (Tilmeld::$config['email_usernames']) {
       $this->privateData[] = 'groupname';
     }
-    if (User::current(true)->gatekeeper('tilmeld/admin')) {
+    if (Tilmeld::gatekeeper('tilmeld/admin')) {
       // Users who can edit groups can see their data.
       $this->privateData = [];
       $this->whitelistData = false;
@@ -438,7 +443,7 @@ class Group extends AbleObject {
   }
 
   public function delete() {
-    if (!User::current(true)->gatekeeper('tilmeld/admin')) {
+    if (!Tilmeld::gatekeeper('tilmeld/admin')) {
       return false;
     }
     $entities = Nymph::getEntities(
