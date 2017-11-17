@@ -1,6 +1,6 @@
 {
   "name": "tilmeld",
-  "version": "1.0.0-beta.3",
+  "version": "1.0.0-beta.4",
   "description": "Nymph user and group management with access controls.",
   "main": "lib/Entities/index.js",
   "scripts": {
@@ -45,6 +45,6 @@
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-3": "^6.24.1",
     "svelte-cli": "^1.4.0",
-    "umailphp": "^2.1"
+    "umailphp": "^2.2"
   }
 }
