@@ -1,7 +1,7 @@
 {
   "name": "sciactive/tilmeld",
   "description": "Nymph user and group management with access controls.",
-  "version": "1.0.0-beta.4",
+  "version": "1.0.0-beta.5",
   "time": "2017-11-16",
   "type": "library",
   "keywords": [
@@ -31,6 +31,14 @@
   },
   "archive": {
     "exclude": ["**/.*", "node_modules"]
+  },
+  "autoload": {
+    "psr-0": {
+      "Tilmeld\\": "src/"
+    },
+    "psr-4": {
+      "Tilmeld\\": "src/"
+    }
   },
   "require": {
     "sciactive/hookphp": "^2.0",
