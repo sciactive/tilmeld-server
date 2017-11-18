@@ -32,7 +32,7 @@
         </div>
         {{#if layout === 'compact'}}
           <div class="close-button-container">
-            <button class="pf-button" type="button" on:click="set({__showDialog: false})">Close</button>
+            <button class="pf-button {{classButton}}" type="button" on:click="set({__showDialog: false})">Close</button>
           </div>
         {{/if}}
       </div>
@@ -53,7 +53,7 @@
         {{#if __clientConfig.allow_registration && showExistingUserCheckbox}}
           <div class="pf-element">
             <span class="{{layout !== 'small' ? 'pf-group' : ''}}" style="display: {{layout !== 'small' ? 'block' : 'in-line'}};">
-              <label><input class="pf-field" type="checkbox" bind:checked="existingUser" /> I have an account.</label>
+              <label><input class="pf-field {{classCheckbox}}" type="checkbox" bind:checked="existingUser" /> I have an account.</label>
             </span>
           </div>
         {{/if}}
@@ -63,9 +63,9 @@
             <span class="pf-label">{{__clientConfig.email_usernames ? 'Email' : 'Username'}}</span>
             <span class="{{layout !== 'small' ? 'pf-group' : ''}}" style="display: {{layout !== 'small' ? 'block' : 'in-line'}};">
               {{#if __clientConfig.email_usernames}}
-                <input class="pf-field" bind:value="username" ref:username type="email" name="email" size="24" />
+                <input class="pf-field {{classInput}}" bind:value="username" ref:username type="email" name="email" size="24" />
               {{else}}
-                <input class="pf-field" bind:value="username" ref:username type="text" name="username" size="24" />
+                <input class="pf-field {{classInput}}" bind:value="username" ref:username type="text" name="username" size="24" />
               {{/if}}
               {{#if !existingUser}}
                 {{#if layout === 'small' || layout === 'compact'}}
@@ -81,21 +81,21 @@
         <div class="pf-element">
           <label>
             <span class="pf-label">Password</span>
-            <input class="pf-field" bind:value="password" type="password" name="password" size="24" />
+            <input class="pf-field {{classInput}}" bind:value="password" type="password" name="password" size="24" />
           </label>
         </div>
         {{#if __clientConfig.allow_registration && !existingUser}}
           <div class="pf-element">
             <label>
               <span class="pf-label">Re-enter Password</span>
-              <input class="pf-field" bind:value="password2" type="password" name="password2" size="24" />
+              <input class="pf-field {{classInput}}" bind:value="password2" type="password" name="password2" size="24" />
             </label>
           </div>
           {{#if __clientConfig.reg_fields.indexOf('name') !== -1}}
             <div class="pf-element">
               <label>
                 <span class="pf-label">Name</span>
-                <input class="pf-field" bind:value="name" type="text" name="name" size="24" />
+                <input class="pf-field {{classInput}}" bind:value="name" type="text" name="name" size="24" />
               </label>
             </div>
           {{/if}}
@@ -103,7 +103,7 @@
             <div class="pf-element">
               <label>
                 <span class="pf-label">Email</span>
-                <input class="pf-field" bind:value="email" type="email" name="email" size="24" />
+                <input class="pf-field {{classInput}}" bind:value="email" type="email" name="email" size="24" />
               </label>
             </div>
           {{/if}}
@@ -111,7 +111,7 @@
             <div class="pf-element">
               <label>
                 <span class="pf-label">Phone Number</span>
-                <input class="pf-field" bind:value="phone" type="tel" name="phone" size="24" />
+                <input class="pf-field {{classInput}}" bind:value="phone" type="tel" name="phone" size="24" />
               </label>
             </div>
           {{/if}}
@@ -134,27 +134,27 @@
           {{#if __clientConfig.reg_fields.indexOf('address') !== -1}}
             <div class="pf-element">
               <span class="pf-label">Address Type</span>
-              <label><input class="pf-field" bind:group="addressType" type="radio" name="addressType" value="us" /> US</label>
-              <label><input class="pf-field" bind:group="addressType" type="radio" name="addressType" value="international" /> International</label>
+              <label><input class="pf-field {{classRadio}}" bind:group="addressType" type="radio" name="addressType" value="us" /> US</label>
+              <label><input class="pf-field {{classRadio}}" bind:group="addressType" type="radio" name="addressType" value="international" /> International</label>
             </div>
             {{#if addressType === 'us'}}
               <div class="pf-element">
                 <label>
                   <span class="pf-label">Address 1</span>
-                  <input class="pf-field" bind:value="addressStreet" type="text" name="street" size="24" />
+                  <input class="pf-field {{classInput}}" bind:value="addressStreet" type="text" name="street" size="24" />
                 </label>
               </div>
               <div class="pf-element">
                 <label>
                   <span class="pf-label">Address 2</span>
-                  <input class="pf-field" bind:value="addressStreet2" type="text" name="street2" size="24" />
+                  <input class="pf-field {{classInput}}" bind:value="addressStreet2" type="text" name="street2" size="24" />
                 </label>
               </div>
               <div class="pf-element {{layout === 'small' ? 'pf-full-width' : ''}}">
                 <span class="pf-label">City, State</span>
                 <span class="{{layout === 'compact' ? 'pf-group' : ''}}" style="{{layout === 'compact' ? 'white-space: nowrap; margin-right: 16px; display: block;' : 'display: in-line;'}}">
-                  <input class="pf-field" bind:value="addressCity" type="text" name="city" size="{{layout === 'small' ? '10' : '15'}}" />
-                  <select class="pf-field" bind:value="addressState" name="state" style="{{layout === 'small' ? 'max-width: 95%;' : ''}}">
+                  <input class="pf-field {{classInput}}" bind:value="addressCity" type="text" name="city" size="{{layout === 'small' ? '10' : '15'}}" />
+                  <select class="pf-field {{classSelect}}" bind:value="addressState" name="state" style="{{layout === 'small' ? 'max-width: 95%;' : ''}}">
                     {{#each states as state}}
                       <option value="{{state[0]}}">{{state[1]}}</option>
                     {{/each}}
@@ -164,7 +164,7 @@
               <div class="pf-element">
                 <label>
                   <span class="pf-label">Zip</span>
-                  <input class="pf-field" bind:value="addressZip" type="text" name="zip" size="24" />
+                  <input class="pf-field {{classInput}}" bind:value="addressZip" type="text" name="zip" size="24" />
                 </label>
               </div>
             {{else}}
@@ -173,7 +173,7 @@
                   <span class="pf-label">Address</span>
                   <span class="pf-group pf-full-width">
                     <span class="pf-field" style="display: block;">
-                      <textarea style="width: 100%;" rows="3" cols="35" bind:value="addressInternational" name="address"></textarea>
+                      <textarea class="{{classTextarea}}" style="width: 100%;" rows="3" cols="35" bind:value="addressInternational" name="address"></textarea>
                     </span>
                   </span>
                 </label>
@@ -194,12 +194,12 @@
 
         <div class="pf-element {{layout === 'small' ? '' : 'pf-buttons'}}">
           {{#if existingUser}}
-            <button class="pf-button" type="submit" on:click="login()">Log In</button>
+            <button class="pf-button {{classSubmit}}" type="submit" on:click="login()">Log In</button>
           {{else}}
-            <button class="pf-button" type="submit" on:click="register()">Create Account</button>
+            <button class="pf-button {{classSubmit}}" type="submit" on:click="register()">Create Account</button>
           {{/if}}
           {{#if layout === 'compact'}}
-            <button class="pf-button" type="button" on:click="set({__showDialog: false})">Close</button>
+            <button class="pf-button {{classButton}}" type="button" on:click="set({__showDialog: false})">Close</button>
           {{/if}}
         </div>
 
@@ -207,7 +207,7 @@
           <div class="pf-element pf-full-width">
             <span class="pf-group pf-full-width">
               <span class="pf-field" style="display: block;">
-                <TilmeldRecover account="{{username}}"></TilmeldRecover>
+                <TilmeldRecover account="{{username}}" classInput="{{classInput}}" classRadio="{{classRadio}}" classSubmit="{{classSubmit}}" classButton="{{classButton}}"></TilmeldRecover>
               </span>
             </span>
           </div>
@@ -344,6 +344,13 @@
           ['AE', 'Armed Forces (AE)'],
           ['AP', 'Armed Forces (AP)']
         ],
+        classCheckbox: '',
+        classInput: '',
+        classRadio: '',
+        classSelect: '',
+        classTextarea: '',
+        classSubmit: '',
+        classButton: '',
         __clientConfig: {
           'reg_fields': [],
           'email_usernames': true,

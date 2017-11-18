@@ -20,7 +20,7 @@
           {{__successRecoveredMessage}}
         </div>
         <div class="close-button-container">
-          <button class="pf-button" type="button" on:click="set({__showDialog: false})">Close</button>
+          <button class="pf-button {{classButton}}" type="button" on:click="set({__showDialog: false})">Close</button>
         </div>
       </div>
     {{else}}
@@ -32,8 +32,8 @@
           {{#if !__clientConfig.email_usernames}}
             <div class="pf-element">
               <span class="pf-label">Recovery Type</span>
-              <label><input class="pf-field" bind:group="recoveryType" type="radio" name="type" value="password" /> I forgot my password.</label>
-              <label><input class="pf-field" bind:group="recoveryType" type="radio" name="type" value="username" /> I forgot my username.</label>
+              <label><input class="pf-field {{classRadio}}" bind:group="recoveryType" type="radio" name="type" value="password" /> I forgot my password.</label>
+              <label><input class="pf-field {{classRadio}}" bind:group="recoveryType" type="radio" name="type" value="username" /> I forgot my username.</label>
             </div>
           {{/if}}
           <div class="pf-element">
@@ -52,7 +52,7 @@
               {{#if recoveryType === 'username'}}
                 <span class="pf-label">Email Address</span>
               {{/if}}
-              <input class="pf-field" type="text" ref:account bind:value="account" size="24" />
+              <input class="pf-field {{classInput}}" type="text" ref:account bind:value="account" size="24" />
             </label>
           </div>
         {{else}}
@@ -64,19 +64,19 @@
           <div class="pf-element">
             <label>
               <span class="pf-label">Recovery Code</span>
-              <input class="pf-field" bind:value="secret" type="text" size="24" />
+              <input class="pf-field {{classInput}}" bind:value="secret" type="text" size="24" />
             </label>
           </div>
           <div class="pf-element">
             <label>
               <span class="pf-label">Password</span>
-              <input class="pf-field" bind:value="password" type="password" size="24" />
+              <input class="pf-field {{classInput}}" bind:value="password" type="password" size="24" />
             </label>
           </div>
           <div class="pf-element">
             <label>
               <span class="pf-label">Re-enter Password</span>
-              <input class="pf-field" bind:value="password2" type="password" size="24" />
+              <input class="pf-field {{classInput}}" bind:value="password2" type="password" size="24" />
             </label>
           </div>
         {{/if}}
@@ -93,11 +93,11 @@
 
         <div class="pf-element pf-buttons">
           {{#if !__hasSentSecret}}
-            <button class="pf-button" type="submit" on:click="sendRecoveryLink()">Send Recovery Link</button>
+            <button class="pf-button {{classSubmit}}" type="submit" on:click="sendRecoveryLink()">Send Recovery Link</button>
           {{else}}
-            <button class="pf-button" type="submit" on:click="recover()">Reset Password</button>
+            <button class="pf-button {{classSubmit}}" type="submit" on:click="recover()">Reset Password</button>
           {{/if}}
-          <button class="pf-button" type="button" on:click="set({__showDialog: false})">Close</button>
+          <button class="pf-button {{classButton}}" type="button" on:click="set({__showDialog: false})">Close</button>
         </div>
       </form>
     {{/if}}
@@ -126,6 +126,10 @@
         linkText: 'I can\'t access my account.', // The text used to toggle the dialog.
         autofocus: true, // Give focus to the account box when the form is ready.
         recoveryType: 'password',
+        classInput: '',
+        classRadio: '',
+        classSubmit: '',
+        classButton: '',
         __clientConfig: {
           'reg_fields': [],
           'email_usernames': true,
