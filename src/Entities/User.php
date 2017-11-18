@@ -1076,6 +1076,10 @@ class User extends AbleObject {
       // The email has changed, so send a new verification email.
       $this->sendEmailVerification();
     }
+    if ($return && self::current() !== null && self::current(true)->is($this)) {
+      // Update the user in the session cache.
+      Tilmeld::login($this);
+    }
     return $return;
   }
 
