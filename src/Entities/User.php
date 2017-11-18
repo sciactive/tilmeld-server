@@ -245,7 +245,7 @@ class User extends AbleObject {
       // Create a unique secret.
       $user->recoverSecret = self::generateSecret($user);
       $user->recoverSecretTime = time();
-      if (!$user->save()) {
+      if (!$user->saveSkipAC()) {
         return ['result' => false, 'message' => 'Couldn\'t save user secret.'];
       }
 
@@ -298,7 +298,7 @@ class User extends AbleObject {
     $user->password($data['password']);
     unset($user->recoverSecret);
     unset($user->recoverSecretTime);
-    if ($user->save()) {
+    if ($user->saveSkipAC()) {
       return ['result' => true, 'message' => 'Your password has been reset. You can now log in using your new password.'];
     } else {
       return ['result' => false, 'message' => 'Error saving new password.'];
@@ -912,8 +912,7 @@ class User extends AbleObject {
       }
     }
 
-    $this->skipAcWhenSaving = true;
-    if ($this->save()) {
+    if ($this->saveSkipAC()) {
       // Send the new user registered email.
       $macros = [
         'user_username' => htmlspecialchars($this->username),
@@ -1081,6 +1080,14 @@ class User extends AbleObject {
       Tilmeld::login($this);
     }
     return $return;
+  }
+
+  /*
+   * This should *never* be accessible on the client.
+   */
+  public function saveSkipAC() {
+    $this->skipAcWhenSaving = true;
+    return $this->save();
   }
 
   public function tilmeldSaveSkipAC() {

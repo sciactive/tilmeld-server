@@ -90,7 +90,7 @@ if (isset($_REQUEST['action']) && \Tilmeld\Tilmeld::$config['verify_email']) {
       break;
   }
 
-  if ($user->save()) {
+  if ($user->saveSkipAC()) {
     switch ($_REQUEST['action']) {
       case 'verifyemail':
       default:
