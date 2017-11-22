@@ -137,46 +137,62 @@ function is_secure() {
         (typeof Promise !== "undefined" && typeof Promise.all === "function") || document.getElementsByTagName('head')[0].appendChild(s);
       })();
       NymphOptions = {
-        restURL: <?php echo json_encode($restEndpoint); ?>,
-        pubsubURL: '<?php echo is_secure() ? 'wss' : 'ws'; ?>://<?php echo getenv('NYMPH_PRODUCTION') ? 'nymph-pubsub-demo.herokuapp.com' : '\'+window.location.hostname+\''; ?>:<?php echo getenv('NYMPH_PRODUCTION') ? (is_secure() ? '443' : '80') : '8081'; ?>',
-        rateLimit: 100
+        restURL: <?php echo json_encode($restEndpoint); ?>
+        <?php if (\Nymph\Nymph::$config['pubsub']) { ?>
+        ,pubsubURL: '<?php echo is_secure() ? 'wss' : 'ws'; ?>://<?php echo getenv('NYMPH_PRODUCTION') ? 'nymph-pubsub-demo.herokuapp.com' : '\'+window.location.hostname+\''; ?>:<?php echo getenv('NYMPH_PRODUCTION') ? (is_secure() ? '443' : '80') : '8081'; ?>'
+        ,rateLimit: 100
+        <?php } ?>
       };
       TilmeldOptions = {
-        tilmeldURL: <?php echo json_encode($tilmeldURL); ?>
+        tilmeldURL: <?php echo json_encode($tilmeldURL); ?>,
+        pubsub: <?php echo json_encode(\Nymph\Nymph::$config['pubsub']); ?>
       };
     </script>
-    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib/Nymph.js"></script>
-    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib/Entity.js"></script>
-    <script src="<?php echo htmlspecialchars($sciactiveBaseURL); ?>nymph-client/lib/PubSub.js"></script>
+    <?php if (isset($sciactiveDevClientURL)) { ?>
+      <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>lib/Nymph.js"></script>
+      <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>lib/Entity.js"></script>
+      <?php if (\Nymph\Nymph::$config['pubsub']) { ?>
+      <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>lib/PubSub.js"></script>
+      <?php } ?>
+    <?php } else { ?>
+      <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>nymph-client/lib/Nymph.js"></script>
+      <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>nymph-client/lib/Entity.js"></script>
+      <?php if (\Nymph\Nymph::$config['pubsub']) { ?>
+      <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>nymph-client/lib/PubSub.js"></script>
+      <?php } ?>
+    <?php } ?>
     <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Entities/User.js"></script>
     <script src="<?php echo htmlspecialchars($tilmeldURL); ?>lib/Entities/Group.js"></script>
 
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.15/angular-route.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular-route.js"></script>
 
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-
-    <link rel="stylesheet" href="<?php echo htmlspecialchars($sciactiveBaseURL); ?>pform/css/pform.css">
-    <link rel="stylesheet" href="<?php echo htmlspecialchars($sciactiveBaseURL); ?>pform/css/pform-bootstrap.css">
-
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css">
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
     <script src="<?php echo htmlspecialchars($tilmeldURL); ?>setup/setupApp.js"></script>
   </head>
   <body>
     <div class="container" ng-controller="MainController">
-      <div class="page-header">
-        <h1>Tilmeld Setup App</h1>
+      <div class="my-3 border border-top-0 border-right-0 border-left-0">
+        <h1 class="display-4 mb-3">Tilmeld Setup App</h1>
       </div>
       <div class="row">
-        <div class="col-lg-3">
-          <ul class="nav nav-pills nav-stacked">
-            <li role="presentation" ng-class="{active: $location.path() === '/'}"><a href="#/">Instructions</a></li>
-            <li role="presentation" ng-class="{active: $location.path().indexOf('/user/') === 0}"><a href="#/user/">Users</a></li>
-            <li role="presentation" ng-class="{active: $location.path().indexOf('/group/') === 0}"><a href="#/group/">Groups</a></li>
+        <div class="col-md-3">
+          <ul class="nav nav-pills flex-column">
+            <li class="nav-item" role="presentation">
+              <a href="#!/instructions" class="nav-link" ng-class="{active: $route.current.scope.name === 'InstructionsController'}">Instructions</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a href="#!/user" class="nav-link" ng-class="{active: $route.current.scope.name === 'UserController'}">Users</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a href="#!/group" class="nav-link" ng-class="{active: $route.current.scope.name === 'GroupController'}">Groups</a>
+            </li>
           </ul>
         </div>
-        <div class="col-lg-9">
+        <div class="col-md-9">
           <div ng-view></div>
         </div>
       </div>

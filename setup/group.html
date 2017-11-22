@@ -1,209 +1,218 @@
-<div class="panel panel-default">
-  <div class="panel-heading">
+<div class="card">
+  <div class="card-header">
     Select a Group to edit.
   </div>
-  <div class="panel-body">
-    <select class="form-control" ng-model="entity" ng-options="ent as ent.data.name+(ent.data.enabled ? '' : ' (Disabled)') for ent in uiState.entities track by ent.guid" ng-change="checkNewEntity()">
-      <option value="" ng-value="null">- New Group -</option>
-    </select>
+  <div class="card-body">
+    <select class="form-control" ng-model="entity" ng-options="ent as (ent.guid===null ? '- New Group -' : ent.data.name+' ('+ent.data.groupname+')')+(ent.data.enabled ? '' : ' (Disabled)') for ent in uiState.entities track by ent.guid"></select>
   </div>
 </div>
-<div class="page-header" style="margin-top: 0;">
-  <h2 style="margin-top: 0;">Editing {{entity.data.guid ? entity.data.name : 'New Group'}}</h2>
+<div class="my-3 border border-top-0 border-right-0 border-left-0">
+  <h2>Editing {{entity.guid ? entity.data.name : 'New Group'}}</h2>
+  <p class="lead" ng-if="entity.data.user">Generated primary group for {{entity.data.user.data.name}} ({{entity.data.user.data.username}})</p>
 </div>
-<form class="pf-form" name="groupform" ng-submit="saveEntity()" style="position: relative;" autocomplete="off">
-  <ul class="nav nav-tabs" style="clear: both; margin-bottom: 15px;">
-    <li class="active"><a href=".tab-pane-general" data-toggle="tab">General</a></li>
-    <li><a href=".tab-pane-location" data-toggle="tab">Address</a></li>
-    <li><a href=".tab-pane-abilities" data-toggle="tab">Abilities</a></li>
+<form name="groupform" ng-submit="saveEntity()" autocomplete="off">
+  <ul class="nav nav-tabs">
+    <li class="nav-item">
+      <a class="nav-link active" href=".tab-pane-general" data-toggle="tab" role="tab" aria-selected="true">General</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href=".tab-pane-location" data-toggle="tab" role="tab" aria-selected="false">Address</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href=".tab-pane-abilities" data-toggle="tab" role="tab" aria-selected="false">Abilities</a>
+    </li>
   </ul>
-  <div class="tab-content">
+  <div class="tab-content py-3">
     <div class="tab-pane tab-pane-general active">
-      <div class="pf-element">
-        <label>
-          <span class="pf-label">Groupname</span>
-          <span class="pf-group pf-full-width">
-            <span class="form-group" ng-class="{'has-success': uiState.groupnameVerified === true, 'has-error': uiState.groupnameVerified === false}">
-              <input class="pf-field form-control" type="text" name="groupname" size="24" ng-model="entity.data.groupname" />
-            </span>
-            <span class="pf-field" ng-if="uiState.groupnameVerifiedMessage">{{uiState.groupnameVerifiedMessage}}</span>
-          </span>
+      <div class="form-check">
+        <label class="form-check-label">
+          <input class="form-check-input" type="checkbox" name="enabled" ng-model="entity.data.enabled">
+          Enabled
         </label>
       </div>
-      <div class="pf-element">
-        <label>
-          <span class="pf-label">Email</span>
-          <span class="pf-group pf-full-width">
-            <span class="form-group" ng-class="{'has-success': uiState.emailVerified === true, 'has-error': uiState.emailVerified === false}">
-              <input class="pf-field form-control" type="email" name="email" size="24" ng-model="entity.data.email" />
-            </span>
-            <span class="pf-field" ng-if="uiState.emailVerifiedMessage">{{uiState.emailVerifiedMessage}}</span>
-          </span>
+      <label class="d-block form-group">
+        <span class="d-inline-block mb-2">Groupname</span>
+        <input class="form-control" type="text" name="groupname" ng-model="entity.data.groupname" ng-class="{'border-danger': uiState.groupnameVerified === false}" />
+        <small class="form-text" ng-class="{'text-success': uiState.groupnameVerified === true, 'text-danger': uiState.groupnameVerified === false}" ng-if="uiState.groupnameVerifiedMessage">{{uiState.groupnameVerifiedMessage}}</small>
+      </label>
+      <label class="d-block form-group">
+        <span class="d-inline-block mb-2">Email</span>
+        <input class="form-control" type="email" name="email" ng-model="entity.data.email" ng-class="{'border-danger': uiState.emailVerified === false}" />
+        <small class="form-text" ng-class="{'text-success': uiState.emailVerified === true, 'text-danger': uiState.emailVerified === false}" ng-if="uiState.emailVerifiedMessage">{{uiState.emailVerifiedMessage}}</small>
+      </label>
+      <label class="d-block form-group">
+        <span class="d-inline-block mb-2">Display Name</span>
+        <input class="form-control" type="text" name="name" ng-model="entity.data.name" />
+      </label>
+      <label class="d-block form-group">
+        <span class="d-inline-block mb-2">Phone</span>
+        <input class="form-control" type="tel" name="phone" ng-model="entity.data.phone" />
+      </label>
+      <label class="d-block form-group">
+        <span class="d-inline-block mb-2">Timezone</span>
+        <select class="form-control" ng-options="timezone for timezone in clientConfig.timezones" name="timezone" ng-model="entity.data.timezone">
+          <option value="">- System Default -</option>
+        </select>
+      </label>
+      <label class="d-block form-group">
+        <span class="d-inline-block mb-2">Parent</span>
+        <select class="form-control" name="parent" ng-options="group as group.data.name+' ('+group.data.groupname+')' for group in uiState.parents track by group.guid" ng-model="entity.data.parent">
+          <option value="" ng-value="null">- No Parent -</option>
+        </select>
+      </label>
+      <div class="form-check">
+        <label class="form-check-label">
+          <input class="form-check-input" type="checkbox" name="defaultPrimary" ng-model="entity.data.defaultPrimary">
+          Default primary group for newly registered users.
+        </label>
+        <small class="form-text text-muted">Setting this will unset any current default primary group.</small>
+      </div>
+      <div class="form-check">
+        <label class="form-check-label">
+          <input class="form-check-input" type="checkbox" name="defaultSecondary" ng-model="entity.data.defaultSecondary">
+          Default secondary group for newly registered{{(clientConfig.verify_email && clientConfig.unverified_access) ? ', verified' : ''}} users.
         </label>
       </div>
-      <div class="pf-element">
-        <label><span class="pf-label">Display Name</span>
-          <input class="pf-field form-control" type="text" name="name" size="24" ng-model="entity.data.name" /></label>
-      </div>
-      <div class="pf-element">
-        <label><span class="pf-label">Enabled</span>
-          <input class="pf-field" type="checkbox" name="enabled" ng-model="entity.data.enabled" /></label>
-      </div>
-      <div class="pf-element">
-        <label><span class="pf-label">Phone</span>
-          <input class="pf-field form-control" type="tel" name="phone" size="24" ng-model="entity.data.phone" /></label>
-      </div>
-      <div class="pf-element">
-        <label>
-          <span class="pf-label">Timezone</span>
-          <span class="pf-note">This overrides the primary group's timezone.</span>
-          <select class="pf-field form-control" ng-options="timezone for timezone in clientConfig.timezones" name="timezone" ng-model="entity.data.timezone">
-            <option value="">- System Default -</option>
-          </select>
+      <div class="form-check" ng-if="clientConfig.verify_email && clientConfig.unverified_access">
+        <label class="form-check-label">
+          <input class="form-check-input" type="checkbox" name="unverifiedSecondary" ng-model="entity.data.unverifiedSecondary">
+          Default secondary group for newly registered, unverified users.
         </label>
       </div>
-      <div class="pf-element">
-        <label>
-          <span class="pf-label">Parent</span>
-          <select class="pf-field form-control" name="parent" ng-options="group as group.name+' ('+group.groupname+')' for group in entities track by group.guid" ng-model="entity.data.parent">
-            <option value="">- No Parent -</option>
-          </select>
-        </label>
-      </div>
-      <div class="pf-element">
-        <label><span class="pf-label">New User Primary Group</span>
-          <span class="pf-note">Default primary group for newly registered users.</span>
-          <input class="pf-field" type="checkbox" name="defaultPrimary" ng-model="entity.data.defaultPrimary" /></label>
-      </div>
-      <div class="pf-element">
-        <label><span class="pf-label">New User Secondary Group</span>
-          <span class="pf-note">Default secondary group for newly registered users.</span>
-          <input class="pf-field" type="checkbox" name="defaultSecondary" ng-model="entity.data.defaultSecondary" /></label>
-      </div>
-      <div class="pf-element">
-        <label><span class="pf-label">Unverified User Secondary Group</span>
-          <span class="pf-note">Default secondary group for newly registered users who haven't verified their email. See config for details.</span>
-          <input class="pf-field" type="checkbox" name="unverifiedSecondary" ng-model="entity.data.unverifiedSecondary" /></label>
-      </div>
-      <br class="pf-clearing" />
     </div>
     <div class="tab-pane tab-pane-location">
-      <div class="pf-element">
-        <span class="pf-label">Address Type</span>
-        <label><input class="pf-field" type="radio" name="addressType" value="us" ng-model="entity.data.addressType" /> US</label>
-        <label><input class="pf-field" type="radio" name="addressType" value="international" ng-model="entity.data.addressType" /> International</label>
+      <div class="form-group">
+        <span class="d-block mb-2">Address Type</span>
+        <div class="form-check form-check-inline">
+          <label class="form-check-label">
+            <input class="form-check-input" type="radio" name="addressType" value="us" ng-model="entity.data.addressType" />
+            US
+          </label>
+        </div>
+        <div class="form-check form-check-inline">
+          <label class="form-check-label">
+            <input class="form-check-input" type="radio" name="addressType" value="international" ng-model="entity.data.addressType" />
+            International
+          </label>
+        </div>
       </div>
       <div ng-if="entity.data.addressType === 'us'">
-        <div class="pf-element">
-          <label><span class="pf-label">Address 1</span>
-            <input class="pf-field form-control" type="text" name="addressStreet" size="24" ng-model="entity.data.addressStreet" /></label>
-        </div>
-        <div class="pf-element">
-          <label><span class="pf-label">Address 2</span>
-            <input class="pf-field form-control" type="text" name="addressStreet2" size="24" ng-model="entity.data.addressStreet2" /></label>
-        </div>
-        <div class="pf-element">
-          <span class="pf-label">City, State</span>
-          <input class="pf-field form-control" type="text" name="addressCity" size="15" ng-model="entity.data.addressCity" />
-          <select class="pf-field form-control" name="addressState" ng-model="entity.data.addressState">
-            <option value="">None</option>
-            <option value="AL">Alabama</option>
-            <option value="AK">Alaska</option>
-            <option value="AZ">Arizona</option>
-            <option value="AR">Arkansas</option>
-            <option value="CA">California</option>
-            <option value="CO">Colorado</option>
-            <option value="CT">Connecticut</option>
-            <option value="DE">Delaware</option>
-            <option value="DC">DC</option>
-            <option value="FL">Florida</option>
-            <option value="GA">Georgia</option>
-            <option value="HI">Hawaii</option>
-            <option value="ID">Idaho</option>
-            <option value="IL">Illinois</option>
-            <option value="IN">Indiana</option>
-            <option value="IA">Iowa</option>
-            <option value="KS">Kansas</option>
-            <option value="KY">Kentucky</option>
-            <option value="LA">Louisiana</option>
-            <option value="ME">Maine</option>
-            <option value="MD">Maryland</option>
-            <option value="MA">Massachusetts</option>
-            <option value="MI">Michigan</option>
-            <option value="MN">Minnesota</option>
-            <option value="MS">Mississippi</option>
-            <option value="MO">Missouri</option>
-            <option value="MT">Montana</option>
-            <option value="NE">Nebraska</option>
-            <option value="NV">Nevada</option>
-            <option value="NH">New Hampshire</option>
-            <option value="NJ">New Jersey</option>
-            <option value="NM">New Mexico</option>
-            <option value="NY">New York</option>
-            <option value="NC">North Carolina</option>
-            <option value="ND">North Dakota</option>
-            <option value="OH">Ohio</option>
-            <option value="OK">Oklahoma</option>
-            <option value="OR">Oregon</option>
-            <option value="PA">Pennsylvania</option>
-            <option value="RI">Rhode Island</option>
-            <option value="SC">South Carolina</option>
-            <option value="SD">South Dakota</option>
-            <option value="TN">Tennessee</option>
-            <option value="TX">Texas</option>
-            <option value="UT">Utah</option>
-            <option value="VT">Vermont</option>
-            <option value="VA">Virginia</option>
-            <option value="WA">Washington</option>
-            <option value="WV">West Virginia</option>
-            <option value="WI">Wisconsin</option>
-            <option value="WY">Wyoming</option>
-            <option value="AA">Armed Forces (AA)</option>
-            <option value="AE">Armed Forces (AE)</option>
-            <option value="AP">Armed Forces (AP)</option>
-          </select>
-        </div>
-        <div class="pf-element">
-          <label><span class="pf-label">Zip</span>
-            <input class="pf-field form-control" type="text" name="addressZip" size="24" ng-model="entity.data.addressZip" /></label>
+        <label class="d-block form-group">
+          <span class="d-inline-block mb-2">Address</span>
+          <input class="form-control" type="text" name="addressStreet" ng-model="entity.data.addressStreet" />
+        </label>
+        <label class="d-block form-group">
+          <span class="d-inline-block mb-2">Address 2</span>
+          <input class="form-control" type="text" name="addressStreet2" ng-model="entity.data.addressStreet2" />
+        </label>
+        <div class="form-row">
+          <label class="d-block form-group col-md-6">
+            <span class="d-inline-block mb-2">City</span>
+            <input class="form-control" type="text" name="addressCity" ng-model="entity.data.addressCity" />
+          </label>
+          <label class="d-block form-group col-md-4">
+            <span class="d-inline-block mb-2">State</span>
+            <select class="form-control" name="addressState" ng-model="entity.data.addressState">
+              <option value="">None</option>
+              <option value="AL">Alabama</option>
+              <option value="AK">Alaska</option>
+              <option value="AZ">Arizona</option>
+              <option value="AR">Arkansas</option>
+              <option value="CA">California</option>
+              <option value="CO">Colorado</option>
+              <option value="CT">Connecticut</option>
+              <option value="DE">Delaware</option>
+              <option value="DC">DC</option>
+              <option value="FL">Florida</option>
+              <option value="GA">Georgia</option>
+              <option value="HI">Hawaii</option>
+              <option value="ID">Idaho</option>
+              <option value="IL">Illinois</option>
+              <option value="IN">Indiana</option>
+              <option value="IA">Iowa</option>
+              <option value="KS">Kansas</option>
+              <option value="KY">Kentucky</option>
+              <option value="LA">Louisiana</option>
+              <option value="ME">Maine</option>
+              <option value="MD">Maryland</option>
+              <option value="MA">Massachusetts</option>
+              <option value="MI">Michigan</option>
+              <option value="MN">Minnesota</option>
+              <option value="MS">Mississippi</option>
+              <option value="MO">Missouri</option>
+              <option value="MT">Montana</option>
+              <option value="NE">Nebraska</option>
+              <option value="NV">Nevada</option>
+              <option value="NH">New Hampshire</option>
+              <option value="NJ">New Jersey</option>
+              <option value="NM">New Mexico</option>
+              <option value="NY">New York</option>
+              <option value="NC">North Carolina</option>
+              <option value="ND">North Dakota</option>
+              <option value="OH">Ohio</option>
+              <option value="OK">Oklahoma</option>
+              <option value="OR">Oregon</option>
+              <option value="PA">Pennsylvania</option>
+              <option value="RI">Rhode Island</option>
+              <option value="SC">South Carolina</option>
+              <option value="SD">South Dakota</option>
+              <option value="TN">Tennessee</option>
+              <option value="TX">Texas</option>
+              <option value="UT">Utah</option>
+              <option value="VT">Vermont</option>
+              <option value="VA">Virginia</option>
+              <option value="WA">Washington</option>
+              <option value="WV">West Virginia</option>
+              <option value="WI">Wisconsin</option>
+              <option value="WY">Wyoming</option>
+              <option value="AA">Armed Forces (AA)</option>
+              <option value="AE">Armed Forces (AE)</option>
+              <option value="AP">Armed Forces (AP)</option>
+            </select>
+          </label>
+          <label class="d-block form-group col-md-2">
+            <span class="d-inline-block mb-2">Zip</span>
+            <input class="form-control" type="text" name="addressZip" ng-model="entity.data.addressZip" />
+          </label>
         </div>
       </div>
       <div ng-if="entity.data.addressType === 'international'">
-        <div class="pf-element pf-full-width">
-          <label><span class="pf-label">Address</span>
-            <span class="pf-group pf-full-width">
-              <span class="pf-field" style="display: block;">
-                <textarea class="form-control" style="width: 100%;" rows="3" cols="35" name="addressInternational" ng-model="entity.data.addressInternational"></textarea>
-              </span>
-            </span></label>
-        </div>
+        <label class="d-block form-group">
+          <span class="d-inline-block mb-2">Address</span>
+          <textarea class="form-control" style="width: 100%;" rows="3" cols="35" name="addressInternational" ng-model="entity.data.addressInternational"></textarea>
+        </label>
       </div>
-      <br class="pf-clearing" />
     </div>
     <div class="tab-pane tab-pane-abilities">
-      <div class="pf-element pf-full-width">
-        <span class="pf-label">Abilities</span>
-        <div class="pf-group pf-full-width">
-          <div class="text-right">
-            Add an ability: <input class="form-control" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" type="button" ng-click="addAbility()"><i class="glyphicon glyphicon-plus"></i></button> <button class="btn btn-primary" type="button" ng-click="addSysAdminAbility()">Make SysAdmin Group</button>
-          </div>
-          <br />
+      <div>
+        <div class="mb-2">Abilities</div>
+        <div>
           <table class="table table-striped">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Ability</th>
+                <th class="text-right">Remove</th>
+              </tr>
+            </thead>
             <tbody>
-              <tr ng-repeat="(key, ability) in entity.data.abilities">
-                <td style="vertical-align: middle;">{{ability}}</td>
-                <td class="text-right"><button class="btn btn-danger btn-xs" type="button" ng-click="entity.data.abilities.splice(key, 1)"><i class="glyphicon glyphicon-remove"></i></button></td>
+              <tr ng-repeat="ability in entity.data.abilities track by $index">
+                <td class="align-middle">{{$index + 1}}</td>
+                <td class="align-middle">{{ability}}</td>
+                <td class="text-right"><button class="btn btn-danger btn-xs" type="button" ng-click="entity.data.abilities.splice($index, 1)"><strong>-</strong></button></td>
               </tr>
             </tbody>
           </table>
+          <div class="text-right my-3">
+            Add an ability: <input class="form-control d-inline align-bottom" style="width: auto;" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" type="button" ng-click="addAbility()"><strong>+</strong></button> <button class="btn btn-warning" type="button" ng-click="addSysAdminAbility()">Make SysAdmin Group</button>
+          </div>
         </div>
       </div>
-      <br class="pf-clearing" />
     </div>
   </div>
-  <div class="pf-element pf-full-width">
+  <div class="mb-3">
     <input class="btn btn-primary" type="submit" value="Save" />
-    <span ng-if="success" class="label label-success">Successfully saved!</span>
-    <input class="btn btn-danger pull-right" type="button" value="Delete" ng-if="entity.guid" ng-click="deleteEntity()" />
+    <span ng-if="success" class="badge badge-success">Successfully saved!</span>
+    <input class="btn btn-danger float-right" type="button" value="Delete" ng-if="entity.guid" ng-click="deleteEntity()" />
   </div>
 </form>

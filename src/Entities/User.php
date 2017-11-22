@@ -313,6 +313,8 @@ class User extends AbleObject {
       'email_usernames' => Tilmeld::$config['email_usernames'],
       'allow_registration' => Tilmeld::$config['allow_registration'],
       'pw_recovery' => Tilmeld::$config['pw_recovery'],
+      'verify_email' => Tilmeld::$config['verify_email'],
+      'unverified_access' => Tilmeld::$config['unverified_access'],
       'timezones' => $timezones,
     ];
   }
