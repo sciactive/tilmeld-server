@@ -310,44 +310,38 @@ class Group extends AbleObject {
    * @return array An associative array with a boolean 'result' entry and a 'message' entry.
    */
   public function checkGroupname() {
-    if (!Tilmeld::$config['email_usernames']) {
-      if (empty($this->groupname)) {
-        return ['result' => false, 'message' => 'Please specify a groupname.'];
-      }
-      if (Tilmeld::$config['max_username_length'] > 0 && strlen($this->groupname) > Tilmeld::$config['max_username_length']) {
-        return ['result' => false, 'message' => 'Groupnames must not exceed '.Tilmeld::$config['max_username_length'].' characters.'];
-      }
-      if (array_diff(str_split($this->groupname), str_split(Tilmeld::$config['valid_chars']))) {
-        return ['result' => false, 'message' => Tilmeld::$config['valid_chars_notice']];
-      }
-      if (!preg_match(Tilmeld::$config['valid_regex'], $this->groupname)) {
-        return ['result' => false, 'message' => Tilmeld::$config['valid_regex_notice']];
-      }
-      $selector = ['&',
-        'ilike' => ['groupname', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $this->groupname)]
-      ];
-      if (isset($this->guid)) {
-        $selector['!guid'] = $this->guid;
-      }
-      $test = Nymph::getEntity(
-          ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
-          $selector
-      );
-      if (isset($test->guid)) {
-        return ['result' => false, 'message' => 'That groupname is taken.'];
-      }
-
-      return ['result' => true, 'message' => (isset($this->guid) ? 'Groupname is valid.' : 'Groupname is available!')];
-    } else {
-      if (empty($this->groupname)) {
-        return ['result' => false, 'message' => 'Please specify an email.'];
-      }
-      if (Tilmeld::$config['max_username_length'] > 0 && strlen($this->groupname) > Tilmeld::$config['max_username_length']) {
-        return ['result' => false, 'message' => 'Emails must not exceed '.Tilmeld::$config['max_username_length'].' characters.'];
-      }
-
+    // Groupnames can either be constrained by username validation, or be an
+    // email address.
+    if (Tilmeld::$config['email_usernames'] && $this->groupname === $this->email) {
       return $this->checkEmail();
     }
+    if (empty($this->groupname)) {
+      return ['result' => false, 'message' => 'Please specify a groupname.'];
+    }
+    if (Tilmeld::$config['max_username_length'] > 0 && strlen($this->groupname) > Tilmeld::$config['max_username_length']) {
+      return ['result' => false, 'message' => 'Groupnames must not exceed '.Tilmeld::$config['max_username_length'].' characters.'];
+    }
+    if (array_diff(str_split($this->groupname), str_split(Tilmeld::$config['valid_chars']))) {
+      return ['result' => false, 'message' => Tilmeld::$config['valid_chars_notice']];
+    }
+    if (!preg_match(Tilmeld::$config['valid_regex'], $this->groupname)) {
+      return ['result' => false, 'message' => Tilmeld::$config['valid_regex_notice']];
+    }
+    $selector = ['&',
+      'ilike' => ['groupname', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $this->groupname)]
+    ];
+    if (isset($this->guid)) {
+      $selector['!guid'] = $this->guid;
+    }
+    $test = Nymph::getEntity(
+        ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
+        $selector
+    );
+    if (isset($test->guid)) {
+      return ['result' => false, 'message' => 'That groupname is taken.'];
+    }
+
+    return ['result' => true, 'message' => (isset($this->guid) ? 'Groupname is valid.' : 'Groupname is available!')];
   }
 
   /**
@@ -356,8 +350,11 @@ class Group extends AbleObject {
    * @return array An associative array with a boolean 'result' entry and a 'message' entry.
    */
   public function checkEmail() {
+    if ($this->email === '') {
+      return ['result' => true, 'message' => ''];
+    }
     if (empty($this->email)) {
-      return ['result' => false, 'message' => 'Please specify an email.'];
+      return ['result' => false, 'message' => 'Please specify a valid email.'];
     }
     if (!preg_match('/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i', $this->email)) {
       return ['result' => false, 'message' => 'Email must be a correctly formatted address.'];
@@ -395,7 +392,7 @@ class Group extends AbleObject {
     if (!$unCheck['result']) {
       throw new \Tilmeld\Exceptions\BadUsernameException($unCheck['message']);
     }
-    if (!Tilmeld::$config['email_usernames']) {
+    if (!(Tilmeld::$config['email_usernames'] && $this->groupname === $this->email)) {
       $emCheck = $this->checkEmail();
       if (!$emCheck['result']) {
         throw new \Tilmeld\Exceptions\BadEmailException($emCheck['message']);
