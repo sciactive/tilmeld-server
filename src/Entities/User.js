@@ -26,19 +26,19 @@ export default class User extends Entity {
   // === Instance Methods ===
 
   checkUsername(...args) {
-    return this.serverCall('checkUsername', args);
+    return this.serverCall('checkUsername', args, true);
   }
 
   checkEmail(...args) {
-    return this.serverCall('checkEmail', args);
+    return this.serverCall('checkEmail', args, true);
   }
 
   checkPhone(...args) {
-    return this.serverCall('checkPhone', args);
+    return this.serverCall('checkPhone', args, true);
   }
 
   getAvatar(...args) {
-    return this.serverCall('getAvatar', args);
+    return this.serverCall('getAvatar', args, true);
   }
 
   register(...args) {
@@ -69,7 +69,7 @@ export default class User extends Entity {
   }
 
   gatekeeper(...args) {
-    return this.serverCall('gatekeeper', args);
+    return this.serverCall('gatekeeper', args, true);
   }
 
   changePassword(...args) {

@@ -21,31 +21,31 @@ export default class Group extends Entity {
   // === Instance Methods ===
 
   checkGroupname(...args) {
-    return this.serverCall('checkGroupname', args);
+    return this.serverCall('checkGroupname', args, true);
   }
 
   checkEmail(...args) {
-    return this.serverCall('checkEmail', args);
+    return this.serverCall('checkEmail', args, true);
   }
 
   getAvatar(...args) {
-    return this.serverCall('getAvatar', args);
+    return this.serverCall('getAvatar', args, true);
   }
 
   getChildren(...args) {
-    return this.serverCall('getChildren', args);
+    return this.serverCall('getChildren', args, true);
   }
 
   getDescendants(...args) {
-    return this.serverCall('getDescendants', args);
+    return this.serverCall('getDescendants', args, true);
   }
 
   getLevel(...args) {
-    return this.serverCall('getLevel', args);
+    return this.serverCall('getLevel', args, true);
   }
 
   isDescendant(...args) {
-    return this.serverCall('isDescendant', args);
+    return this.serverCall('isDescendant', args, true);
   }
 
   // === Static Methods ===
