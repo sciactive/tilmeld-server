@@ -1,6 +1,6 @@
 {
   "name": "tilmeld",
-  "version": "1.0.0-beta.9",
+  "version": "1.0.0-beta.10",
   "description": "Nymph user and group management with access controls.",
   "main": "lib/Entities/index.js",
   "scripts": {
@@ -44,6 +44,7 @@
     "babel-plugin-transform-es2015-modules-umd": "^6.24.1",
     "babel-preset-env": "^1.6.1",
     "babel-preset-stage-3": "^6.24.1",
+    "svelte": "^1.48.0",
     "svelte-cli": "^1.4.0",
     "umailphp": "^2.2"
   }
