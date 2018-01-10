@@ -1,8 +1,8 @@
 {
-  "name": "sciactive/tilmeld",
+  "name": "sciactive/tilmeld-server",
   "description": "Nymph user and group management with access controls.",
-  "version": "1.0.0-beta.11",
-  "time": "2017-12-14",
+  "version": "1.0.0-beta.12",
+  "time": "2018-01-10",
   "type": "library",
   "keywords": [
     "users",
@@ -25,12 +25,12 @@
     }
   ],
   "support": {
-    "issues": "https://github.com/sciactive/tilmeld/issues",
-    "wiki": "https://github.com/sciactive/tilmeld/wiki",
-    "source": "https://github.com/sciactive/tilmeld"
+    "issues": "https://github.com/sciactive/tilmeld-server/issues",
+    "wiki": "https://github.com/sciactive/tilmeld-server/wiki",
+    "source": "https://github.com/sciactive/tilmeld-server"
   },
   "archive": {
-    "exclude": ["**/.*", "node_modules"]
+    "exclude": ["**/.*"]
   },
   "autoload": {
     "psr-0": {
