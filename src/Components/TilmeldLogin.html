@@ -185,9 +185,7 @@
         {{#if __failureMessage}}
           <div class="pf-element pf-full-width">
             <span class="pf-group pf-full-width">
-              <span class="pf-field" style="display: block;">
-                {{__failureMessage}}
-              </span>
+              <span class="pf-field" style="display: block; white-space: pre-line;">{{__failureMessage}}</span>
             </span>
           </div>
         {{/if}}
@@ -487,9 +485,9 @@
             this.fire('login', {user});
           }
           this.set({__registering: false});
-        }, () => {
+        }, (err) => {
           this.set({
-            __failureMessage: 'An error occurred.',
+            __failureMessage: err.exception === 'Tilmeld\\Exceptions\\BadDataException' ? err.message : 'An error occurred.',
             __registering: false
           });
         });

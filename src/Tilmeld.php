@@ -266,8 +266,6 @@ class Tilmeld {
    * Fill the $_SESSION['tilmeld_user'] variable with the logged in user's data.
    *
    * Also sets the default timezone to the user's timezone.
-   *
-   * This must be called at the i11 position in the init script processing.
    */
   public static function fillSession() {
     self::session('write');

@@ -9,6 +9,8 @@
  * @link http://sciactive.com/
  */
 
+use Respect\Validation\Validator as v;
+
 return [
   /*
    * Setup URL
@@ -154,5 +156,55 @@ return [
    * Username Max Length
    * The maximum length for usernames. 0 for unlimited.
    */
-  'max_username_length' => 0,
+  'max_username_length' => 128,
+  /*
+   * Group Validator
+   * The validator used to check groups before saving.
+   */
+  'validator_group' => v::notEmpty()
+    ->attribute('groupname', v::stringType()->notBlank()->length(1, null))
+    ->attribute('enabled', v::boolType())
+    ->attribute('email', v::optional(v::email()), false)
+    ->attribute('name', v::stringType()->notBlank()->prnt()->length(1, 256))
+    ->attribute('phone', v::optional(v::phone()), false)
+    ->attribute('addressType', v::optional(v::stringType()->in(['us','international'])), false)
+    ->attribute('addressStreet', v::optional(v::stringType()->prnt()->length(1, 256)), false)
+    ->attribute('addressStreet2', v::optional(v::stringType()->prnt()->length(1, 256)), false)
+    ->attribute('addressCity', v::optional(v::stringType()->prnt()->length(1, 256)), false)
+    ->attribute('addressState', v::optional(v::stringType()->alpha()->uppercase()->length(2, 2)), false)
+    ->attribute('addressZip', v::optional(v::postalCode('US')), false)
+    ->attribute('addressInternational', v::optional(v::stringType()->prnt()->length(1, 1024)), false)
+    ->attribute('parent', v::when(v::nullType(), v::alwaysValid(), v::oneOf(v::instance('\Tilmeld\Entities\Group'), v::instance('\SciActive\HookOverride_Tilmeld_Entities_Group'))), false)
+    ->attribute('user', v::when(v::nullType(), v::alwaysValid(), v::oneOf(v::instance('\Tilmeld\Entities\User'), v::instance('\SciActive\HookOverride_Tilmeld_Entities_User'))), false)
+    ->attribute('abilities', v::arrayType()->each(v::stringType()->notBlank()->prnt()->length(1, 256)))
+    ->attribute('defaultPrimary', v::when(v::nullType(), v::alwaysValid(), v::boolType()), false)
+    ->attribute('defaultSecondary', v::when(v::nullType(), v::alwaysValid(), v::boolType()), false)
+    ->setName('group object'),
+  /*
+   * User Validator
+   * The validator used to check users before saving.
+   */
+  'validator_user' => v::notEmpty()
+    ->attribute('username', v::stringType()->notBlank()->length(1, null))
+    ->attribute('enabled', v::boolType())
+    ->attribute('email', v::optional(v::email()), false)
+    ->attribute('nameFirst', v::stringType()->notBlank()->prnt()->length(1, 256))
+    ->attribute('nameMiddle', v::optional(v::stringType()->notBlank()->prnt()->length(1, 256)), false)
+    ->attribute('nameLast', v::optional(v::stringType()->notBlank()->prnt()->length(1, 256)), false)
+    ->attribute('name', v::stringType()->notBlank()->prnt()->length(1, 256))
+    ->attribute('phone', v::optional(v::phone()), false)
+    ->attribute('timezone', v::optional(v::in(\DateTimeZone::listIdentifiers())), false)
+    ->attribute('addressType', v::optional(v::stringType()->in(['us','international'])), false)
+    ->attribute('addressStreet', v::optional(v::stringType()->prnt()->length(1, 256)), false)
+    ->attribute('addressStreet2', v::optional(v::stringType()->prnt()->length(1, 256)), false)
+    ->attribute('addressCity', v::optional(v::stringType()->prnt()->length(1, 256)), false)
+    ->attribute('addressState', v::optional(v::stringType()->alpha()->uppercase()->length(2, 2)), false)
+    ->attribute('addressZip', v::optional(v::postalCode('US')), false)
+    ->attribute('addressInternational', v::optional(v::stringType()->prnt()->length(1, 1024)), false)
+    ->attribute('group', v::when(v::nullType(), v::alwaysValid(), v::oneOf(v::instance('\Tilmeld\Entities\Group'), v::instance('\SciActive\HookOverride_Tilmeld_Entities_Group'))))
+    ->attribute('groups', v::arrayType()->each(v::oneOf(v::instance('\Tilmeld\Entities\Group'), v::instance('\SciActive\HookOverride_Tilmeld_Entities_Group'))))
+    ->attribute('abilities', v::arrayType()->each(v::stringType()->notBlank()->prnt()->length(1, 256)))
+    ->attribute('inheritAbilities', v::boolType())
+    ->attribute('password', v::stringType()->notBlank()->length(1, 1024))
+    ->setName('user object'),
 ];

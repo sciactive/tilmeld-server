@@ -108,11 +108,11 @@ class User extends AbleObject {
    * @param bool $skipUpdateDataProtectionOnNewEntity Used to load the session.
    */
   public function __construct($id = 0, $skipUpdateDataProtectionOnNewEntity = false) {
-    if ($id > 0 || (string) $id === $id) {
-      if ((int) $id === $id) {
-        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'guid' => (int) $id]);
+    if ((is_int($id) && $id > 0) || is_string($id)) {
+      if (is_int($id)) {
+        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'guid' => $id]);
       } else {
-        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'strict' => ['username', (string) $id]]);
+        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'strict' => ['username', $id]]);
       }
       if (isset($entity)) {
         $this->guid = $entity->guid;
@@ -850,14 +850,14 @@ class User extends AbleObject {
       $primaryGroup->groupname = $this->username;
       $primaryGroup->name = $this->name;
       $primaryGroup->email = $this->email;
-      $primaryGroup->group = Nymph::getEntity(
+      $primaryGroup->parent = Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
             'data' => ['defaultPrimary', true]
           ]
       );
-      if (!isset($primaryGroup->group) || !isset($primaryGroup->group->guid)) {
-        unset($primaryGroup->group);
+      if (!isset($primaryGroup->parent) || !isset($primaryGroup->group->guid)) {
+        unset($primaryGroup->parent);
       }
       if (!$primaryGroup->saveSkipAC()) {
         return ['result' => false, 'loggedin' => false, 'message' => 'Error creating primary group for user.'];
@@ -976,7 +976,7 @@ class User extends AbleObject {
     $this->nameFirst = trim($this->nameFirst);
     $this->nameMiddle = trim($this->nameMiddle);
     $this->nameLast = trim($this->nameLast);
-    $this->phone = preg_replace('/\D/', '', $this->phone);
+    $this->phone = trim($this->phone);
     $this->name = $this->nameFirst.(!empty($this->nameMiddle) ? ' '.$this->nameMiddle : '').(!empty($this->nameLast) ? ' '.$this->nameLast : '');
 
     // Verification.
@@ -1063,6 +1063,12 @@ class User extends AbleObject {
       $this->password($this->passwordTemp);
     }
     unset($this->passwordTemp);
+
+    try {
+      Tilmeld::$config['validator_user']->assert($this->getValidatable());
+    } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
+      throw new \Tilmeld\Exceptions\BadDataException($exception->getFullMessage());
+    }
 
     if (isset($this->group->user) && $this->is($this->group->user)) {
       // Update the user's generated primary group.

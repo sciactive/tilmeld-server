@@ -79,11 +79,11 @@ class Group extends AbleObject {
    * @param bool $skipUpdateDataProtectionOnNewEntity Used to load the session.
    */
   public function __construct($id = 0, $skipUpdateDataProtectionOnNewEntity = false) {
-    if ($id > 0 || (string) $id === $id) {
-      if ((int) $id === $id) {
+    if ((is_int($id) && $id > 0) || is_string($id)) {
+      if (is_int($id)) {
         $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'guid' => $id]);
       } else {
-        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'data' => ['groupname', $id]]);
+        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'strict' => ['groupname', $id]]);
       }
       if (isset($entity)) {
         $this->guid = $entity->guid;
@@ -385,7 +385,7 @@ class Group extends AbleObject {
     $this->groupname = trim($this->groupname);
     $this->email = trim($this->email);
     $this->name = trim($this->name);
-    $this->phone = preg_replace('/\D/', '', $this->phone);
+    $this->phone = trim($this->phone);
 
     // Verification.
     $unCheck = $this->checkGroupname();
@@ -407,14 +407,20 @@ class Group extends AbleObject {
           $this->parent->isDescendant($this)
         )
       ) {
-      $this->parent = null;
+      throw new \Tilmeld\Exceptions\BadDataException('Group parent can\'t be itself or descendant of itself.');
+    }
+
+    try {
+      Tilmeld::$config['validator_group']->assert($this->getValidatable());
+    } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
+      throw new \Tilmeld\Exceptions\BadDataException($exception->getFullMessage());
     }
 
     // Only one default primary group is allowed.
     if ($this->defaultPrimary) {
       $currentPrimary = Nymph::getEntity(['class' => '\Tilmeld\Entities\Group'], ['&', 'data' => ['defaultPrimary', true]]);
       if (isset($currentPrimary) && !$this->is($currentPrimary)) {
-        unset($currentPrimary->defaultPrimary);
+        $currentPrimary->defaultPrimary = false;
         if (!$currentPrimary->save()) {
           throw new \Tilmeld\Exceptions\CouldNotChangeDefaultPrimaryGroupException("Could not change new user primary group from {$currentPrimary->groupname}.");
         }
