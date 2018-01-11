@@ -881,16 +881,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.6",
+            "version": "3.0.0-beta.7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "0d503d2be2e0298986355287dfc577e2194c07b4"
+                "reference": "740c65e2e1dbea7ceee0165c37f5ca73f1cb6cbb"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/0d503d2be2e0298986355287dfc577e2194c07b4",
-                "reference": "0d503d2be2e0298986355287dfc577e2194c07b4",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/740c65e2e1dbea7ceee0165c37f5ca73f1cb6cbb",
+                "reference": "740c65e2e1dbea7ceee0165c37f5ca73f1cb6cbb",
                 "shasum": ""
             },
             "require-dev": {
@@ -930,7 +930,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-01-08T00:00:00+00:00"
+            "time": "2018-01-11T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
