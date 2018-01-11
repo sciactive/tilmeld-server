@@ -112,7 +112,7 @@ class Group extends AbleObject {
       $primaryGroups = Nymph::getEntities(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
-            'data' => ['enabled', true]
+            'equal' => ['enabled', true]
           ]
       );
     } else {
@@ -137,7 +137,7 @@ class Group extends AbleObject {
       $secondaryGroups = Nymph::getEntities(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
-            'data' => ['enabled', true]
+            'equal' => ['enabled', true]
           ]
       );
     } else {
@@ -219,7 +219,7 @@ class Group extends AbleObject {
     $return = (array) Nymph::getEntities(
         ['class' => '\Tilmeld\Entities\Group'],
         ['&',
-          'data' => ['enabled', true],
+          'equal' => ['enabled', true],
           'ref' => ['parent', $this]
         ]
     );
@@ -237,7 +237,7 @@ class Group extends AbleObject {
     $entities = Nymph::getEntities(
         ['class' => '\Tilmeld\Entities\Group'],
         ['&',
-          'data' => ['enabled', true],
+          'equal' => ['enabled', true],
           'ref' => ['parent', $this]
         ]
     );
@@ -297,7 +297,7 @@ class Group extends AbleObject {
     $return = Nymph::getEntities(
         ['class' => '\Tilmeld\Entities\User'],
         ['&',
-          'data' => ['enabled', true]
+          'equal' => ['enabled', true]
         ],
         $or
     );
@@ -418,7 +418,7 @@ class Group extends AbleObject {
 
     // Only one default primary group is allowed.
     if ($this->defaultPrimary) {
-      $currentPrimary = Nymph::getEntity(['class' => '\Tilmeld\Entities\Group'], ['&', 'data' => ['defaultPrimary', true]]);
+      $currentPrimary = Nymph::getEntity(['class' => '\Tilmeld\Entities\Group'], ['&', 'equal' => ['defaultPrimary', true]]);
       if (isset($currentPrimary) && !$this->is($currentPrimary)) {
         $currentPrimary->defaultPrimary = false;
         if (!$currentPrimary->save()) {

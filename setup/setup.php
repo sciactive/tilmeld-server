@@ -40,7 +40,7 @@ if (isset($_REQUEST['action']) && \Tilmeld\Tilmeld::$config['verify_email']) {
         $user->groups = (array) \Nymph\Nymph::getEntities(
             ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
             ['&',
-              'data' => ['defaultSecondary', true]
+              'equal' => ['defaultSecondary', true]
             ]
         );
       }

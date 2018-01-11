@@ -853,7 +853,7 @@ class User extends AbleObject {
       $primaryGroup->parent = Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
-            'data' => ['defaultPrimary', true]
+            'equal' => ['defaultPrimary', true]
           ]
       );
       if (!isset($primaryGroup->parent) || !isset($primaryGroup->group->guid)) {
@@ -868,7 +868,7 @@ class User extends AbleObject {
       $this->group = Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
-            'data' => ['defaultPrimary', true]
+            'equal' => ['defaultPrimary', true]
           ]
       );
       if (!isset($this->group) || !isset($this->group->guid)) {
@@ -882,7 +882,7 @@ class User extends AbleObject {
       $this->groups = (array) Nymph::getEntities(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
-            'data' => ['unverifiedSecondary', true]
+            'equal' => ['unverifiedSecondary', true]
           ]
       );
     } else {
@@ -890,7 +890,7 @@ class User extends AbleObject {
       $this->groups = (array) Nymph::getEntities(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
-            'data' => ['defaultSecondary', true]
+            'equal' => ['defaultSecondary', true]
           ]
       );
     }
@@ -1090,7 +1090,7 @@ class User extends AbleObject {
     return $return;
   }
 
-  /*
+  /**
    * This should *never* be accessible on the client.
    */
   public function saveSkipAC() {
