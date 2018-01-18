@@ -46,9 +46,10 @@ angular.module('setupApp', ['ngRoute'])
   $scope.clientConfig = {};
   $scope.uiState = {
     loading: false,
-    sort: 'nameFirst',
-    entities: [],
     ability: '',
+    entitySearch: '',
+    primaryGroupSearch: '',
+    secondayGroupSearch: '',
     verifyPassword: '',
     passwordVerified: null,
     usernameVerified: null,
@@ -57,11 +58,13 @@ angular.module('setupApp', ['ngRoute'])
     emailVerifiedMessage: null,
     success: null
   };
-  $scope.primaryGroups = [];
-  $scope.secondaryGroups = [];
+
+  $scope.setEntity = function(entity) {
+    $scope.entity = entity ? entity : new User();
+  };
 
   function setup() {
-    $scope.entity = new User();
+    $scope.setEntity();
     $scope.currentUser = null;
     $scope.avatar = '//secure.gravatar.com/avatar/?d=mm&s=40';
     User.current().then(function(user) {
@@ -73,12 +76,67 @@ angular.module('setupApp', ['ngRoute'])
   }
   setup();
 
+  $scope.entities = [];
+  $scope.searchEntities = function() {
+    $scope.entities = null;
+    var query = $scope.uiState.entitySearch;
+    if (!query.match(/[_%]/)) {
+      query += '%';
+    }
+    Nymph.getEntities({"class": User.class}, {
+      'type': '&',
+      'equal': ['enabled', true]
+    }, {
+      'type': '|',
+      'ilike': [
+        ['name', query],
+        ['username', query]
+      ],
+    }).then(function(entities) {
+      $scope.entities = entities;
+      $scope.$apply();
+    });
+  };
+
+  $scope.primaryGroups = [];
+  $scope.searchPrimaryGroups = function() {
+    $scope.primaryGroups = null;
+    var query = $scope.uiState.primaryGroupSearch;
+    if (!query.match(/[_%]/)) {
+      query += '%';
+    }
+    Group.getPrimaryGroups(query).then(function(groups) {
+      $scope.primaryGroups = groups.filter(function(group) {
+        return !group.is($scope.entity.data.group);
+      });
+      $scope.$apply();
+    });
+  };
+
+  $scope.secondaryGroups = [];
+  $scope.searchSecondaryGroups = function() {
+    $scope.secondaryGroups = null;
+    var query = $scope.uiState.secondayGroupSearch;
+    if (!query.match(/[_%]/)) {
+      query += '%';
+    }
+    Group.getSecondaryGroups(query).then(function(groups) {
+      $scope.secondaryGroups = groups.filter(function(group) {
+        return !group.inArray($scope.entity.data.groups);
+      });
+      $scope.$apply();
+    });
+  };
+
   $scope.$watch('entity.data.email', function() {
     if ($scope.entity) {
       $scope.entity.getAvatar().then(function(avatar) {
         $scope.avatar = avatar;
         $scope.$apply();
       });
+      $scope.entity.readyAll(function() {
+        $scope.$apply();
+      }, undefined, 1);
     }
   });
 
@@ -88,35 +146,6 @@ angular.module('setupApp', ['ngRoute'])
       $scope.$apply();
     }
   });
-  Group.getPrimaryGroups().then(function(groups) {
-    $scope.primaryGroups = groups;
-    $scope.$apply();
-  });
-  Group.getSecondaryGroups().then(function(groups) {
-    $scope.secondaryGroups = groups;
-    $scope.$apply();
-  });
-
-  var updateEntitiesCallback = function(entities) {
-    var newEntity = new User();
-    if ($scope.uiState.entities.length && $scope.uiState.entities[0].guid === null) {
-      newEntity = $scope.uiState.entities[0];
-      $scope.uiState.entities.splice(0, 1);
-    }
-    Nymph.updateArray($scope.uiState.entities, entities);
-    Nymph.sort($scope.uiState.entities, $scope.uiState.sort);
-    $scope.uiState.entities.splice(0, 0, newEntity);
-    $scope.$apply();
-  };
-  var updateEntities = function() {
-    var entitiesPromise = Nymph.getEntities({"class": User.class});
-    if (TilmeldOptions.pubsub) {
-      entitiesPromise.subscribe(updateEntitiesCallback);
-    } else {
-      entitiesPromise.then(updateEntitiesCallback);
-    }
-  };
-  updateEntities();
 
   var usernameTimer = null;
   $scope.$watch('entity.data.username', function(newValue, oldValue) {
@@ -196,13 +225,12 @@ angular.module('setupApp', ['ngRoute'])
       } else {
         alert("Error saving user.");
       }
-      if (!TilmeldOptions.pubsub) {
-        updateEntities();
-      }
+      $scope.entity.readyAll(function() {
+        $scope.$apply();
+      }, undefined, 1);
     }, function(errObj) {
-      // Todo: handle exceptions.
       console.log("errObj:",errObj);
-      alert("Error communicating data.");
+      alert("Error: "+errObj.message);
     });
   };
 
@@ -210,9 +238,6 @@ angular.module('setupApp', ['ngRoute'])
     if (confirm('Are you sure you want to delete this?')) {
       $scope.entity.delete().then(function() {
         setup();
-        if (!TilmeldOptions.pubsub) {
-          updateEntities();
-        }
         $scope.$apply();
       }, function(err) {
         alert("An error occurred: "+err.textStatus);
@@ -227,9 +252,8 @@ angular.module('setupApp', ['ngRoute'])
   $scope.clientConfig = {};
   $scope.uiState = {
     loading: false,
-    sort: 'name',
-    entities: [],
-    parents: [],
+    entitySearch: '',
+    parentSearch: '',
     ability: '',
     groupnameVerified: null,
     groupnameVerifiedMessage: null,
@@ -238,10 +262,68 @@ angular.module('setupApp', ['ngRoute'])
     success: null
   };
 
+  $scope.setEntity = function(entity) {
+    $scope.entity = entity ? entity : new Group();
+  };
+
   function setup() {
-    $scope.entity = new Group();
+    $scope.setEntity();
   }
   setup();
+
+  $scope.entities = [];
+  $scope.searchEntities = function() {
+    $scope.entities = null;
+    var query = $scope.uiState.entitySearch;
+    if (!query.match(/[_%]/)) {
+      query += '%';
+    }
+    Nymph.getEntities({"class": Group.class}, {
+      'type': '&',
+      'equal': ['enabled', true]
+    }, {
+      'type': '|',
+      'ilike': [
+        ['name', query],
+        ['groupname', query]
+      ],
+    }).then(function(entities) {
+      $scope.entities = entities;
+      $scope.$apply();
+    });
+  };
+
+  $scope.parents = [];
+  $scope.searchParents = function() {
+    $scope.parents = null;
+    var query = $scope.uiState.parentSearch;
+    if (!query.match(/[_%]/)) {
+      query += '%';
+    }
+    Nymph.getEntities({"class": Group.class}, {
+      'type': '&',
+      'equal': ['enabled', true]
+    }, {
+      'type': '|',
+      'ilike': [
+        ['name', query],
+        ['groupname', query]
+      ],
+    }).then(function(groups) {
+      $scope.parents = groups.filter(function(group) {
+        return !group.is($scope.entity) && !group.is($scope.entity.data.parent);
+      });
+      $scope.$apply();
+    });
+  };
+
+  $scope.$watch('entity.data.email', function() {
+    if ($scope.entity) {
+      $scope.entity.readyAll(function() {
+        $scope.$apply();
+      }, undefined, 1);
+    }
+  });
 
   User.getClientConfig().then(function(config) {
     if (config) {
@@ -249,30 +331,6 @@ angular.module('setupApp', ['ngRoute'])
       $scope.$apply();
     }
   });
-
-  var updateEntitiesCallback = function(entities) {
-    var newEntity = new Group();
-    if ($scope.uiState.entities.length && $scope.uiState.entities[0].guid === null) {
-      newEntity = $scope.uiState.entities[0];
-      $scope.uiState.entities.splice(0, 1);
-    }
-    Nymph.updateArray($scope.uiState.entities, entities);
-    Nymph.sort($scope.uiState.entities, $scope.uiState.sort);
-    $scope.uiState.parents = $scope.uiState.entities.filter(function(group) {
-      return !(group.guid === null || group.guid === $scope.entity.guid);
-    });
-    $scope.uiState.entities.splice(0, 0, newEntity);
-    $scope.$apply();
-  };
-  var updateEntities = function() {
-    var entitiesPromise = Nymph.getEntities({"class": Group.class});
-    if (TilmeldOptions.pubsub) {
-      entitiesPromise.subscribe(updateEntitiesCallback);
-    } else {
-      entitiesPromise.then(updateEntitiesCallback);
-    }
-  };
-  updateEntities();
 
   var groupnameTimer = null;
   $scope.$watch('entity.data.groupname', function(newValue, oldValue) {
@@ -316,28 +374,6 @@ angular.module('setupApp', ['ngRoute'])
       });
     }, 400);
   });
-  var cacheUser = null;
-  $scope.$watch('entity.data.user', function(newValue, oldValue) {
-    if (
-        newValue === oldValue
-        || newValue === undefined
-        || !newValue.isASleepingReference
-      ) {
-      return;
-    }
-    if ($scope.entity.data.user.isASleepingReference
-        && !$scope.entity.data.user.readyPromise
-      ) {
-      if (cacheUser !== null && cacheUser.is($scope.entity.data.user)) {
-        $scope.entity.data.user.init(cacheUser.toJSON());
-      } else {
-        $scope.entity.data.user.ready().then(function(user) {
-          cacheUser = user;
-          $scope.$apply();
-        });
-      }
-    }
-  }, true);
 
   $scope.addAbility = function() {
     if ($scope.uiState.ability === '') {
@@ -364,11 +400,12 @@ angular.module('setupApp', ['ngRoute'])
       } else {
         alert("Error saving group.");
       }
-      if (!TilmeldOptions.pubsub) {
-        updateEntities();
-      }
-    }, function() {
-      alert("Error communicating data.");
+      $scope.entity.readyAll(function() {
+        $scope.$apply();
+      }, undefined, 1);
+    }, function(errObj) {
+      console.log("errObj:",errObj);
+      alert("Error: "+errObj.message);
     });
   };
 
@@ -376,9 +413,6 @@ angular.module('setupApp', ['ngRoute'])
     if (confirm('Are you sure you want to delete this?')) {
       $scope.entity.delete().then(function() {
         setup();
-        if (!TilmeldOptions.pubsub) {
-          updateEntities();
-        }
         $scope.$apply();
       }, function(err) {
         alert("An error occurred: "+err.textStatus);

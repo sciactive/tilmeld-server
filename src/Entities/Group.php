@@ -103,52 +103,74 @@ class Group extends AbleObject {
 
   /**
    * Get all the groups that can be assigned as primary groups.
+   * @param string|null $search A search query. If null, all will be returned.
+   *                            Uses ilike on name and groupname.
    * @return array An array of the assignable primary groups.
    */
-  public static function getPrimaryGroups() {
-    $highestPrimaryParent = Tilmeld::$config['highest_primary'];
-    $primaryGroups = [];
-    if ($highestPrimaryParent == 0) {
-      $primaryGroups = Nymph::getEntities(
-          ['class' => '\Tilmeld\Entities\Group'],
-          ['&',
-            'equal' => ['enabled', true]
-          ]
-      );
-    } else {
-      if ($highestPrimaryParent > 0) {
-        $highestPrimaryParent = Group::factory($highestPrimaryParent);
-        if (isset($highestPrimaryParent->guid)) {
-          $primaryGroups = $highestPrimaryParent->getDescendants();
-        }
-      }
-    }
-    return $primaryGroups;
+  public static function getPrimaryGroups($search = null) {
+    return self::getAssignableGroups(
+        $search,
+        Tilmeld::$config['highest_primary']
+    );
   }
 
   /**
    * Get all the groups that can be assigned as secondary groups.
+   * @param string|null $search A search query. If null, all will be returned.
+   *                            Uses ilike on name and groupname.
    * @return array An array of the assignable secondary groups.
    */
-  public static function getSecondaryGroups() {
-    $highestSecondaryParent = Tilmeld::$config['highest_secondary'];
-    $secondaryGroups = [];
-    if ($highestSecondaryParent == 0) {
-      $secondaryGroups = Nymph::getEntities(
+  public static function getSecondaryGroups($search = null) {
+    return self::getAssignableGroups(
+        $search,
+        Tilmeld::$config['highest_secondary']
+    );
+  }
+
+  private static function getAssignableGroups($search = null, $highestParent) {
+    $assignableGroups = [];
+    if ($search !== null) {
+      $assignableGroups = Nymph::getEntities(
           ['class' => '\Tilmeld\Entities\Group'],
           ['&',
             'equal' => ['enabled', true]
+          ],
+          ['|',
+            'ilike' => [
+              ['name', $search],
+              ['groupname', $search]
+            ],
           ]
       );
+      if ($highestParent != 0) {
+        $assignableGroups = array_values(array_filter($assignableGroups, function ($curGroup) use ($highestParent) {
+          while (isset($curGroup->parent) && $curGroup->parent->guid) {
+            if ($curGroup->parent->guid === $highestParent) {
+              return true;
+            }
+            $curGroup = $curGroup->parent;
+          }
+          return false;
+        }));
+      }
     } else {
-      if ($highestSecondaryParent > 0) {
-        $highestSecondaryParent = Group::factory($highestSecondaryParent);
-        if (isset($highestSecondaryParent->guid)) {
-          $secondaryGroups = $highestSecondaryParent->getDescendants();
+      if ($highestParent == 0) {
+        $assignableGroups = Nymph::getEntities(
+            ['class' => '\Tilmeld\Entities\Group'],
+            ['&',
+              'equal' => ['enabled', true]
+            ]
+        );
+      } else {
+        if ($highestParent > 0) {
+          $highestParent = Group::factory($highestParent);
+          if (isset($highestParent->guid)) {
+            $assignableGroups = $highestParent->getDescendants();
+          }
         }
       }
     }
-    return $secondaryGroups;
+    return $assignableGroups;
   }
 
   public function getAvatar() {

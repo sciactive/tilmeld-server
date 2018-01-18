@@ -1,9 +1,28 @@
 <div class="card">
   <div class="card-header">
-    Select a User to edit.
+    <div class="row">
+      <div class="col align-self-center">
+        User Search
+      </div>
+      <div class="col text-right">
+        <button class="btn btn-secondary btn-sm" ng-click="setEntity()">Create New User</button>
+      </div>
+    </div>
   </div>
   <div class="card-body">
-    <select class="form-control" ng-model="entity" ng-options="ent as (ent.guid===null ? '- New User -' : ent.data.name+' ('+ent.data.username+')')+(ent.data.enabled ? '' : ' (Disabled)') for ent in uiState.entities track by ent.guid"></select>
+    <div class="input-group">
+      <input class="form-control align-bottom" type="text" name="search-entities" ng-model="uiState.entitySearch" ng-keydown="$event.keyCode === 13 ? ($event.preventDefault() || $event.stopPropagation()) : void(0)" />
+      <div class="input-group-append">
+        <button ng-click="searchEntities()" type="button" class="btn btn-outline-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fa fa-search" aria-hidden="true"></i>
+        </button>
+        <div class="dropdown-menu dropdown-menu-right">
+          <button class="dropdown-item disabled" type="button" disabled ng-if="entities === null"><i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> Searching...</button>
+          <button class="dropdown-item disabled" type="button" disabled ng-if="entities.length === 0">No results</button>
+          <button class="dropdown-item" type="button" ng-repeat="curEntity in entities track by curEntity.guid" ng-click="setEntity(curEntity)">{{curEntity.data.name+' ('+curEntity.data.username+')'}}</button>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <div class="my-3 border border-top-0 border-right-0 border-left-0">
@@ -31,7 +50,7 @@
           <img class="img-thumbnail" ng-src="{{avatar}}" alt="Avatar" title="Avatar by Gravatar" />
         </a>
       </div>
-      <div class="form-check">
+      <div class="form-check mb-2">
         <label class="form-check-label">
           <input class="form-check-input" type="checkbox" name="enabled" ng-model="entity.data.enabled">
           Enabled
@@ -80,17 +99,63 @@
       </label>
     </div>
     <div class="tab-pane tab-pane-groups">
-      <label class="d-block form-group">
-        <span class="d-inline-block mb-2">Primary Group</span>
-        <select class="form-control" name="group" ng-options="group as group.data.name+' ('+group.data.groupname+')' for group in primaryGroups track by group.guid" ng-model="entity.data.group">
-          <option value="" ng-value="null">- No Primary Group -</option>
-        </select>
-      </label>
-      <label class="d-block form-group">
-        <span class="d-inline-block mb-2">Groups</span>
-        <select class="form-control" name="groups" multiple="true" ng-options="group as group.data.name+' ('+group.data.groupname+')' for group in secondaryGroups track by group.guid" ng-model="entity.data.groups"></select>
-        <small class="form-text text-muted">Use CTRL (CMD on Mac) to select multiple.</small>
-      </label>
+      <div>
+        <div class="mb-2">Primary Group</div>
+        <div class="row">
+          <div class="col" ng-if="!entity.data.group">No Primary Group</div>
+          <div class="col" ng-if="entity.data.group">{{entity.data.group.data.name+' ('+entity.data.group.data.groupname+')'}}</div>
+          <div class="col text-right" ng-if="entity.data.group"><button class="btn btn-danger btn-sm" type="button" ng-click="entity.data.group = null"><i class="fa fa-minus" aria-hidden="true"></i></button></div>
+        </div>
+        <div class="text-right my-3">
+          Change primary group:
+          <input class="form-control d-inline align-bottom" style="width: auto;" type="text" name="search-primary-groups" ng-model="uiState.primaryGroupSearch" ng-keydown="$event.keyCode === 13 ? ($event.preventDefault() || $event.stopPropagation()) : void(0)" />
+          <div class="btn-group">
+            <button ng-click="searchPrimaryGroups()" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              <i class="fa fa-search" aria-hidden="true"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-right">
+              <button class="dropdown-item disabled" type="button" disabled ng-if="primaryGroups === null"><i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> Searching...</button>
+              <button class="dropdown-item disabled" type="button" disabled ng-if="primaryGroups.length === 0">No results</button>
+              <button class="dropdown-item" type="button" ng-repeat="group in primaryGroups track by group.guid" ng-click="entity.data.group = group">{{group.data.name+' ('+group.data.groupname+')'}}</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="mb-2">Secondary Groups</div>
+        <div>
+          <table class="table table-striped" ng-if="entity.data.groups.length">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Groupname</th>
+                <th class="text-right">Remove</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr ng-repeat="group in entity.data.groups track by group.guid">
+                <td class="align-middle">{{group.data.name}}</td>
+                <td class="align-middle">{{group.data.groupname}}</td>
+                <td class="text-right"><button class="btn btn-danger btn-sm" type="button" ng-click="entity.data.groups.splice($index, 1)"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="text-right my-3">
+            Add secondary group:
+            <input class="form-control d-inline align-bottom" style="width: auto;" type="text" name="search-secondary-groups" ng-model="uiState.secondayGroupSearch" ng-keydown="$event.keyCode === 13 ? ($event.preventDefault() || $event.stopPropagation()) : void(0)" />
+            <div class="btn-group">
+              <button ng-click="searchSecondaryGroups()" type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fa fa-search" aria-hidden="true"></i>
+              </button>
+              <div class="dropdown-menu dropdown-menu-right">
+                <button class="dropdown-item disabled" type="button" disabled ng-if="secondaryGroups === null"><i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> Searching...</button>
+                <button class="dropdown-item disabled" type="button" disabled ng-if="secondaryGroups.length === 0">No results</button>
+                <button class="dropdown-item" type="button" ng-repeat="group in secondaryGroups track by group.guid" ng-click="entity.data.groups.push(group)">{{group.data.name+' ('+group.data.groupname+')'}}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="tab-pane tab-pane-location">
       <div class="form-group">
@@ -199,7 +264,7 @@
       <div>
         <div class="mb-2">Abilities</div>
         <div>
-          <table class="table table-striped">
+          <table class="table table-striped" ng-if="entity.data.abilities.length">
             <thead>
               <tr>
                 <th>#</th>
@@ -211,12 +276,12 @@
               <tr ng-repeat="ability in entity.data.abilities track by $index">
                 <td class="align-middle">{{$index + 1}}</td>
                 <td class="align-middle">{{ability}}</td>
-                <td class="text-right"><button class="btn btn-danger btn-xs" type="button" ng-click="entity.data.abilities.splice($index, 1)"><strong>-</strong></button></td>
+                <td class="text-right"><button class="btn btn-danger btn-sm" type="button" ng-click="entity.data.abilities.splice($index, 1)"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
               </tr>
             </tbody>
           </table>
           <div class="text-right my-3">
-            Add an ability: <input class="form-control d-inline align-bottom" style="width: auto;" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" type="button" ng-click="addAbility()"><strong>+</strong></button> <button class="btn btn-warning" type="button" ng-click="addSysAdminAbility()">Make SysAdmin</button>
+            Add an ability: <input class="form-control d-inline align-bottom" style="width: auto;" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" type="button" ng-click="addAbility()"><i class="fa fa-plus" aria-hidden="true"></i></button> <button class="btn btn-warning" type="button" ng-click="addSysAdminAbility()">Make SysAdmin</button>
           </div>
         </div>
       </div>
