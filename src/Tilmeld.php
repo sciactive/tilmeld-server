@@ -102,7 +102,7 @@ class Tilmeld {
     if ($user === null) {
       $optionsAndSelectors[] = ['|',
         // Other access control is sufficient.
-        'gte' => ['ac_other', Tilmeld::READ_ACCESS],
+        'gte' => ['acOther', Tilmeld::READ_ACCESS],
         // The user and group are not set.
         ['&',
           '!isset' => ['user', 'group']
@@ -111,7 +111,7 @@ class Tilmeld {
     } else {
       $selector = ['|',
         // Other access control is sufficient.
-        'gte' => ['ac_other', Tilmeld::READ_ACCESS],
+        'gte' => ['acOther', Tilmeld::READ_ACCESS],
         // The user and group are not set.
         ['&',
           '!isset' => ['user', 'group']
@@ -119,7 +119,7 @@ class Tilmeld {
         // It is owned by the user.
         ['&',
           'ref' => ['user', $user],
-          'gte' => ['ac_user', Tilmeld::READ_ACCESS]
+          'gte' => ['acUser', Tilmeld::READ_ACCESS]
         ]
       ];
       $groupRefs = [];
@@ -133,7 +133,7 @@ class Tilmeld {
           $groupRefs[] = ['group', $curSecondaryGroup];
         }
       }
-      foreach ($_SESSION['tilmeld_descendants'] as $curDescendantGroup) {
+      foreach ($_SESSION['tilmeldDescendants'] as $curDescendantGroup) {
         if (isset($curDescendantGroup) && isset($curDescendantGroup->guid)) {
           // It belongs to the user's secondary group.
           $groupRefs[] = ['group', $curDescendantGroup];
@@ -142,7 +142,7 @@ class Tilmeld {
       // All the group refs.
       if (!empty($groupRefs)) {
         $selector[] = ['&',
-          'gte' => ['ac_group', Tilmeld::READ_ACCESS],
+          'gte' => ['acGroup', Tilmeld::READ_ACCESS],
           ['|',
             'ref' => $groupRefs
           ]
@@ -158,12 +158,12 @@ class Tilmeld {
    * This will check the AC (Access Control) properties of the entity. These
    * include the following properties:
    *
-   * - ac_user
-   * - ac_group
-   * - ac_other
+   * - acUser
+   * - acGroup
+   * - acOther
    *
-   * The property "ac_user" refers to the entity's owner, "ac_group" refers to
-   * all users in the entity's group and all ancestor groups, and "ac_other"
+   * The property "acUser" refers to the entity's owner, "acGroup" refers to
+   * all users in the entity's group and all ancestor groups, and "acOther"
    * refers to any user who doesn't fit these descriptions.
    *
    * Each property should be either NO_ACCESS, READ_ACCESS, WRITE_ACCESS, or
@@ -174,9 +174,9 @@ class Tilmeld {
    *
    * AC properties defaults to:
    *
-   * - ac_user = Tilmeld::DELETE_ACCESS
-   * - ac_group = Tilmeld::READ_ACCESS
-   * - ac_other = Tilmeld::NO_ACCESS
+   * - acUser = Tilmeld::DELETE_ACCESS
+   * - acGroup = Tilmeld::READ_ACCESS
+   * - acOther = Tilmeld::NO_ACCESS
    *
    * The following conditions will result in different checks, which determine
    * whether the check passes:
@@ -202,7 +202,7 @@ class Tilmeld {
     $currentUserOrNull = User::current();
     $currentUserOrEmpty = User::current(true);
 
-    if ((object) $entity !== $entity || !is_callable([$entity, 'is'])) {
+    if (!is_object($entity) || !is_callable([$entity, 'is'])) {
       return false;
     }
     if ($currentUserOrEmpty->gatekeeper('system/admin')) {
@@ -229,12 +229,12 @@ class Tilmeld {
     }
 
     // Load access control, since we need it now...
-    $ac_user = $entity->ac_user ?? Tilmeld::DELETE_ACCESS;
-    $ac_group = $entity->ac_group ?? Tilmeld::READ_ACCESS;
-    $ac_other = $entity->ac_other ?? Tilmeld::NO_ACCESS;
+    $acUser = $entity->acUser ?? Tilmeld::DELETE_ACCESS;
+    $acGroup = $entity->acGroup ?? Tilmeld::READ_ACCESS;
+    $acOther = $entity->acOther ?? Tilmeld::NO_ACCESS;
 
     if ($currentUserOrNull === null) {
-      return ($ac_other >= $type);
+      return ($acOther >= $type);
     }
     if ($currentUserOrEmpty->is($entity)) {
       return true;
@@ -248,68 +248,68 @@ class Tilmeld {
       return true;
     }
     if (is_callable([$entity->user, 'is']) && $entity->user->is($currentUserOrNull)) {
-      return ($ac_user >= $type);
+      return ($acUser >= $type);
     }
     if (is_callable([$entity->group, 'is'])
         && (
           $entity->group->is($currentUserOrEmpty->group) ||
           $entity->group->inArray($currentUserOrEmpty->groups) ||
-          $entity->group->inArray($_SESSION['tilmeld_descendants'])
+          $entity->group->inArray($_SESSION['tilmeldDescendants'])
         )
       ) {
-      return ($ac_group >= $type);
+      return ($acGroup >= $type);
     }
-    return ($ac_other >= $type);
+    return ($acOther >= $type);
   }
 
   /**
-   * Fill the $_SESSION['tilmeld_user'] variable with the logged in user's data.
+   * Fill the $_SESSION['tilmeldUser'] variable with the logged in user's data.
    *
    * Also sets the default timezone to the user's timezone.
    */
   public static function fillSession() {
     self::session('write');
-    if (isset($_SESSION['tilmeld_user'])
-        && (object) $_SESSION['tilmeld_user'] === $_SESSION['tilmeld_user']
-        && $_SESSION['tilmeld_user']->guid === $_SESSION['tilmeld_user_id']
+    if (isset($_SESSION['tilmeldUser'])
+        && is_object($_SESSION['tilmeldUser'])
+        && $_SESSION['tilmeldUser']->guid === $_SESSION['tilmeldUserId']
       ) {
-      $tmp_user = Nymph::getEntity(
+      $tmpUser = Nymph::getEntity(
           ['class' => '\Tilmeld\Entities\User'],
           ['&',
-            'guid' => [$_SESSION['tilmeld_user']->guid],
-            'gt' => ['mdate', $_SESSION['tilmeld_user']->mdate]
+            'guid' => [$_SESSION['tilmeldUser']->guid],
+            'gt' => ['mdate', $_SESSION['tilmeldUser']->mdate]
           ]
       );
-      if (!isset($tmp_user)) {
-        $_SESSION['tilmeld_user']->clearCache();
-        date_default_timezone_set($_SESSION['tilmeld_user_timezone']);
+      if (!isset($tmpUser)) {
+        $_SESSION['tilmeldUser']->clearCache();
+        date_default_timezone_set($_SESSION['tilmeldUserTimezone']);
         self::session('close');
         return;
       }
-      unset($_SESSION['tilmeld_user']);
+      unset($_SESSION['tilmeldUser']);
     } else {
-      $tmp_user = User::factory($_SESSION['tilmeld_user_id']);
+      $tmpUser = User::factory($_SESSION['tilmeldUserId']);
     }
-    $_SESSION['tilmeld_user_timezone'] = $tmp_user->getTimezone();
-    date_default_timezone_set($_SESSION['tilmeld_user_timezone']);
-    $_SESSION['tilmeld_descendants'] = [];
-    if (isset($tmp_user->group)) {
-      $_SESSION['tilmeld_descendants'] = (array) $tmp_user->group->getDescendants();
+    $_SESSION['tilmeldUserTimezone'] = $tmpUser->getTimezone();
+    date_default_timezone_set($_SESSION['tilmeldUserTimezone']);
+    $_SESSION['tilmeldDescendants'] = [];
+    if (isset($tmpUser->group)) {
+      $_SESSION['tilmeldDescendants'] = (array) $tmpUser->group->getDescendants();
     }
-    foreach ($tmp_user->groups as $cur_group) {
-      $_SESSION['tilmeld_descendants'] = array_merge((array) $_SESSION['tilmeld_descendants'], (array) $cur_group->getDescendants());
+    foreach ($tmpUser->groups as $curGroup) {
+      $_SESSION['tilmeldDescendants'] = array_merge((array) $_SESSION['tilmeldDescendants'], (array) $curGroup->getDescendants());
     }
-    if ($tmp_user->inheritAbilities) {
-      $_SESSION['tilmeld_inherited_abilities'] = $tmp_user->abilities;
-      foreach ($tmp_user->groups as $cur_group) {
-        $_SESSION['tilmeld_inherited_abilities'] = array_merge($_SESSION['tilmeld_inherited_abilities'], $cur_group->abilities);
+    if ($tmpUser->inheritAbilities) {
+      $_SESSION['tilmeldInheritedAbilities'] = $tmpUser->abilities;
+      foreach ($tmpUser->groups as $curGroup) {
+        $_SESSION['tilmeldInheritedAbilities'] = array_merge($_SESSION['tilmeldInheritedAbilities'], $curGroup->abilities);
       }
-      if (isset($tmp_user->group)) {
-        $_SESSION['tilmeld_inherited_abilities'] = array_merge($_SESSION['tilmeld_inherited_abilities'], $tmp_user->group->abilities);
+      if (isset($tmpUser->group)) {
+        $_SESSION['tilmeldInheritedAbilities'] = array_merge($_SESSION['tilmeldInheritedAbilities'], $tmpUser->group->abilities);
       }
     }
-    $_SESSION['tilmeld_user'] = $tmp_user;
-    $_SESSION['tilmeld_user']->updateDataProtection();
+    $_SESSION['tilmeldUser'] = $tmpUser;
+    $_SESSION['tilmeldUser']->updateDataProtection();
     self::session('close');
   }
 
@@ -324,7 +324,7 @@ class Tilmeld {
       // Destroy session data.
       self::logout();
       self::session('write');
-      $_SESSION['tilmeld_user_id'] = $user->guid;
+      $_SESSION['tilmeldUserId'] = $user->guid;
       self::fillSession();
       self::session('close');
       return true;
@@ -337,8 +337,8 @@ class Tilmeld {
    */
   public static function logout() {
     self::session('write');
-    unset($_SESSION['tilmeld_user_id']);
-    unset($_SESSION['tilmeld_user']);
+    unset($_SESSION['tilmeldUserId']);
+    unset($_SESSION['tilmeldUser']);
     self::session('destroy');
   }
 
@@ -389,8 +389,8 @@ class Tilmeld {
       default:
         if ((
               isset($_SESSION)
-              && isset($_SESSION['tilmeld_session_access'])
-              && $_SESSION['tilmeld_session_access']
+              && isset($_SESSION['tilmeldSessionAccess'])
+              && $_SESSION['tilmeldSessionAccess']
             )
             || session_status() === PHP_SESSION_ACTIVE) {
           return;
@@ -403,7 +403,7 @@ class Tilmeld {
         if (session_status() !== PHP_SESSION_ACTIVE) {
           session_start();
         }
-        $_SESSION['tilmeld_session_access'] = true;
+        $_SESSION['tilmeldSessionAccess'] = true;
         break;
       case 'close':
         if (session_status() === PHP_SESSION_ACTIVE) {

@@ -264,8 +264,8 @@ class Group extends AbleObject {
         ]
     );
     foreach ($entities as $entity) {
-      $child_array = $entity->getDescendants(true);
-      $return = array_merge($return, $child_array);
+      $childArray = $entity->getDescendants(true);
+      $return = array_merge($return, $childArray);
     }
     $hooked = $this;
     if (class_exists('\SciActive\Hook')) {
@@ -478,8 +478,8 @@ class Group extends AbleObject {
           'ref' => ['parent', $this]
         ]
     );
-    foreach ($entities as $cur_group) {
-      if (!$cur_group->delete()) {
+    foreach ($entities as $curGroup) {
+      if (!$curGroup->delete()) {
         return false;
       }
     }

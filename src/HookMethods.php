@@ -16,7 +16,7 @@ class HookMethods {
     // Check for the skip access control option and add AC selectors.
     $GetEntitiesHook = function (&$array, $name, &$object, &$function, &$data) {
       if (isset($array[0]['skip_ac']) && $array[0]['skip_ac']) {
-        $data['Tilmeld_skip_ac'] = true;
+        $data['TilmeldSkipAc'] = true;
       } else {
         if (
             isset($array[0]['source'])
@@ -72,10 +72,10 @@ class HookMethods {
     // Filter entities being deleted for user permissions.
     $CheckPermissionsDeleteHook = function (&$array) {
       $entity = $array[0];
-      if ((int) $entity === $entity) {
+      if (is_int($entity)) {
         $entity = \Nymph\Nymph::getEntity($array[0]);
       }
-      if ((object) $entity !== $entity) {
+      if (!is_object($entity)) {
         $array = false;
         return;
       }
@@ -88,14 +88,14 @@ class HookMethods {
     // TODO(hperrin): Is this necessary, after adding AC selectors?
     // Filter entities being returned for user permissions.
     // $CheckPermissionsReturnHook = function (&$array, $name, &$object, &$function, &$data) {
-    //   if (isset($data['Tilmeld_skip_ac']) && $data['Tilmeld_skip_ac']) {
+    //   if (isset($data['TilmeldSkipAc']) && $data['TilmeldSkipAc']) {
     //     return;
     //   }
     //   if (is_array($array[0])) {
-    //     $is_array = true;
+    //     $isArray = true;
     //     $entities = &$array[0];
     //   } else {
-    //     $is_array = false;
+    //     $isArray = false;
     //     $entities = &$array;
     //   }
     //   foreach ($entities as $key => &$curEntity) {
@@ -110,7 +110,7 @@ class HookMethods {
     // Filter entities being saved for user permissions.
     $CheckPermissionsSaveHook = function (&$array) {
       $entity = $array[0];
-      if ((object) $entity !== $entity) {
+      if (!is_object($entity)) {
         $array = false;
         return;
       }

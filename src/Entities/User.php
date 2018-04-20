@@ -193,13 +193,13 @@ class User extends AbleObject {
   }
 
   public static function current($returnObjectIfNotExist = false) {
-    if (!isset($_SESSION['tilmeld_user'])) {
+    if (!isset($_SESSION['tilmeldUser'])) {
       Tilmeld::session();
     }
-    if (!isset($_SESSION['tilmeld_user'])) {
+    if (!isset($_SESSION['tilmeldUser'])) {
       return $returnObjectIfNotExist ? self::factory() : null;
     }
-    return $_SESSION['tilmeld_user'];
+    return $_SESSION['tilmeldUser'];
   }
 
   /**
@@ -383,23 +383,23 @@ class User extends AbleObject {
    * the secondary groups, then the system default. The first timezone found
    * is returned.
    *
-   * @param bool $return_date_time_zone_object Whether to return an object of the DateTimeZone class, instead of an identifier string.
+   * @param bool $returnDateTimeZoneObject Whether to return an object of the DateTimeZone class, instead of an identifier string.
    * @return string|DateTimeZone The timezone identifier or the DateTimeZone object.
    */
-  public function getTimezone($return_date_time_zone_object = false) {
+  public function getTimezone($returnDateTimeZoneObject = false) {
     if (!empty($this->timezone)) {
-      return $return_date_time_zone_object ? new DateTimeZone($this->timezone) : $this->timezone;
+      return $returnDateTimeZoneObject ? new DateTimeZone($this->timezone) : $this->timezone;
     }
     if (isset($this->group->guid) && !empty($this->group->timezone)) {
-      return $return_date_time_zone_object ? new DateTimeZone($this->group->timezone) : $this->group->timezone;
+      return $returnDateTimeZoneObject ? new DateTimeZone($this->group->timezone) : $this->group->timezone;
     }
-    foreach ((array) $this->groups as $cur_group) {
-      if (!empty($cur_group->timezone)) {
-        return $return_date_time_zone_object ? new DateTimeZone($cur_group->timezone) : $cur_group->timezone;
+    foreach ((array) $this->groups as $curGroup) {
+      if (!empty($curGroup->timezone)) {
+        return $returnDateTimeZoneObject ? new DateTimeZone($curGroup->timezone) : $curGroup->timezone;
       }
     }
     $timezone = date_default_timezone_get();
-    return $return_date_time_zone_object ? new DateTimeZone($timezone) : $timezone;
+    return $returnDateTimeZoneObject ? new DateTimeZone($timezone) : $timezone;
   }
 
   public function putData($data, $sdata = []) {
@@ -500,20 +500,20 @@ class User extends AbleObject {
     } else {
       $abilities = $this->abilities;
       if ($this->inheritAbilities) {
-        foreach ($this->groups as &$cur_group) {
-          if (!isset($cur_group->guid)) {
+        foreach ($this->groups as &$curGroup) {
+          if (!isset($curGroup->guid)) {
             continue;
           }
-          $abilities = array_merge($abilities, $cur_group->abilities);
+          $abilities = array_merge($abilities, $curGroup->abilities);
         }
-        unset($cur_group);
+        unset($curGroup);
         if (isset($this->group) && isset($this->group->guid)) {
           $abilities = array_merge($abilities, $this->group->abilities);
         }
       }
       $this->gatekeeperCache = $abilities;
     }
-    if ((array) $abilities !== $abilities) {
+    if (!is_array($abilities)) {
       return false;
     }
     return (in_array($ability, $abilities) || in_array('system/admin', $abilities));
@@ -615,8 +615,8 @@ class User extends AbleObject {
    */
   public function delGroup($group) {
     if ( $group->inArray((array) $this->groups) ) {
-      foreach ((array) $this->groups as $key => $cur_group) {
-        if ($group->is($cur_group)) {
+      foreach ((array) $this->groups as $key => $curGroup) {
+        if ($group->is($curGroup)) {
           unset($this->groups[$key]);
         }
       }
@@ -658,8 +658,8 @@ class User extends AbleObject {
     if (isset($this->group->guid) && $this->group->isDescendant($group)) {
       return true;
     }
-    foreach ((array) $this->groups as $cur_group) {
-      if ($cur_group->isDescendant($group)) {
+    foreach ((array) $this->groups as $curGroup) {
+      if ($curGroup->isDescendant($group)) {
         return true;
       }
     }
@@ -795,12 +795,12 @@ class User extends AbleObject {
       return ['result' => false, 'message' => 'Please specify a phone number.'];
     }
 
-    $strip_to_digits = preg_replace('/\D/', '', $this->phone);
-    if (!preg_match('/\d{10}/', $strip_to_digits)) {
+    $stripToDigits = preg_replace('/\D/', '', $this->phone);
+    if (!preg_match('/\d{10}/', $stripToDigits)) {
       return ['result' => false, 'message' => 'Phone must contain 10 digits, but formatting does not matter.'];
     }
     $selector = ['&',
-        'strict' => ['phone', $strip_to_digits]
+        'strict' => ['phone', $stripToDigits]
       ];
     if (isset($this->guid)) {
       $selector['!guid'] = $this->guid;
