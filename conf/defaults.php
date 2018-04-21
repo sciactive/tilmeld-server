@@ -11,6 +11,8 @@
 
 use Respect\Validation\Validator as v;
 
+// phpcs:disable Generic.Files.LineLength.TooLong,Squiz.WhiteSpace.ObjectOperatorSpacing.Before
+
 return [
   /*
    * Setup URL

@@ -1,5 +1,7 @@
 <?php namespace Tilmeld\Entities\Mail;
 
+// phpcs:disable Generic.Files.LineLength.TooLong
+
 /**
  * Recover Account Password
  *
@@ -22,7 +24,8 @@ class RecoverPassword extends \uMailPHP\Definition {
     'to_address' => 'The recipient\'s address.',
   ];
 
-  public static function getMacro($name) {}
+  public static function getMacro($name) {
+  }
 
   public static function getSubject() {
     return 'Hey #to_first_name#, here\'s an account recovery code for #site_name#.';

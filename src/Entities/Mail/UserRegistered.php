@@ -1,5 +1,7 @@
 <?php namespace Tilmeld\Entities\Mail;
 
+// phpcs:disable Generic.Files.LineLength.TooLong
+
 /**
  * New User Registered
  *
@@ -24,7 +26,8 @@ class UserRegistered extends \uMailPHP\Definition {
     'user_address' => 'The user\'s address.',
   ];
 
-  public static function getMacro($name) {}
+  public static function getMacro($name) {
+  }
 
   public static function getSubject() {
     return '#to_first_name#, New user [#user_username#] registered on #site_name#.';

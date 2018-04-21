@@ -19,15 +19,19 @@ use Nymph\Nymph;
  * @property string $name The group's name.
  * @property string $email The group's email address.
  * @property string $phone The group's telephone number.
- * @property string $addressType The group's address type. "us" or "international".
+ * @property string $addressType The group's address type. "us" or
+ *                               "international".
  * @property string $addressStreet The group's address line 1 for US addresses.
  * @property string $addressStreet2 The group's address line 2 for US addresses.
  * @property string $addressCity The group's city for US addresses.
- * @property string $addressState The group's state abbreviation for US addresses.
+ * @property string $addressState The group's state abbreviation for US
+ *                                addresses.
  * @property string $addressZip The group's ZIP code for US addresses.
- * @property string $addressInternational The group's full address for international addresses.
+ * @property string $addressInternational The group's full address for
+ *                                        international addresses.
  * @property Group $parent The group's parent.
- * @property User|null $user If generate_primary is on, this will be the user who generated this group.
+ * @property User|null $user If generate_primary is on, this will be the user
+*                            who generated this group.
  */
 class Group extends AbleObject {
   const ETYPE = 'tilmeld_group';
@@ -78,12 +82,21 @@ class Group extends AbleObject {
    * @param int $id The ID of the group to load, 0 for a new group.
    * @param bool $skipUpdateDataProtectionOnNewEntity Used to load the session.
    */
-  public function __construct($id = 0, $skipUpdateDataProtectionOnNewEntity = false) {
+  public function __construct(
+      $id = 0,
+      $skipUpdateDataProtectionOnNewEntity = false
+  ) {
     if ((is_int($id) && $id > 0) || is_string($id)) {
       if (is_int($id)) {
-        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'guid' => $id]);
+        $entity = Nymph::getEntity(
+            ['class' => get_class($this)],
+            ['&', 'guid' => $id]
+        );
       } else {
-        $entity = Nymph::getEntity(['class' => get_class($this)], ['&', 'strict' => ['groupname', $id]]);
+        $entity = Nymph::getEntity(
+            ['class' => get_class($this)],
+            ['&', 'strict' => ['groupname', $id]]
+        );
       }
       if (isset($entity)) {
         $this->guid = $entity->guid;
@@ -127,7 +140,7 @@ class Group extends AbleObject {
     );
   }
 
-  private static function getAssignableGroups($search = null, $highestParent) {
+  private static function getAssignableGroups($search, $highestParent) {
     $assignableGroups = [];
     if ($search !== null) {
       $assignableGroups = Nymph::getEntities(
@@ -143,15 +156,20 @@ class Group extends AbleObject {
           ]
       );
       if ($highestParent != 0) {
-        $assignableGroups = array_values(array_filter($assignableGroups, function ($curGroup) use ($highestParent) {
-          while (isset($curGroup->parent) && $curGroup->parent->guid) {
-            if ($curGroup->parent->guid === $highestParent) {
-              return true;
-            }
-            $curGroup = $curGroup->parent;
-          }
-          return false;
-        }));
+        $assignableGroups = array_values(
+            array_filter(
+                $assignableGroups,
+                function ($curGroup) use ($highestParent) {
+                  while (isset($curGroup->parent) && $curGroup->parent->guid) {
+                    if ($curGroup->parent->guid === $highestParent) {
+                      return true;
+                    }
+                    $curGroup = $curGroup->parent;
+                  }
+                  return false;
+                }
+            )
+        );
       }
     } else {
       if ($highestParent == 0) {
@@ -178,7 +196,8 @@ class Group extends AbleObject {
     if (!isset($this->email) || empty($this->email)) {
       return $proto.'://secure.gravatar.com/avatar/?d=mm&s=40';
     }
-    return $proto.'://secure.gravatar.com/avatar/'.md5(strtolower(trim($this->email))).'?d=identicon&s=40';
+    return $proto.'://secure.gravatar.com/avatar/'.
+      md5(strtolower(trim($this->email))).'?d=identicon&s=40';
   }
 
   public function putData($data, $sdata = []) {
@@ -329,28 +348,53 @@ class Group extends AbleObject {
   /**
    * Check that a groupname is valid.
    *
-   * @return array An associative array with a boolean 'result' entry and a 'message' entry.
+   * @return array An associative array with a boolean 'result' entry and a
+   *               'message' entry.
    */
   public function checkGroupname() {
     // Groupnames can either be constrained by username validation, or be an
     // email address.
-    if (Tilmeld::$config['email_usernames'] && $this->groupname === $this->email) {
+    if (Tilmeld::$config['email_usernames']
+        && $this->groupname === $this->email
+      ) {
       return $this->checkEmail();
     }
     if (empty($this->groupname)) {
       return ['result' => false, 'message' => 'Please specify a groupname.'];
     }
-    if (Tilmeld::$config['max_username_length'] > 0 && strlen($this->groupname) > Tilmeld::$config['max_username_length']) {
-      return ['result' => false, 'message' => 'Groupnames must not exceed '.Tilmeld::$config['max_username_length'].' characters.'];
+    if (Tilmeld::$config['max_username_length'] > 0
+        && strlen($this->groupname) > Tilmeld::$config['max_username_length']
+      ) {
+      return [
+        'result' => false,
+        'message' => 'Groupnames must not exceed '.
+          Tilmeld::$config['max_username_length'].' characters.'
+      ];
     }
-    if (array_diff(str_split($this->groupname), str_split(Tilmeld::$config['valid_chars']))) {
-      return ['result' => false, 'message' => Tilmeld::$config['valid_chars_notice']];
+    if (array_diff(
+        str_split($this->groupname),
+        str_split(Tilmeld::$config['valid_chars'])
+    )) {
+      return [
+        'result' => false,
+        'message' => Tilmeld::$config['valid_chars_notice']
+      ];
     }
     if (!preg_match(Tilmeld::$config['valid_regex'], $this->groupname)) {
-      return ['result' => false, 'message' => Tilmeld::$config['valid_regex_notice']];
+      return [
+        'result' => false,
+        'message' => Tilmeld::$config['valid_regex_notice']
+      ];
     }
     $selector = ['&',
-      'ilike' => ['groupname', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $this->groupname)]
+      'ilike' => [
+        'groupname',
+        str_replace(
+            ['\\', '%', '_'],
+            ['\\\\\\\\', '\%', '\_'],
+            $this->groupname
+        )
+      ]
     ];
     if (isset($this->guid)) {
       $selector['!guid'] = $this->guid;
@@ -363,13 +407,19 @@ class Group extends AbleObject {
       return ['result' => false, 'message' => 'That groupname is taken.'];
     }
 
-    return ['result' => true, 'message' => (isset($this->guid) ? 'Groupname is valid.' : 'Groupname is available!')];
+    return [
+      'result' => true,
+      'message' => (
+        isset($this->guid) ? 'Groupname is valid.' : 'Groupname is available!'
+      )
+    ];
   }
 
   /**
    * Check that an email is unique.
    *
-   * @return array An associative array with a boolean 'result' entry and a 'message' entry.
+   * @return array An associative array with a boolean 'result' entry and a
+   *               'message' entry.
    */
   public function checkEmail() {
     if ($this->email === '') {
@@ -378,11 +428,20 @@ class Group extends AbleObject {
     if (empty($this->email)) {
       return ['result' => false, 'message' => 'Please specify a valid email.'];
     }
-    if (!preg_match('/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i', $this->email)) {
-      return ['result' => false, 'message' => 'Email must be a correctly formatted address.'];
+    if (!preg_match(
+        '/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i',
+        $this->email
+    )) {
+      return [
+        'result' => false,
+        'message' => 'Email must be a correctly formatted address.'
+      ];
     }
     $selector = ['&',
-      'ilike' => ['email', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $this->email)]
+      'ilike' => [
+        'email',
+        str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $this->email)
+      ]
     ];
     if (isset($this->guid)) {
       $selector['!guid'] = $this->guid;
@@ -392,10 +451,18 @@ class Group extends AbleObject {
         $selector
     );
     if (isset($test->guid)) {
-      return ['result' => false, 'message' => 'That email address is already registered.'];
+      return [
+        'result' => false,
+        'message' => 'That email address is already registered.'
+      ];
     }
 
-    return ['result' => true, 'message' => (isset($this->guid) ? 'Email is valid.' : 'Email address is valid!')];
+    return [
+      'result' => true,
+      'message' => (
+        isset($this->guid) ? 'Email is valid.' : 'Email address is valid!'
+      )
+    ];
   }
 
   public function save() {
@@ -414,7 +481,9 @@ class Group extends AbleObject {
     if (!$unCheck['result']) {
       throw new \Tilmeld\Exceptions\BadUsernameException($unCheck['message']);
     }
-    if (!(Tilmeld::$config['email_usernames'] && $this->groupname === $this->email)) {
+    if (!(Tilmeld::$config['email_usernames']
+        && $this->groupname === $this->email)
+      ) {
       $emCheck = $this->checkEmail();
       if (!$emCheck['result']) {
         throw new \Tilmeld\Exceptions\BadEmailException($emCheck['message']);
@@ -429,22 +498,34 @@ class Group extends AbleObject {
           $this->parent->isDescendant($this)
         )
       ) {
-      throw new \Tilmeld\Exceptions\BadDataException('Group parent can\'t be itself or descendant of itself.');
+      throw new \Tilmeld\Exceptions\BadDataException(
+          'Group parent can\'t be itself or descendant of itself.'
+      );
     }
 
     try {
       Tilmeld::$config['validator_group']->assert($this->getValidatable());
+      // phpcs:ignore Generic.Files.LineLength.TooLong
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
-      throw new \Tilmeld\Exceptions\BadDataException($exception->getFullMessage());
+      throw new \Tilmeld\Exceptions\BadDataException(
+          $exception->getFullMessage()
+      );
     }
 
     // Only one default primary group is allowed.
     if ($this->defaultPrimary) {
-      $currentPrimary = Nymph::getEntity(['class' => '\Tilmeld\Entities\Group'], ['&', 'equal' => ['defaultPrimary', true]]);
+      $currentPrimary = Nymph::getEntity(
+          ['class' => '\Tilmeld\Entities\Group'],
+          ['&', 'equal' => ['defaultPrimary', true]]
+      );
       if (isset($currentPrimary) && !$this->is($currentPrimary)) {
         $currentPrimary->defaultPrimary = false;
         if (!$currentPrimary->save()) {
-          throw new \Tilmeld\Exceptions\CouldNotChangeDefaultPrimaryGroupException("Could not change new user primary group from {$currentPrimary->groupname}.");
+          // phpcs:ignore Generic.Files.LineLength.TooLong
+          throw new \Tilmeld\Exceptions\CouldNotChangeDefaultPrimaryGroupException(
+              "Could not change new user primary group from ".
+                "{$currentPrimary->groupname}."
+          );
         }
       }
     }

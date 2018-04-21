@@ -86,8 +86,7 @@ class Tilmeld {
 
     if (!isset($optionsAndSelectors[0])) {
       throw new Exception('No options in argument.');
-    } elseif (
-        isset($optionsAndSelectors[0]['class'])
+    } elseif (isset($optionsAndSelectors[0]['class'])
         && (
           $optionsAndSelectors[0]['class'] === '\Tilmeld\Entities\User'
           || $optionsAndSelectors[0]['class'] === '\Tilmeld\Entities\Group'
@@ -195,10 +194,16 @@ class Tilmeld {
    * - None of the above. (Check other AC.)
    *
    * @param object &$entity The entity to check.
-   * @param int $type The lowest level of permission to consider a pass. One of Tilmeld::READ_ACCESS, Tilmeld::WRITE_ACCESS, or Tilmeld::DELETE_ACCESS.
-   * @return bool Whether the current user has at least $type permission for the entity.
+   * @param int $type The lowest level of permission to consider a pass. One of
+   *                  Tilmeld::READ_ACCESS, Tilmeld::WRITE_ACCESS, or
+   *                  Tilmeld::DELETE_ACCESS.
+   * @return bool Whether the current user has at least $type permission for the
+   *              entity.
    */
-  public static function checkPermissions(&$entity, $type = Tilmeld::READ_ACCESS) {
+  public static function checkPermissions(
+      &$entity,
+      $type = Tilmeld::READ_ACCESS
+  ) {
     $currentUserOrNull = User::current();
     $currentUserOrEmpty = User::current(true);
 
@@ -208,8 +213,7 @@ class Tilmeld {
     if ($currentUserOrEmpty->gatekeeper('system/admin')) {
       return true;
     }
-    if (
-        (
+    if ((
           is_a($entity, '\Tilmeld\Entities\User')
           || is_a($entity, '\Tilmeld\Entities\Group')
           || is_a($entity, '\SciActive\HookOverride_Tilmeld_Entities_User')
@@ -239,15 +243,16 @@ class Tilmeld {
     if ($currentUserOrEmpty->is($entity)) {
       return true;
     }
-    if (
-        isset($currentUserOrEmpty->group)
+    if (isset($currentUserOrEmpty->group)
         && is_callable([$currentUserOrEmpty->group, 'is'])
         && $currentUserOrEmpty->group->is($entity)
         && $type === Tilmeld::READ_ACCESS
       ) {
       return true;
     }
-    if (is_callable([$entity->user, 'is']) && $entity->user->is($currentUserOrNull)) {
+    if (is_callable([$entity->user, 'is'])
+        && $entity->user->is($currentUserOrNull)
+      ) {
       return ($acUser >= $type);
     }
     if (is_callable([$entity->group, 'is'])
@@ -294,18 +299,31 @@ class Tilmeld {
     date_default_timezone_set($_SESSION['tilmeldUserTimezone']);
     $_SESSION['tilmeldDescendants'] = [];
     if (isset($tmpUser->group)) {
-      $_SESSION['tilmeldDescendants'] = (array) $tmpUser->group->getDescendants();
+      $_SESSION['tilmeldDescendants'] =
+        (array) $tmpUser->group->getDescendants();
     }
     foreach ($tmpUser->groups as $curGroup) {
-      $_SESSION['tilmeldDescendants'] = array_merge((array) $_SESSION['tilmeldDescendants'], (array) $curGroup->getDescendants());
+      $_SESSION['tilmeldDescendants'] =
+        array_merge(
+            (array) $_SESSION['tilmeldDescendants'],
+            (array) $curGroup->getDescendants()
+        );
     }
     if ($tmpUser->inheritAbilities) {
       $_SESSION['tilmeldInheritedAbilities'] = $tmpUser->abilities;
       foreach ($tmpUser->groups as $curGroup) {
-        $_SESSION['tilmeldInheritedAbilities'] = array_merge($_SESSION['tilmeldInheritedAbilities'], $curGroup->abilities);
+        $_SESSION['tilmeldInheritedAbilities'] =
+          array_merge(
+              $_SESSION['tilmeldInheritedAbilities'],
+              $curGroup->abilities
+          );
       }
       if (isset($tmpUser->group)) {
-        $_SESSION['tilmeldInheritedAbilities'] = array_merge($_SESSION['tilmeldInheritedAbilities'], $tmpUser->group->abilities);
+        $_SESSION['tilmeldInheritedAbilities'] =
+          array_merge(
+              $_SESSION['tilmeldInheritedAbilities'],
+              $tmpUser->group->abilities
+          );
       }
     }
     $_SESSION['tilmeldUser'] = $tmpUser;
@@ -373,12 +391,16 @@ class Tilmeld {
     }
     // First load the hook classes for user and group.
     if ($option === 'read' || $option === 'write') {
-      if (class_exists('\SciActive\Hook') && !class_exists('HookOverride_Tilmeld_Entities_User')) {
+      if (class_exists('\SciActive\Hook')
+          && !class_exists('HookOverride_Tilmeld_Entities_User')
+        ) {
         $entity = new User(0, true);
         Hook::hookObject($entity, 'Tilmeld\Entities\User->', false);
         unset($entity);
       }
-      if (class_exists('\SciActive\Hook') && !class_exists('HookOverride_Tilmeld_Entities_Group')) {
+      if (class_exists('\SciActive\Hook')
+          && !class_exists('HookOverride_Tilmeld_Entities_Group')
+        ) {
         $entity = new Group(0, true);
         Hook::hookObject($entity, 'Tilmeld\Entities\Group->', false);
         unset($entity);
@@ -427,11 +449,17 @@ class Tilmeld {
    * parents.
    *
    * @param array &$array The array of groups.
-   * @param string|null $property The name of the property to sort groups by. Null for no additional sorting.
+   * @param string|null $property The name of the property to sort groups by.
+   *                              Null for no additional sorting.
    * @param bool $caseSensitive Sort case sensitively.
    * @param bool $reverse Reverse the sort order.
    */
-  public static function groupSort(&$array, $property = null, $caseSensitive = false, $reverse = false) {
+  public static function groupSort(
+      &$array,
+      $property = null,
+      $caseSensitive = false,
+      $reverse = false
+  ) {
     Nymph::hsort($array, $property, 'parent', $caseSensitive, $reverse);
   }
 }

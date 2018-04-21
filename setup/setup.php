@@ -1,4 +1,4 @@
-<?php
+<?php // phpcs:disable Generic.Files.LineLength.TooLong,PSR1.Files.SideEffects.FoundWithSymbols
 
 if (isset($_REQUEST['action']) && \Tilmeld\Tilmeld::$config['verify_email']) {
   // Verify user email addresses.

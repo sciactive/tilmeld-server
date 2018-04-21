@@ -1,5 +1,7 @@
 <?php namespace Tilmeld\Entities\Mail;
 
+// phpcs:disable Generic.Files.LineLength.TooLong
+
 /**
  * Verify Email
  *
@@ -20,7 +22,8 @@ class VerifyEmail extends \uMailPHP\Definition {
     'to_address' => 'The recipient\'s address.',
   ];
 
-  public static function getMacro($name) {}
+  public static function getMacro($name) {
+  }
 
   public static function getSubject() {
     return 'Hi #to_first_name#, please verify your email at #site_name#.';

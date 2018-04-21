@@ -1,5 +1,7 @@
 <?php namespace Tilmeld\Entities\Mail;
 
+// phpcs:disable Generic.Files.LineLength.TooLong
+
 /**
  * Recover Account Username
  *
@@ -20,7 +22,8 @@ class RecoverUsername extends \uMailPHP\Definition {
     'to_address' => 'The recipient\'s address.',
   ];
 
-  public static function getMacro($name) {}
+  public static function getMacro($name) {
+  }
 
   public static function getSubject() {
     return 'Hey #to_first_name#, here\'s your username for #site_name#.';

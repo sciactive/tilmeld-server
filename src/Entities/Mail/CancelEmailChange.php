@@ -1,5 +1,7 @@
 <?php namespace Tilmeld\Entities\Mail;
 
+// phpcs:disable Generic.Files.LineLength.TooLong
+
 /**
  * Cancel Email Change
  *
@@ -22,7 +24,8 @@ class CancelEmailChange extends \uMailPHP\Definition {
     'to_address' => 'The recipient\'s address.',
   ];
 
-  public static function getMacro($name) {}
+  public static function getMacro($name) {
+  }
 
   public static function getSubject() {
     return 'Hey #to_first_name#, your email address has been changed on #site_name#.';

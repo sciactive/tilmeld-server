@@ -18,8 +18,7 @@ class HookMethods {
       if (isset($array[0]['skip_ac']) && $array[0]['skip_ac']) {
         $data['TilmeldSkipAc'] = true;
       } else {
-        if (
-            isset($array[0]['source'])
+        if (isset($array[0]['source'])
             && $array[0]['source'] === 'client'
             && !Tilmeld::gatekeeper('tilmeld/admin')
             && (
@@ -87,7 +86,13 @@ class HookMethods {
 
     // TODO(hperrin): Is this necessary, after adding AC selectors?
     // Filter entities being returned for user permissions.
-    // $CheckPermissionsReturnHook = function (&$array, $name, &$object, &$function, &$data) {
+    // $CheckPermissionsReturnHook = function (
+    //     &$array,
+    //     $name,
+    //     &$object,
+    //     &$function,
+    //     &$data
+    // ) {
     //   if (isset($data['TilmeldSkipAc']) && $data['TilmeldSkipAc']) {
     //     return;
     //   }
@@ -114,7 +119,9 @@ class HookMethods {
         $array = false;
         return;
       }
-      if (is_callable([$array[0], 'tilmeldSaveSkipAC']) && $array[0]->tilmeldSaveSkipAC()) {
+      if (is_callable([$array[0], 'tilmeldSaveSkipAC'])
+          && $array[0]->tilmeldSaveSkipAC()
+        ) {
         return;
       }
       // Test for permissions.
@@ -124,9 +131,10 @@ class HookMethods {
     };
 
     /*
-     * Add the current user's "user", "group", and access control to a new entity.
+     * Add the current user's "user", "group", and access control to new entity.
      *
-     * This occurs right before an entity is saved. It only alters the entity if:
+     * This occurs right before an entity is saved. It only alters the entity
+     * if:
      * - There is a user logged in.
      * - The entity is new (doesn't have a GUID.)
      * - The entity is not a user or group.
@@ -142,8 +150,7 @@ class HookMethods {
      */
     $AddAccessHook = function (&$array) {
       $user = Entities\User::current();
-      if (
-          $user !== null
+      if ($user !== null
           && !isset($array[0]->guid)
           && !is_a($array[0], '\Tilmeld\Entities\User')
           && !is_a($array[0], '\Tilmeld\Entities\Group')
@@ -175,6 +182,10 @@ class HookMethods {
     Hook::addCallback('Nymph->saveEntity', -99, $CheckPermissionsSaveHook);
 
     Hook::addCallback('Nymph->deleteEntity', -99, $CheckPermissionsDeleteHook);
-    Hook::addCallback('Nymph->deleteEntityById', -99, $CheckPermissionsDeleteHook);
+    Hook::addCallback(
+        'Nymph->deleteEntityById',
+        -99,
+        $CheckPermissionsDeleteHook
+    );
   }
 }

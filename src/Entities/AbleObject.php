@@ -31,7 +31,8 @@ class AbleObject extends \Nymph\Entity {
    */
   public function revoke($ability) {
     if (in_array($ability, $this->abilities)) {
-      return $this->abilities = array_values(array_diff($this->abilities, [$ability]));
+      return $this->abilities =
+        array_values(array_diff($this->abilities, [$ability]));
     }
     return true;
   }
