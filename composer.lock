@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "9cd2627215b61fab587794797c0ec035",
+    "content-hash": "a587957d87ba6858ed966be6b17f2dac",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -826,16 +826,16 @@
         },
         {
             "name": "sciactive/nymph-pubsub",
-            "version": "3.0.0-beta.2",
+            "version": "3.0.0-beta.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-pubsub.git",
-                "reference": "edb248e4cc217489c1cc2245028ea7857b6a6242"
+                "reference": "dcd8258a488f092d4de337ead434947c2dd88c7b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/edb248e4cc217489c1cc2245028ea7857b6a6242",
-                "reference": "edb248e4cc217489c1cc2245028ea7857b6a6242",
+                "url": "https://api.github.com/repos/sciactive/nymph-pubsub/zipball/dcd8258a488f092d4de337ead434947c2dd88c7b",
+                "reference": "dcd8258a488f092d4de337ead434947c2dd88c7b",
                 "shasum": ""
             },
             "require": {
@@ -844,6 +844,9 @@
                 "sciactive/nymph-server": "^3.0@beta",
                 "textalk/websocket": "1.2.*",
                 "zendframework/zend-log": "2.*"
+            },
+            "require-dev": {
+                "squizlabs/php_codesniffer": "3.*"
             },
             "type": "library",
             "autoload": {
@@ -875,25 +878,26 @@
                 "pubsub",
                 "subscribe"
             ],
-            "time": "2017-11-17T00:00:00+00:00"
+            "time": "2018-04-23T00:00:00+00:00"
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.7",
+            "version": "3.0.0-beta.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "740c65e2e1dbea7ceee0165c37f5ca73f1cb6cbb"
+                "reference": "b0c341744aa44d3e2fc3039eabcf25cc5ab4035b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/740c65e2e1dbea7ceee0165c37f5ca73f1cb6cbb",
-                "reference": "740c65e2e1dbea7ceee0165c37f5ca73f1cb6cbb",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/b0c341744aa44d3e2fc3039eabcf25cc5ab4035b",
+                "reference": "b0c341744aa44d3e2fc3039eabcf25cc5ab4035b",
                 "shasum": ""
             },
             "require-dev": {
-                "phpunit/phpunit": "^6.1",
-                "sciactive/hookphp": "~2.0.2"
+                "phpunit/phpunit": "^7.1",
+                "sciactive/hookphp": "~2.0.2",
+                "squizlabs/php_codesniffer": "3.*"
             },
             "type": "library",
             "autoload": {
@@ -928,7 +932,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-01-11T00:00:00+00:00"
+            "time": "2018-04-23T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
