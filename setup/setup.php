@@ -154,16 +154,16 @@ function is_secure() {
       <?php if (\Nymph\Nymph::$config['pubsub']) { ?>
       <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>lib/PubSub.js"></script>
       <?php } ?>
-      <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>../tilmeld-client/lib/Entities/User.js"></script>
-      <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>../tilmeld-client/lib/Entities/Group.js"></script>
+      <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>../tilmeld-client/lib/umd/Entities/User.js"></script>
+      <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>../tilmeld-client/lib/umd/Entities/Group.js"></script>
     <?php } else { ?>
       <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>nymph-client/lib/Nymph.js"></script>
       <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>nymph-client/lib/Entity.js"></script>
       <?php if (\Nymph\Nymph::$config['pubsub']) { ?>
       <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>nymph-client/lib/PubSub.js"></script>
       <?php } ?>
-      <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>tilmeld-client/lib/Entities/User.js"></script>
-      <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>tilmeld-client/lib/Entities/Group.js"></script>
+      <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>tilmeld-client/lib/umd/Entities/User.js"></script>
+      <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>tilmeld-client/lib/umd/Entities/Group.js"></script>
     <?php } ?>
 
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"></script>
