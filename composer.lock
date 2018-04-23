@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "a587957d87ba6858ed966be6b17f2dac",
+    "content-hash": "abe9b8fe322041b6b5e7a3ecf7dd9534",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -936,16 +936,16 @@
         },
         {
             "name": "sciactive/umailphp",
-            "version": "2.2.0",
+            "version": "2.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/umailphp.git",
-                "reference": "b9a2cff16cfaf3136d768fe1db885d36fdbc9348"
+                "reference": "9e6a510b9614c0a479c7e1648d957a503803b188"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/umailphp/zipball/b9a2cff16cfaf3136d768fe1db885d36fdbc9348",
-                "reference": "b9a2cff16cfaf3136d768fe1db885d36fdbc9348",
+                "url": "https://api.github.com/repos/sciactive/umailphp/zipball/9e6a510b9614c0a479c7e1648d957a503803b188",
+                "reference": "9e6a510b9614c0a479c7e1648d957a503803b188",
                 "shasum": ""
             },
             "require": {
@@ -978,7 +978,7 @@
                 "email",
                 "templating"
             ],
-            "time": "2017-11-16T00:00:00+00:00"
+            "time": "2018-04-23T00:00:00+00:00"
         },
         {
             "name": "symfony/http-foundation",

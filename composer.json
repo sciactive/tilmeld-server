@@ -1,7 +1,7 @@
 {
   "name": "sciactive/tilmeld-server",
   "description": "Nymph user and group management with access controls.",
-  "version": "1.0.0-beta.14",
+  "version": "1.0.0-beta.15",
   "time": "2018-04-23",
   "type": "library",
   "keywords": [
@@ -44,7 +44,7 @@
     "sciactive/hookphp": "^2.0",
     "sciactive/nymph-server": "~3.0@beta",
     "sciactive/nymph-pubsub": "~3.0@beta",
-    "sciactive/umailphp": "^2.2",
+    "sciactive/umailphp": "^2.3",
     "respect/validation": "^1.1"
   },
   "require-dev": {
