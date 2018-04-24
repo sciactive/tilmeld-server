@@ -151,29 +151,27 @@ function is_secure() {
     <?php if (isset($sciactiveDevClientURL)) { ?>
       <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>lib/Nymph.js"></script>
       <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>lib/Entity.js"></script>
-      <?php if (\Nymph\Nymph::$config['pubsub']) { ?>
       <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>lib/PubSub.js"></script>
-      <?php } ?>
+      <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>lib/nymph-client.js"></script>
       <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>../tilmeld-client/lib/umd/Entities/User.js"></script>
       <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>../tilmeld-client/lib/umd/Entities/Group.js"></script>
     <?php } else { ?>
       <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>nymph-client/lib/Nymph.js"></script>
       <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>nymph-client/lib/Entity.js"></script>
-      <?php if (\Nymph\Nymph::$config['pubsub']) { ?>
       <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>nymph-client/lib/PubSub.js"></script>
-      <?php } ?>
+      <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>nymph-client/lib/nymph-client.js"></script>
       <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>tilmeld-client/lib/umd/Entities/User.js"></script>
       <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>tilmeld-client/lib/umd/Entities/Group.js"></script>
     <?php } ?>
 
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"></script>
-    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular-route.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular-route.js"></script>
 
-    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
-    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.3/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
     <script src="<?php echo htmlspecialchars($tilmeldURL); ?>setup/setupApp.js"></script>
   </head>
   <body>

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "abe9b8fe322041b6b5e7a3ecf7dd9534",
+    "content-hash": "2914c68c7143eb2bc439e24e5dba191e",
     "packages": [
         {
             "name": "cboden/ratchet",
@@ -882,16 +882,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.8",
+            "version": "3.0.0-beta.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "b0c341744aa44d3e2fc3039eabcf25cc5ab4035b"
+                "reference": "849aea3840898bf694c9467678d2c9c83e4f1921"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/b0c341744aa44d3e2fc3039eabcf25cc5ab4035b",
-                "reference": "b0c341744aa44d3e2fc3039eabcf25cc5ab4035b",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/849aea3840898bf694c9467678d2c9c83e4f1921",
+                "reference": "849aea3840898bf694c9467678d2c9c83e4f1921",
                 "shasum": ""
             },
             "require-dev": {
