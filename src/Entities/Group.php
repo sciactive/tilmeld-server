@@ -82,10 +82,7 @@ class Group extends AbleObject {
    * @param int $id The ID of the group to load, 0 for a new group.
    * @param bool $skipUpdateDataProtectionOnNewEntity Used to load the session.
    */
-  public function __construct(
-      $id = 0,
-      $skipUpdateDataProtectionOnNewEntity = false
-  ) {
+  public function __construct($id = 0) {
     if ((is_int($id) && $id > 0) || is_string($id)) {
       if (is_int($id)) {
         $entity = Nymph::getEntity(
@@ -109,9 +106,7 @@ class Group extends AbleObject {
     $this->enabled = true;
     $this->abilities = [];
     $this->addressType = 'us';
-    if (!$skipUpdateDataProtectionOnNewEntity) {
-      $this->updateDataProtection();
-    }
+    $this->updateDataProtection();
   }
 
   /**

@@ -33,6 +33,46 @@ class Tilmeld {
   public static $config;
 
   /**
+   * The currently logged in user.
+   *
+   * @var \Tilmeld\Entities\User|null
+   * @access public
+   */
+  public static $currentUser = null;
+
+  /**
+   * The currently logged in user's group descendants.
+   *
+   * @var array|null
+   * @access private
+   */
+  private static $currentDescendantGroups = null;
+
+  /**
+   * Get the current user's group descendants.
+   */
+  public static function getCurrentDescendantGroups() {
+    if (!isset(self::$currentUser)) {
+      self::$currentDescendantGroups = null;
+      return [];
+    } else if (!isset(self::$currentDescendantGroups)) {
+      self::$currentDescendantGroups = [];
+      if (isset(self::$currentUser->group)) {
+        self::$currentDescendantGroups =
+          (array) self::$currentUser->group->getDescendants();
+      }
+      foreach (self::$currentUser->groups as $curGroup) {
+        self::$currentDescendantGroups =
+          array_merge(
+              (array) self::$currentDescendantGroups,
+              (array) $curGroup->getDescendants()
+          );
+      }
+    }
+    return self::$currentDescendantGroups;
+  }
+
+  /**
    * Check to see if the current user has an ability.
    *
    * If $ability is null, it will check to see if a user is currently logged
@@ -42,10 +82,10 @@ class Tilmeld {
    * @return bool True or false.
    */
   public static function gatekeeper($ability = null) {
-    if (User::current() === null) {
+    if (!isset(self::$currentUser)) {
       return false;
     }
-    return User::current(true)->gatekeeper($ability);
+    return self::$currentUser->gatekeeper($ability);
   }
 
   /**
@@ -70,6 +110,7 @@ class Tilmeld {
       throw new Exception('Tilmeld can\'t be configured before Nymph.');
     }
     HookMethods::setup();
+    self::authenticate();
   }
 
   /**
@@ -77,9 +118,9 @@ class Tilmeld {
    * to only entities the currently logged in user has access to.
    */
   public static function addAccessControlSelectors(&$optionsAndSelectors) {
-    $user = User::current();
+    $user = self::$currentUser;
 
-    if ($user !== null && $user->gatekeeper('system/admin')) {
+    if (isset($user) && $user->gatekeeper('system/admin')) {
       // The user is a system admin, so they can see everything.
       return;
     }
@@ -132,7 +173,7 @@ class Tilmeld {
           $groupRefs[] = ['group', $curSecondaryGroup];
         }
       }
-      foreach ($_SESSION['tilmeldDescendants'] as $curDescendantGroup) {
+      foreach (self::getCurrentDescendantGroups() as $curDescendantGroup) {
         if (isset($curDescendantGroup) && isset($curDescendantGroup->guid)) {
           // It belongs to the user's secondary group.
           $groupRefs[] = ['group', $curDescendantGroup];
@@ -204,7 +245,7 @@ class Tilmeld {
       &$entity,
       $type = Tilmeld::READ_ACCESS
   ) {
-    $currentUserOrNull = User::current();
+    $currentUserOrNull = self::$currentUser;
     $currentUserOrEmpty = User::current(true);
 
     if (!is_object($entity) || !is_callable([$entity, 'is'])) {
@@ -259,7 +300,7 @@ class Tilmeld {
         && (
           $entity->group->is($currentUserOrEmpty->group) ||
           $entity->group->inArray($currentUserOrEmpty->groups) ||
-          $entity->group->inArray($_SESSION['tilmeldDescendants'])
+          $entity->group->inArray(self::getCurrentDescendantGroups())
         )
       ) {
       return ($acGroup >= $type);
@@ -268,67 +309,56 @@ class Tilmeld {
   }
 
   /**
-   * Fill the $_SESSION['tilmeldUser'] variable with the logged in user's data.
+   * Fill session user data.
    *
    * Also sets the default timezone to the user's timezone.
+   *
+   * @param \Tilmeld\Entities\User $user The user.
    */
-  public static function fillSession() {
-    self::session('write');
-    if (isset($_SESSION['tilmeldUser'])
-        && is_object($_SESSION['tilmeldUser'])
-        && $_SESSION['tilmeldUser']->guid === $_SESSION['tilmeldUserId']
-      ) {
-      $tmpUser = Nymph::getEntity(
-          ['class' => '\Tilmeld\Entities\User'],
-          ['&',
-            'guid' => [$_SESSION['tilmeldUser']->guid],
-            'gt' => ['mdate', $_SESSION['tilmeldUser']->mdate]
-          ]
-      );
-      if (!isset($tmpUser)) {
-        $_SESSION['tilmeldUser']->clearCache();
-        date_default_timezone_set($_SESSION['tilmeldUserTimezone']);
-        self::session('close');
-        return;
-      }
-      unset($_SESSION['tilmeldUser']);
+  public static function fillSession($user) {
+    self::$currentUser = $user;
+    self::$currentDescendantGroups = null;
+    date_default_timezone_set($user->getTimezone());
+    self::$currentUser->updateDataProtection();
+  }
+
+  /**
+   * Check for a TILMELDAUTH cookie, and, if set, authenticate from it.
+   *
+   * @return bool True if a user was authenticated, false on any failure.
+   */
+  public static function authenticate() {
+    if (empty($_COOKIE['TILMELDAUTH'])) {
+      return false;
+    }
+
+    $extract = self::$config['jwt_extract']($_COOKIE['TILMELDAUTH']);
+    if (!$extract) {
+      self::logout();
+      return false;
+    }
+    $guid = $extract['guid'];
+    $expire = $extract['expire'];
+
+    $user = Nymph::getEntity(
+        ['class' => '\Tilmeld\Entities\User'],
+        ['&',
+          'guid' => $guid
+        ]
+    );
+    if (!$user || !$user->guid || !$user->enabled) {
+      self::logout();
+      return false;
+    }
+
+    if ($expire < time() + self::$config['jwt_renew']) {
+      // If the user is less than renew time from needing a new token, give them
+      // a new one.
+      self::login($user);
     } else {
-      $tmpUser = User::factory($_SESSION['tilmeldUserId']);
+      self::fillSession($user);
     }
-    $_SESSION['tilmeldUserTimezone'] = $tmpUser->getTimezone();
-    date_default_timezone_set($_SESSION['tilmeldUserTimezone']);
-    $_SESSION['tilmeldDescendants'] = [];
-    if (isset($tmpUser->group)) {
-      $_SESSION['tilmeldDescendants'] =
-        (array) $tmpUser->group->getDescendants();
-    }
-    foreach ($tmpUser->groups as $curGroup) {
-      $_SESSION['tilmeldDescendants'] =
-        array_merge(
-            (array) $_SESSION['tilmeldDescendants'],
-            (array) $curGroup->getDescendants()
-        );
-    }
-    if ($tmpUser->inheritAbilities) {
-      $_SESSION['tilmeldInheritedAbilities'] = $tmpUser->abilities;
-      foreach ($tmpUser->groups as $curGroup) {
-        $_SESSION['tilmeldInheritedAbilities'] =
-          array_merge(
-              $_SESSION['tilmeldInheritedAbilities'],
-              $curGroup->abilities
-          );
-      }
-      if (isset($tmpUser->group)) {
-        $_SESSION['tilmeldInheritedAbilities'] =
-          array_merge(
-              $_SESSION['tilmeldInheritedAbilities'],
-              $tmpUser->group->abilities
-          );
-      }
-    }
-    $_SESSION['tilmeldUser'] = $tmpUser;
-    $_SESSION['tilmeldUser']->updateDataProtection();
-    self::session('close');
+    return true;
   }
 
   /**
@@ -339,12 +369,17 @@ class Tilmeld {
    */
   public static function login($user) {
     if (isset($user->guid) && $user->enabled) {
-      // Destroy session data.
-      self::logout();
-      self::session('write');
-      $_SESSION['tilmeldUserId'] = $user->guid;
-      self::fillSession();
-      self::session('close');
+      $token = self::$config['jwt_builder']($user);
+      setcookie(
+          'TILMELDAUTH',
+          $token,
+          time() + self::$config['jwt_expire'],
+          '', // Use current path.
+          '', // Use current domain.
+          substr(self::$config['setup_url'], 0, 5) === 'https', // Secure if the user setup URL is.
+          TRUE // Don't allow JS access
+      );
+      self::fillSession($user);
       return true;
     }
     return false;
@@ -354,92 +389,9 @@ class Tilmeld {
    * Logs the current user out of the system.
    */
   public static function logout() {
-    self::session('write');
-    unset($_SESSION['tilmeldUserId']);
-    unset($_SESSION['tilmeldUser']);
-    self::session('destroy');
-  }
-
-  /**
-   * Open, close, or destroy sessions.
-   *
-   * Using this method, you can access an existing session for reading or
-   * writing, and close or destroy it.
-   *
-   * Providing a method to open a session for reading allows asynchronous
-   * calls to the app to work efficiently. PHP will not block during page
-   * requests, so one page taking forever to load doesn't grind a user's whole
-   * session to a halt.
-   *
-   * This method should be the only method sessions are accessed in 2be.
-   * This will allow maximum compatibility between components.
-   *
-   * $option can be one of the following:
-   *
-   * - "read" - Open the session for reading.
-   * - "write" - Open the session for writing. Remember to close it when you
-   *   no longer need write access.
-   * - "close" - Close the session for writing. The session is still readable
-   *   afterward.
-   * - "destroy" - Unset and destroy the session.
-   *
-   * @param string $option The type of access or action requested.
-   */
-  public static function session($option = 'read') {
-    if (session_status() === PHP_SESSION_DISABLED) {
-      throw Exception('Sessions are disabled!');
-    }
-    // First load the hook classes for user and group.
-    if ($option === 'read' || $option === 'write') {
-      if (class_exists('\SciActive\Hook')
-          && !class_exists('HookOverride_Tilmeld_Entities_User')
-        ) {
-        $entity = new User(0, true);
-        Hook::hookObject($entity, 'Tilmeld\Entities\User->', false);
-        unset($entity);
-      }
-      if (class_exists('\SciActive\Hook')
-          && !class_exists('HookOverride_Tilmeld_Entities_Group')
-        ) {
-        $entity = new Group(0, true);
-        Hook::hookObject($entity, 'Tilmeld\Entities\Group->', false);
-        unset($entity);
-      }
-    }
-    switch ($option) {
-      case 'read':
-      default:
-        if ((
-              isset($_SESSION)
-              && isset($_SESSION['tilmeldSessionAccess'])
-              && $_SESSION['tilmeldSessionAccess']
-            )
-            || session_status() === PHP_SESSION_ACTIVE) {
-          return;
-        }
-        if (session_start()) {
-          session_write_close();
-        }
-        break;
-      case 'write':
-        if (session_status() !== PHP_SESSION_ACTIVE) {
-          session_start();
-        }
-        $_SESSION['tilmeldSessionAccess'] = true;
-        break;
-      case 'close':
-        if (session_status() === PHP_SESSION_ACTIVE) {
-          session_write_close();
-        }
-        break;
-      case 'destroy':
-        if (session_status() === PHP_SESSION_ACTIVE) {
-          session_unset();
-          session_destroy();
-          session_write_close();
-        }
-        break;
-    }
+    self::$currentUser = null;
+    self::$currentDescendantGroups = null;
+    setcookie('TILMELDAUTH', '');
   }
 
   /**

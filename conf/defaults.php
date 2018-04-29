@@ -9,6 +9,10 @@
  * @link http://sciactive.com/
  */
 
+use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Signer\Hmac\Sha256;
+use Lcobucci\JWT\Parser;
+use Lcobucci\JWT\ValidationData;
 use Respect\Validation\Validator as v;
 
 // phpcs:disable Generic.Files.LineLength.TooLong,Squiz.WhiteSpace.ObjectOperatorSpacing.Before
@@ -19,7 +23,7 @@ return [
    * The URL where the setup utility is accessible. This is also used for
    * email address verification.
    */
-  'setup_url' => 'http://localhost/nymph/examples/examples/tilmeld/setup.php',
+  'setup_url' => 'http://localhost:8080/examples/examples/tilmeld/setup.php',
   /*
    * Create Admin
    * Allow the creation of an admin user. When a user is created, if there are
@@ -71,7 +75,7 @@ return [
    * Verify Redirect URL
    * After the user verifies their address, redirect them to this URL.
    */
-  'verify_redirect' => 'http://localhost/',
+  'verify_redirect' => 'http://localhost:8080/',
   /*
    * Unverified User Access
    * Unverified users will be able to log in, but will only have the "unverified
@@ -159,6 +163,75 @@ return [
    * The maximum length for usernames. 0 for unlimited.
    */
   'max_username_length' => 128,
+  /*
+   * JWT Secret
+   * The secret used to encrypt/decrypt the JWT. Should be a 256 bit string.
+   */
+  'jwt_secret' => null,
+  /*
+   * JWT Expire
+   * How long from current time, in seconds, the JWT token expires.
+   */
+  'jwt_expire' => 60*60*24*14, // Two weeks(ish)
+  /*
+   * JWT Renew
+   * How long before the JWT token expires to give the user a new one.
+   */
+  'jwt_renew' => 60*60*24*8, // 8 days(ish)
+  /*
+   * JWT Builder
+   * Function to build the JWT for user sessions.
+   */
+  'jwt_builder' => function ($user) {
+    $secret = \Tilmeld\Tilmeld::$config['jwt_secret'];
+    if (!isset($secret)) {
+      throw new \Exception('JWT secret is not configured.');
+    }
+
+    $signer = new Sha256();
+    $token = (new Builder())->setIssuedAt(time())
+                            ->setNotBefore(time())
+                            ->setExpiration(
+                                time() + \Tilmeld\Tilmeld::$config['jwt_expire']
+                            )
+                            ->set('guid', $user->guid)
+                            ->sign($signer, $secret)
+                            ->getToken();
+    return $token;
+  },
+  /*
+   * JWT Extract
+   * Function to verify that a JWT was signed with the secret key, vaildate its
+   * data, and extract the GUID.
+   *
+   * Return false if the JWT is not valid, or an array of GUID and expire
+   * timestamp otherwise.
+   */
+  'jwt_extract' => function ($token) {
+    $secret = \Tilmeld\Tilmeld::$config['jwt_secret'];
+    if (!isset($secret)) {
+      throw new \Exception('JWT secret is not configured.');
+    }
+
+    $token = (new Parser())->parse($token);
+    $signer = new Sha256();
+    if (!$token->verify($signer, $secret)) {
+      return false;
+    }
+
+    $data = new ValidationData();
+    if (!$token->validate($data)) {
+      return false;
+    }
+
+    $token->getClaims();
+    $guid = $token->getClaim('guid');
+    if (!is_numeric($guid) || $guid <= 0) {
+      return false;
+    }
+
+    return ['guid' => $guid, 'expire' => $token->getClaim('exp')];
+  },
   /*
    * Group Validator
    * The validator used to check groups before saving.

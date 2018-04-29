@@ -112,12 +112,8 @@ class User extends AbleObject {
    *
    * @param int|string $id The ID or username of the user to load, 0 for a new
    *                       user.
-   * @param bool $skipUpdateDataProtectionOnNewEntity Used to load the session.
    */
-  public function __construct(
-      $id = 0,
-      $skipUpdateDataProtectionOnNewEntity = false
-  ) {
+  public function __construct($id = 0) {
     if ((is_int($id) && $id > 0) || is_string($id)) {
       if (is_int($id)) {
         $entity = Nymph::getEntity(
@@ -152,9 +148,7 @@ class User extends AbleObject {
     $this->groups = [];
     $this->inheritAbilities = true;
     $this->addressType = 'us';
-    if (!$skipUpdateDataProtectionOnNewEntity) {
-      $this->updateDataProtection();
-    }
+    $this->updateDataProtection();
   }
 
   /**
@@ -221,13 +215,10 @@ class User extends AbleObject {
   }
 
   public static function current($returnObjectIfNotExist = false) {
-    if (!isset($_SESSION['tilmeldUser'])) {
-      Tilmeld::session();
-    }
-    if (!isset($_SESSION['tilmeldUser'])) {
+    if (!isset(Tilmeld::$currentUser)) {
       return $returnObjectIfNotExist ? self::factory() : null;
     }
-    return $_SESSION['tilmeldUser'];
+    return Tilmeld::$currentUser;
   }
 
   /**
@@ -1381,9 +1372,9 @@ class User extends AbleObject {
       // The email has changed, so send a new verification email.
       $this->sendEmailVerification();
     }
-    if ($return && self::current() !== null && self::current(true)->is($this)) {
+    if ($return && $this->is(self::current(true))) {
       // Update the user in the session cache.
-      Tilmeld::login($this);
+      Tilmeld::fillSession($this);
     }
     return $return;
   }
