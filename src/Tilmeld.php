@@ -41,38 +41,6 @@ class Tilmeld {
   public static $currentUser = null;
 
   /**
-   * The currently logged in user's group descendants.
-   *
-   * @var array|null
-   * @access private
-   */
-  private static $currentDescendantGroups = null;
-
-  /**
-   * Get the current user's group descendants.
-   */
-  public static function getCurrentDescendantGroups() {
-    if (!isset(self::$currentUser)) {
-      self::$currentDescendantGroups = null;
-      return [];
-    } else if (!isset(self::$currentDescendantGroups)) {
-      self::$currentDescendantGroups = [];
-      if (isset(self::$currentUser->group)) {
-        self::$currentDescendantGroups =
-          (array) self::$currentUser->group->getDescendants();
-      }
-      foreach (self::$currentUser->groups as $curGroup) {
-        self::$currentDescendantGroups =
-          array_merge(
-              (array) self::$currentDescendantGroups,
-              (array) $curGroup->getDescendants()
-          );
-      }
-    }
-    return self::$currentDescendantGroups;
-  }
-
-  /**
    * Check to see if the current user has an ability.
    *
    * If $ability is null, it will check to see if a user is currently logged
@@ -117,8 +85,10 @@ class Tilmeld {
    * Add selectors to a list of options and selectors which will limit results
    * to only entities the currently logged in user has access to.
    */
-  public static function addAccessControlSelectors(&$optionsAndSelectors) {
-    $user = self::$currentUser;
+  public static function addAccessControlSelectors(&$optionsAndSelectors, $user = null) {
+    if (!isset($user)) {
+      $user = self::$currentUser;
+    }
 
     if (isset($user) && $user->gatekeeper('system/admin')) {
       // The user is a system admin, so they can see everything.
@@ -173,7 +143,7 @@ class Tilmeld {
           $groupRefs[] = ['group', $curSecondaryGroup];
         }
       }
-      foreach (self::getCurrentDescendantGroups() as $curDescendantGroup) {
+      foreach ($user->getDescendantGroups() as $curDescendantGroup) {
         if (isset($curDescendantGroup) && isset($curDescendantGroup->guid)) {
           // It belongs to the user's secondary group.
           $groupRefs[] = ['group', $curDescendantGroup];
@@ -300,7 +270,7 @@ class Tilmeld {
         && (
           $entity->group->is($currentUserOrEmpty->group) ||
           $entity->group->inArray($currentUserOrEmpty->groups) ||
-          $entity->group->inArray(self::getCurrentDescendantGroups())
+          $entity->group->inArray($currentUserOrEmpty->getDescendantGroups())
         )
       ) {
       return ($acGroup >= $type);
@@ -317,7 +287,6 @@ class Tilmeld {
    */
   public static function fillSession($user) {
     self::$currentUser = $user;
-    self::$currentDescendantGroups = null;
     date_default_timezone_set($user->getTimezone());
     self::$currentUser->updateDataProtection();
   }
@@ -390,7 +359,6 @@ class Tilmeld {
    */
   public static function logout() {
     self::$currentUser = null;
-    self::$currentDescendantGroups = null;
     setcookie('TILMELDAUTH', '');
   }
 

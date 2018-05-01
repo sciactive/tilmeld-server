@@ -108,6 +108,35 @@ class User extends AbleObject {
   private $skipAcWhenSaving = false;
 
   /**
+   * The user's group descendants.
+   *
+   * @var array|null
+   * @access private
+   */
+  private $descendantGroups = null;
+
+  /**
+   * Get the current user's group descendants.
+   */
+  public function getDescendantGroups() {
+    if (!isset($this->descendantGroups)) {
+      $this->descendantGroups = [];
+      if (isset($this->group)) {
+        $this->descendantGroups =
+          (array) $this->group->getDescendants();
+      }
+      foreach ($this->groups as $curGroup) {
+        $this->descendantGroups =
+          array_merge(
+              (array) $this->descendantGroups,
+              (array) $curGroup->getDescendants()
+          );
+      }
+    }
+    return $this->descendantGroups;
+  }
+
+  /**
    * Load a user.
    *
    * @param int|string $id The ID or username of the user to load, 0 for a new
@@ -1368,13 +1397,18 @@ class User extends AbleObject {
     }
 
     $return = parent::save();
-    if ($return && $sendVerification) {
-      // The email has changed, so send a new verification email.
-      $this->sendEmailVerification();
-    }
-    if ($return && $this->is(self::current(true))) {
-      // Update the user in the session cache.
-      Tilmeld::fillSession($this);
+    if ($return) {
+      if ($sendVerification) {
+        // The email has changed, so send a new verification email.
+        $this->sendEmailVerification();
+      }
+
+      if ($this->is(self::current(true))) {
+        // Update the user in the session cache.
+        Tilmeld::fillSession($this);
+      }
+
+      $this->descendantGroups = null;
     }
     return $return;
   }
