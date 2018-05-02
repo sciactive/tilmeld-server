@@ -83,9 +83,17 @@ class Tilmeld {
 
   /**
    * Add selectors to a list of options and selectors which will limit results
-   * to only entities the currently logged in user has access to.
+   * to only entities the user has access to.
+   *
+   * @param array &$optionsAndSelectors The options and selectors of the query.
+   * @param \Tilmeld\Entities\User|null $user The user to add access controls
+   *                                          for. If null, uses the current
+   *                                          user.
    */
-  public static function addAccessControlSelectors(&$optionsAndSelectors, $user = null) {
+  public static function addAccessControlSelectors(
+      &$optionsAndSelectors,
+      $user = null
+  ) {
     if (!isset($user)) {
       $user = self::$currentUser;
     }
@@ -163,7 +171,7 @@ class Tilmeld {
   }
 
   /**
-   * Check an entity's permissions for the currently logged in user.
+   * Check an entity's permissions for a user.
    *
    * This will check the AC (Access Control) properties of the entity. These
    * include the following properties:
@@ -208,20 +216,31 @@ class Tilmeld {
    * @param int $type The lowest level of permission to consider a pass. One of
    *                  Tilmeld::READ_ACCESS, Tilmeld::WRITE_ACCESS, or
    *                  Tilmeld::DELETE_ACCESS.
+   * @param \Tilmeld\Entities\User|null $user The user to check permissions for.
+   *                                          If null, uses the current user. If
+   *                                          false, checks for public access.
    * @return bool Whether the current user has at least $type permission for the
    *              entity.
    */
   public static function checkPermissions(
       &$entity,
-      $type = Tilmeld::READ_ACCESS
+      $type = Tilmeld::READ_ACCESS,
+      $user = null
   ) {
-    $currentUserOrNull = self::$currentUser;
-    $currentUserOrEmpty = User::current(true);
+    if ($user === null) {
+      $userOrNull = self::$currentUser;
+      $userOrEmpty = User::current(true);
+    } elseif ($user === false) {
+      $userOrNull = null;
+      $userOrEmpty = User::factory();
+    } else {
+      $userOrNull = $userOrEmpty = $user;
+    }
 
     if (!is_object($entity) || !is_callable([$entity, 'is'])) {
       return false;
     }
-    if ($currentUserOrEmpty->gatekeeper('system/admin')) {
+    if ($userOrEmpty->gatekeeper('system/admin')) {
       return true;
     }
     if ((
@@ -232,14 +251,12 @@ class Tilmeld {
         )
         && (
           $type === Tilmeld::READ_ACCESS
-          || Tilmeld::gatekeeper('tilmeld/admin')
+          || $userOrEmpty->gatekeeper('tilmeld/admin')
         )
       ) {
       return true;
     }
-    if ((!isset($entity->user) || !isset($entity->user->guid))
-        && (!isset($entity->group) || !isset($entity->group->guid))
-      ) {
+    if (!isset($entity->user) && !isset($entity->group)) {
       return true;
     }
 
@@ -248,29 +265,29 @@ class Tilmeld {
     $acGroup = $entity->acGroup ?? Tilmeld::READ_ACCESS;
     $acOther = $entity->acOther ?? Tilmeld::NO_ACCESS;
 
-    if ($currentUserOrNull === null) {
+    if ($userOrNull === null) {
       return ($acOther >= $type);
     }
-    if ($currentUserOrEmpty->is($entity)) {
+    if ($userOrEmpty->is($entity)) {
       return true;
     }
-    if (isset($currentUserOrEmpty->group)
-        && is_callable([$currentUserOrEmpty->group, 'is'])
-        && $currentUserOrEmpty->group->is($entity)
+    if (isset($userOrEmpty->group)
+        && is_callable([$userOrEmpty->group, 'is'])
+        && $userOrEmpty->group->is($entity)
         && $type === Tilmeld::READ_ACCESS
       ) {
       return true;
     }
     if (is_callable([$entity->user, 'is'])
-        && $entity->user->is($currentUserOrNull)
+        && $entity->user->is($userOrNull)
       ) {
       return ($acUser >= $type);
     }
     if (is_callable([$entity->group, 'is'])
         && (
-          $entity->group->is($currentUserOrEmpty->group) ||
-          $entity->group->inArray($currentUserOrEmpty->groups) ||
-          $entity->group->inArray($currentUserOrEmpty->getDescendantGroups())
+          $entity->group->is($userOrEmpty->group) ||
+          $entity->group->inArray($userOrEmpty->groups) ||
+          $entity->group->inArray($userOrEmpty->getDescendantGroups())
         )
       ) {
       return ($acGroup >= $type);
@@ -292,6 +309,32 @@ class Tilmeld {
   }
 
   /**
+   * Validate and extract the user from a token.
+   *
+   * @param string $token The authentication token.
+   * @return \Tilmeld\Entities\User|bool The user on success, false on failure.
+   */
+  public static function extractToken($token) {
+    $extract = self::$config['jwt_extract']($token);
+    if (!$extract) {
+      return false;
+    }
+    $guid = $extract['guid'];
+
+    $user = Nymph::getEntity(
+        ['class' => '\Tilmeld\Entities\User'],
+        ['&',
+          'guid' => $guid
+        ]
+    );
+    if (!$user || !$user->guid || !$user->enabled) {
+      return false;
+    }
+
+    return $user;
+  }
+
+  /**
    * Check for a TILMELDAUTH cookie, and, if set, authenticate from it.
    *
    * @return bool True if a user was authenticated, false on any failure.
@@ -300,8 +343,14 @@ class Tilmeld {
     if (empty($_COOKIE['TILMELDAUTH'])) {
       return false;
     }
+    if (empty($_SERVER['HTTP_X_XSRF_TOKEN'])) {
+      return false;
+    }
 
-    $extract = self::$config['jwt_extract']($_COOKIE['TILMELDAUTH']);
+    $extract = self::$config['jwt_extract'](
+        $_COOKIE['TILMELDAUTH'],
+        $_SERVER['HTTP_X_XSRF_TOKEN']
+    );
     if (!$extract) {
       self::logout();
       return false;
@@ -339,14 +388,15 @@ class Tilmeld {
   public static function login($user) {
     if (isset($user->guid) && $user->enabled) {
       $token = self::$config['jwt_builder']($user);
+      $appUrlParts = parse_url(self::$config['app_url']);
       setcookie(
           'TILMELDAUTH',
           $token,
           time() + self::$config['jwt_expire'],
-          '', // Use current path.
-          '', // Use current domain.
-          substr(self::$config['setup_url'], 0, 5) === 'https', // Secure if the user setup URL is.
-          TRUE // Don't allow JS access
+          $appUrlParts['path'],
+          $appUrlParts['host'],
+          $appUrlParts['scheme'] === 'https',
+          false // Allow JS access (for CSRF protection).
       );
       self::fillSession($user);
       return true;
@@ -359,7 +409,14 @@ class Tilmeld {
    */
   public static function logout() {
     self::$currentUser = null;
-    setcookie('TILMELDAUTH', '');
+    $appUrlParts = parse_url(self::$config['app_url']);
+    setcookie(
+        'TILMELDAUTH',
+        '',
+        null,
+        $appUrlParts['path'],
+        $appUrlParts['host']
+    );
   }
 
   /**

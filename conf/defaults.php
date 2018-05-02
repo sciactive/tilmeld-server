@@ -19,11 +19,18 @@ use Respect\Validation\Validator as v;
 
 return [
   /*
+   * App URL
+   * The URL of the app. Used to define cookie domain, path, and security. Must
+   * be accessible to the Tilmeld client JS. (Note, cookies are not specific to
+   * individual ports, so tokens will be sent to any port running on this host.)
+   */
+  'app_url' => 'http://localhost:8080/',
+  /*
    * Setup URL
    * The URL where the setup utility is accessible. This is also used for
    * email address verification.
    */
-  'setup_url' => 'http://localhost:8080/examples/examples/tilmeld/setup.php',
+  'setup_url' => 'http://localhost:8080/tilmeld/setup.php',
   /*
    * Create Admin
    * Allow the creation of an admin user. When a user is created, if there are
@@ -195,6 +202,7 @@ return [
                                 time() + \Tilmeld\Tilmeld::$config['jwt_expire']
                             )
                             ->set('guid', $user->guid)
+                            ->set('xsrfToken', uniqid('TILMELDXSRF-', true))
                             ->sign($signer, $secret)
                             ->getToken();
     return $token;
@@ -202,12 +210,14 @@ return [
   /*
    * JWT Extract
    * Function to verify that a JWT was signed with the secret key, vaildate its
-   * data, and extract the GUID.
+   * data, validate the XSRF token, and extract the GUID.
+   *
+   * If no XSRF token is supplied, ignore it.
    *
    * Return false if the JWT is not valid, or an array of GUID and expire
    * timestamp otherwise.
    */
-  'jwt_extract' => function ($token) {
+  'jwt_extract' => function ($token, $xsrfToken = null) {
     $secret = \Tilmeld\Tilmeld::$config['jwt_secret'];
     if (!isset($secret)) {
       throw new \Exception('JWT secret is not configured.');
@@ -225,6 +235,12 @@ return [
     }
 
     $token->getClaims();
+
+    $jwtXsrfToken = $token->getClaim('xsrfToken');
+    if (isset($xsrfToken) && $xsrfToken !== $jwtXsrfToken) {
+      return false;
+    }
+
     $guid = $token->getClaim('guid');
     if (!is_numeric($guid) || $guid <= 0) {
       return false;
