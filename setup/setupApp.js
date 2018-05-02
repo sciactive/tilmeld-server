@@ -1,6 +1,6 @@
 angular.module('setupApp', ['ngRoute'])
 .service('Nymph', function() {
-  return nymphClient.Nymph;
+  return NymphClient.Nymph;
 })
 .service('User', function() {
   return User.default;
