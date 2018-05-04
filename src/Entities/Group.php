@@ -201,20 +201,31 @@ class Group extends AbleObject {
     return $return;
   }
 
-  public function updateDataProtection() {
+  /**
+   * Update the data protection arrays for a user.
+   *
+   * @param \Tilmeld\Entities\User|null $user User to update protection for. If
+   *                                          null, will use the currently
+   *                                          logged in user.
+   */
+  public function updateDataProtection($user = null) {
+    if (!isset($user)) {
+      $user = User::current();
+    }
+
     $this->privateData = self::DEFAULT_PRIVATE_DATA;
     $this->whitelistData = self::DEFAULT_WHITELIST_DATA;
 
     if (Tilmeld::$config['email_usernames']) {
       $this->privateData[] = 'groupname';
     }
-    if (Tilmeld::gatekeeper('tilmeld/admin')) {
+    if ($user !== null && $user->gatekeeper('tilmeld/admin')) {
       // Users who can edit groups can see their data.
       $this->privateData = [];
       $this->whitelistData = false;
       return;
     }
-    if (isset($this->user) && User::current(true)->is($this->user)) {
+    if (isset($this->user) && isset($user) && $this->user->is($user)) {
       // Users can see their group's data.
       $this->privateData = [];
     }

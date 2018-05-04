@@ -543,7 +543,18 @@ class User extends AbleObject {
     return $return;
   }
 
-  public function updateDataProtection() {
+  /**
+   * Update the data protection arrays for a user.
+   *
+   * @param \Tilmeld\Entities\User|null $user User to update protection for. If
+   *                                          null, will use the currently
+   *                                          logged in user.
+   */
+  public function updateDataProtection($user = null) {
+    if (!isset($user)) {
+      $user = self::current();
+    }
+
     $this->clientEnabledMethods = self::DEFAULT_CLIENT_ENABLED_METHODS;
     $this->privateData = self::DEFAULT_PRIVATE_DATA;
     $this->whitelistData = self::DEFAULT_WHITELIST_DATA;
@@ -552,7 +563,7 @@ class User extends AbleObject {
       $this->privateData[] = 'username';
     }
 
-    $isCurrentUser = self::current() !== null && self::current(true)->is($this);
+    $isCurrentUser = $user !== null && $this->is($user);
     $isNewUser = !isset($this->guid);
 
     if ($isCurrentUser) {
@@ -563,7 +574,7 @@ class User extends AbleObject {
       $this->clientEnabledMethods[] = 'sendEmailVerification';
     }
 
-    if (Tilmeld::gatekeeper('tilmeld/admin')) {
+    if ($user !== null && $user->gatekeeper('tilmeld/admin')) {
       // Users who can edit other users can see most of their data.
       $this->privateData = [
         'password',
