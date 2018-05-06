@@ -32,7 +32,7 @@ if (isset($_REQUEST['action']) && \Tilmeld\Tilmeld::$config['verify_email']) {
     default:
       // Verify new user's email address.
       if (!isset($user->secret) || $_REQUEST['secret'] !== $user->secret) {
-        $printPage('The secret code given does not match this user.');
+        $printPage('An error occurred.');
         return;
       }
 
@@ -50,7 +50,7 @@ if (isset($_REQUEST['action']) && \Tilmeld\Tilmeld::$config['verify_email']) {
     case 'verifyemailchange':
       // Email address change.
       if (!isset($user->newEmailSecret) || $_REQUEST['secret'] !== $user->newEmailSecret) {
-        $printPage('The secret code given does not match this user.');
+        $printPage('An error occurred.');
         return;
       }
 
@@ -81,7 +81,7 @@ if (isset($_REQUEST['action']) && \Tilmeld\Tilmeld::$config['verify_email']) {
     case 'cancelemailchange':
       // Cancel an email address change.
       if (!isset($user->cancelEmailSecret) || $_REQUEST['secret'] !== $user->cancelEmailSecret) {
-        $printPage('The secret code given does not match this user.');
+        $printPage('An error occurred.');
         return;
       }
 
@@ -138,14 +138,9 @@ function is_secure() {
       })();
       NymphOptions = {
         restURL: <?php echo json_encode($restEndpoint); ?>
-        <?php if (\Nymph\Nymph::$config['pubsub']) { ?>
-        ,pubsubURL: '<?php echo is_secure() ? 'wss' : 'ws'; ?>://<?php echo getenv('NYMPH_PRODUCTION') ? 'nymph-pubsub-demo.herokuapp.com' : '\'+window.location.hostname+\''; ?>:<?php echo getenv('NYMPH_PRODUCTION') ? (is_secure() ? '443' : '80') : '8081'; ?>'
-        ,rateLimit: 100
-        <?php } ?>
       };
       TilmeldOptions = {
-        tilmeldURL: <?php echo json_encode($tilmeldURL); ?>,
-        pubsub: <?php echo json_encode(\Nymph\Nymph::$config['pubsub']); ?>
+        tilmeldURL: <?php echo json_encode($tilmeldURL); ?>
       };
     </script>
     <?php if (isset($sciactiveDevClientURL)) { ?>

@@ -29,6 +29,11 @@ return [
    * Setup URL
    * The URL where the setup utility is accessible. This is also used for
    * email address verification.
+   *
+   * ***************************************************************************
+   * This portion of the app will *not* check for the XSRF token, so make sure
+   * your REST endpoint is *not* under this URL.
+   * ***************************************************************************
    */
   'setup_url' => 'http://localhost:8080/tilmeld/setup.php',
   /*

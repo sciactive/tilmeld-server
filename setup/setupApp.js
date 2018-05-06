@@ -15,15 +15,15 @@ angular.module('setupApp', ['ngRoute'])
   $routeProvider
     .when('/instructions', {
       controller: 'InstructionsController',
-      templateUrl: TilmeldOptions.tilmeldURL+'setup/instructions.html'
+      templateUrl: window.TilmeldOptions.tilmeldURL+'setup/instructions.html'
     })
     .when('/user', {
       controller: 'UserController',
-      templateUrl: TilmeldOptions.tilmeldURL+'setup/user.html'
+      templateUrl: window.TilmeldOptions.tilmeldURL+'setup/user.html'
     })
     .when('/group', {
       controller: 'GroupController',
-      templateUrl: TilmeldOptions.tilmeldURL+'setup/group.html'
+      templateUrl: window.TilmeldOptions.tilmeldURL+'setup/group.html'
     })
     .otherwise('/instructions');
 

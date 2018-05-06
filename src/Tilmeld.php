@@ -343,14 +343,26 @@ class Tilmeld {
     if (empty($_COOKIE['TILMELDAUTH'])) {
       return false;
     }
-    if (empty($_SERVER['HTTP_X_XSRF_TOKEN'])) {
-      return false;
+    $setupUrlParts = parse_url(self::$config['setup_url']);
+    $setupHost = $setupUrlParts['host'] .
+      ($setupUrlParts['port'] ? ':'.$setupUrlParts['port'] : '');
+    if ($_SERVER['HTTP_HOST'] === $setupHost
+        && $_SERVER['REQUEST_URI'] === $setupUrlParts['path']
+      ) {
+      // The request is for the setup app, so don't check for the XSRF token.
+      $extract = self::$config['jwt_extract']($_COOKIE['TILMELDAUTH']);
+    } else {
+      // The request is for something else, so check for a valid XSRF token.
+      if (empty($_SERVER['HTTP_X_XSRF_TOKEN'])) {
+        return false;
+      }
+
+      $extract = self::$config['jwt_extract'](
+          $_COOKIE['TILMELDAUTH'],
+          $_SERVER['HTTP_X_XSRF_TOKEN']
+      );
     }
 
-    $extract = self::$config['jwt_extract'](
-        $_COOKIE['TILMELDAUTH'],
-        $_SERVER['HTTP_X_XSRF_TOKEN']
-    );
     if (!$extract) {
       self::logout();
       return false;

@@ -43,7 +43,6 @@
   "require": {
     "sciactive/hookphp": "^2.0",
     "sciactive/nymph-server": "~3.0@beta",
-    "sciactive/nymph-pubsub": "~3.0@beta",
     "sciactive/umailphp": "^2.3",
     "respect/validation": "^1.1",
     "lcobucci/jwt": "^3.2"
