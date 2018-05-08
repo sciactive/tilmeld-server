@@ -177,7 +177,7 @@ return [
   'max_username_length' => 128,
   /*
    * JWT Secret
-   * The secret used to encrypt/decrypt the JWT. Should be a 256 bit string.
+   * The secret used to sign the JWT. Should be a 256 bit string.
    */
   'jwt_secret' => null,
   /*
@@ -201,15 +201,14 @@ return [
     }
 
     $signer = new Sha256();
-    $token = (new Builder())->setIssuedAt(time())
-                            ->setNotBefore(time())
-                            ->setExpiration(
-                                time() + \Tilmeld\Tilmeld::$config['jwt_expire']
-                            )
-                            ->set('guid', $user->guid)
-                            ->set('xsrfToken', uniqid('TILMELDXSRF-', true))
-                            ->sign($signer, $secret)
-                            ->getToken();
+    $token = (new Builder())
+      ->setIssuedAt(time())
+      ->setNotBefore(time())
+      ->setExpiration(time() + \Tilmeld\Tilmeld::$config['jwt_expire'])
+      ->set('guid', $user->guid)
+      ->set('xsrfToken', uniqid('TILMELDXSRF-', true))
+      ->sign($signer, $secret)
+      ->getToken();
     return $token;
   },
   /*
