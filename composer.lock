@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "160288da6a441037e43bb6f462be9f29",
+    "content-hash": "c52f0a2e0f806eb479dddfcfdca3d8ab",
     "packages": [
         {
             "name": "lcobucci/jwt",
@@ -179,16 +179,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.11",
+            "version": "3.0.0-beta.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "62d89f6e22b095ae99c16d746ff454b96c93bc7e"
+                "reference": "ce1e4dc4b7f03e18f041d02b8a58754cbbf69b5e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/62d89f6e22b095ae99c16d746ff454b96c93bc7e",
-                "reference": "62d89f6e22b095ae99c16d746ff454b96c93bc7e",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/ce1e4dc4b7f03e18f041d02b8a58754cbbf69b5e",
+                "reference": "ce1e4dc4b7f03e18f041d02b8a58754cbbf69b5e",
                 "shasum": ""
             },
             "require-dev": {
@@ -229,7 +229,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-05-04T00:00:00+00:00"
+            "time": "2018-05-07T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",

@@ -27,7 +27,7 @@ class HookMethods {
           ) {
           if ($array[0]['source'] === 'pubsub') {
             if (isset($array[0]['token'])) {
-              $user = Tilmeld::extractToken($array[0]['token']) ?? null;
+              $user = Tilmeld::extractToken($array[0]['token']) ?: null;
             } else {
               $user = null;
             }
