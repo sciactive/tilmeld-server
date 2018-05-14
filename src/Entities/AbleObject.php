@@ -5,11 +5,10 @@
  *
  * Entities which support abilities, such as users and groups.
  *
- * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
- * @link http://sciactive.com/
+ * @link http://tilmeld.org/
  */
 class AbleObject extends \Nymph\Entity {
   /**

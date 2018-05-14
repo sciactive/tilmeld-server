@@ -5,11 +5,10 @@
 /**
  * Verify Email
  *
- * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
- * @link http://sciactive.com/
+ * @link http://tilmeld.org/
  */
 class VerifyEmail extends \uMailPHP\Definition {
   public static $cname = 'Verify Email';

@@ -6,11 +6,11 @@ use Nymph\Nymph;
 /**
  * User class.
  *
- * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
- * @link http://sciactive.com/
+ * @link http://tilmeld.org/
+ *
  * @property int $guid The GUID of the user.
  * @property string $username The user's username.
  * @property string $nameFirst The user's first name.

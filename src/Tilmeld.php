@@ -10,11 +10,10 @@ use Tilmeld\Entities\Group;
  *
  * Provides an Nymph based user and group manager.
  *
- * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
- * @link http://sciactive.com/
+ * @link http://tilmeld.org/
  */
 class Tilmeld {
   const VERSION = '1.0.0-beta.1';

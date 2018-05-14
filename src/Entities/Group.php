@@ -9,11 +9,11 @@ use Nymph\Nymph;
  * Note: When delete() is called all descendants of this group will also be
  * deleted.
  *
- * @package Tilmeld
  * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
- * @link http://sciactive.com/
+ * @link http://tilmeld.org/
+ *
  * @property int $guid The GUID of the group.
  * @property string $groupname The group's groupname.
  * @property string $name The group's name.
@@ -31,7 +31,7 @@ use Nymph\Nymph;
  *                                        international addresses.
  * @property Group $parent The group's parent.
  * @property User|null $user If generate_primary is on, this will be the user
-*                            who generated this group.
+ *                           who generated this group.
  */
 class Group extends AbleObject {
   const ETYPE = 'tilmeld_group';
