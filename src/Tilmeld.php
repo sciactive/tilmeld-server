@@ -21,7 +21,7 @@ class Tilmeld {
   const NO_ACCESS = 0;
   const READ_ACCESS = 1;
   const WRITE_ACCESS = 2;
-  const DELETE_ACCESS = 4;
+  const FULL_ACCESS = 4;
 
   /**
    * The Tilmeld config array.
@@ -131,29 +131,51 @@ class Tilmeld {
         'gte' => ['acOther', Tilmeld::READ_ACCESS],
         // The user and group are not set.
         ['&',
-          '!isset' => ['user', 'group']
+          '!isset' => [
+            'user',
+            'group'
+          ]
         ],
         // It is owned by the user.
         ['&',
           'ref' => ['user', $user],
           'gte' => ['acUser', Tilmeld::READ_ACCESS]
+        ],
+        // The user is listed in acRead, acWrite, or acFull.
+        'ref' => [
+          ['acRead', $user],
+          ['acWrite', $user],
+          ['acFull', $user]
         ]
       ];
       $groupRefs = [];
+      $acRefs = [];
       if (isset($user->group) && isset($user->group->guid)) {
         // It belongs to the user's primary group.
         $groupRefs[] = ['group', $user->group];
+        // User's primary group is listed in acRead, acWrite, or acFull.
+        $acRefs[] = ['acRead', $user->group];
+        $acRefs[] = ['acWrite', $user->group];
+        $acRefs[] = ['acFull', $user->group];
       }
       foreach ($user->groups as $curSecondaryGroup) {
         if (isset($curSecondaryGroup) && isset($curSecondaryGroup->guid)) {
           // It belongs to the user's secondary group.
           $groupRefs[] = ['group', $curSecondaryGroup];
+          // User's secondary group is listed in acRead, acWrite, or acFull.
+          $acRefs[] = ['acRead', $curSecondaryGroup];
+          $acRefs[] = ['acWrite', $curSecondaryGroup];
+          $acRefs[] = ['acFull', $curSecondaryGroup];
         }
       }
       foreach ($user->getDescendantGroups() as $curDescendantGroup) {
         if (isset($curDescendantGroup) && isset($curDescendantGroup->guid)) {
           // It belongs to the user's secondary group.
           $groupRefs[] = ['group', $curDescendantGroup];
+          // User's secondary group is listed in acRead, acWrite, or acFull.
+          $acRefs[] = ['acRead', $curDescendantGroup];
+          $acRefs[] = ['acWrite', $curDescendantGroup];
+          $acRefs[] = ['acFull', $curDescendantGroup];
         }
       }
       // All the group refs.
@@ -163,6 +185,12 @@ class Tilmeld {
           ['|',
             'ref' => $groupRefs
           ]
+        ];
+      }
+      // All the acRead, acWrite, and acFull refs.
+      if (!empty($acRefs)) {
+        $selector[] = ['|',
+          'ref' => $acRefs
         ];
       }
       $optionsAndSelectors[] = $selector;
@@ -178,32 +206,49 @@ class Tilmeld {
    * - acUser
    * - acGroup
    * - acOther
+   * - acRead
+   * - acWrite
+   * - acFull
    *
-   * The property "acUser" refers to the entity's owner, "acGroup" refers to
-   * all users in the entity's group and all ancestor groups, and "acOther"
-   * refers to any user who doesn't fit these descriptions.
+   * "acUser" refers to the entity's owner, "acGroup" refers to all users in the
+   * entity's group and all ancestor groups, and "acOther" refers to any user
+   * who doesn't fit these descriptions.
    *
-   * Each property should be either NO_ACCESS, READ_ACCESS, WRITE_ACCESS, or
-   * DELETE_ACCESS. If it is NO_ACCESS, the user has no access to the entity. If
-   * it is READ_ACCESS, the user has read access to the entity. If it is
-   * WRITE_ACCESS, the user has read and write access to the entity. If it is
-   * DELETE_ACCESS, the user has read, write, and delete access to the entity.
+   * Each of these properties should be either NO_ACCESS, READ_ACCESS,
+   * WRITE_ACCESS, or FULL_ACCESS.
    *
-   * AC properties defaults to:
+   * - NO_ACCESS - the user has no access to the entity.
+   * - READ_ACCESS, the user has read access to the entity.
+   * - WRITE_ACCESS, the user has read and write access to the entity, but can't
+   *   delete it, change its access controls, or change its ownership.
+   * - FULL_ACCESS, the user has read, write, and delete access to the entity,
+   *   as well as being able to manage its access controls and ownership.
    *
-   * - acUser = Tilmeld::DELETE_ACCESS
+   * These properties defaults to:
+   *
+   * - acUser = Tilmeld::FULL_ACCESS
    * - acGroup = Tilmeld::READ_ACCESS
    * - acOther = Tilmeld::NO_ACCESS
+   *
+   * "acRead", "acWrite", and "acFull" are arrays of users and/or groups that
+   * also have those permissions.
+   *
+   * Only users with FULL_ACCESS have the ability to change any of the ac*,
+   * user, and group properties.
    *
    * The following conditions will result in different checks, which determine
    * whether the check passes:
    *
    * - The user has the "system/admin" ability. (Always true.)
-   * - It is a user or group. (Always true for read or Tilmeld admins.)
+   * - It is a user or group. (True for READ_ACCESS or Tilmeld admins.)
    * - The entity has no "user" and no "group". (Always true.)
    * - No user is logged in. (Check other AC.)
    * - The entity is the user. (Always true.)
-   * - It is the user's primary group. (Always true for read.)
+   * - It is the user's primary group. (True for READ_ACCESS.)
+   * - The user or its groups are listed in "acRead". (True for READ_ACCESS.)
+   * - The user or its groups are listed in "acWrite". (True for READ_ACCESS and
+   *   WRITE_ACCESS.)
+   * - The user or its groups are listed in "acFull". (Always true.)
    * - Its "user" is the user. (It is owned by the user.) (Check user AC.)
    * - Its "group" is the user's primary group. (Check group AC.)
    * - Its "group" is one of the user's secondary groups. (Check group AC.)
@@ -214,7 +259,7 @@ class Tilmeld {
    * @param object &$entity The entity to check.
    * @param int $type The lowest level of permission to consider a pass. One of
    *                  Tilmeld::READ_ACCESS, Tilmeld::WRITE_ACCESS, or
-   *                  Tilmeld::DELETE_ACCESS.
+   *                  Tilmeld::FULL_ACCESS.
    * @param \Tilmeld\Entities\User|null $user The user to check permissions for.
    *                                          If null, uses the current user. If
    *                                          false, checks for public access.
@@ -226,6 +271,12 @@ class Tilmeld {
       $type = Tilmeld::READ_ACCESS,
       $user = null
   ) {
+    // Only works for entities.
+    if (!is_object($entity) || !is_callable([$entity, 'is'])) {
+      return false;
+    }
+
+    // Calculate the user.
     if ($user === null) {
       $userOrNull = self::$currentUser;
       $userOrEmpty = User::current(true);
@@ -236,12 +287,11 @@ class Tilmeld {
       $userOrNull = $userOrEmpty = $user;
     }
 
-    if (!is_object($entity) || !is_callable([$entity, 'is'])) {
-      return false;
-    }
     if ($userOrEmpty->gatekeeper('system/admin')) {
       return true;
     }
+
+    // Users and groups are always readable. Editable by Tilmeld admins.
     if ((
           is_a($entity, '\Tilmeld\Entities\User')
           || is_a($entity, '\Tilmeld\Entities\Group')
@@ -255,21 +305,27 @@ class Tilmeld {
       ) {
       return true;
     }
+
+    // Entities with no owners are always editable.
     if (!isset($entity->user) && !isset($entity->group)) {
       return true;
     }
 
     // Load access control, since we need it now...
-    $acUser = $entity->acUser ?? Tilmeld::DELETE_ACCESS;
+    $acUser = $entity->acUser ?? Tilmeld::FULL_ACCESS;
     $acGroup = $entity->acGroup ?? Tilmeld::READ_ACCESS;
     $acOther = $entity->acOther ?? Tilmeld::NO_ACCESS;
 
     if ($userOrNull === null) {
       return ($acOther >= $type);
     }
+
+    // Check if the entity is the user.
     if ($userOrEmpty->is($entity)) {
       return true;
     }
+
+    // Check if the entity is the user's group. Always readable.
     if (isset($userOrEmpty->group)
         && is_callable([$userOrEmpty->group, 'is'])
         && $userOrEmpty->group->is($entity)
@@ -277,17 +333,41 @@ class Tilmeld {
       ) {
       return true;
     }
+
+    // Calculate all the groups the user belongs to.
+    $allGroups = isset($userOrEmpty->group) ? [$userOrEmpty->group] : [];
+    $allGroups = array_merge($allGroups, $userOrEmpty->groups);
+    $allGroups = array_merge($allGroups, $userOrEmpty->getDescendantGroups());
+
+    // Check access ac properties.
+    $checks = [
+      ['type' => Tilmeld::FULL_ACCESS, 'array' => (array) $entity->acFull],
+      ['type' => Tilmeld::WRITE_ACCESS, 'array' => (array) $entity->acWrite],
+      ['type' => Tilmeld::READ_ACCESS, 'array' => (array) $entity->acRead]
+    ];
+    foreach ($checks as $curCheck) {
+      if ($type <= $curCheck['type']) {
+        if ($userOrEmpty->inArray($curCheck['array'])) {
+          return true;
+        }
+        foreach ($allGroups as $curGroup) {
+          if (is_callable([$curGroup, 'inArray'])
+              && $curGroup->inArray($curCheck['array'])
+            ) {
+            return true;
+          }
+        }
+      }
+    }
+
+    // Check ownership ac properties.
     if (is_callable([$entity->user, 'is'])
         && $entity->user->is($userOrNull)
       ) {
       return ($acUser >= $type);
     }
     if (is_callable([$entity->group, 'is'])
-        && (
-          $entity->group->is($userOrEmpty->group) ||
-          $entity->group->inArray($userOrEmpty->groups) ||
-          $entity->group->inArray($userOrEmpty->getDescendantGroups())
-        )
+        && $entity->group->inArray($allGroups)
       ) {
       return ($acGroup >= $type);
     }

@@ -1,6 +1,7 @@
 <?php namespace Tilmeld;
 
 use SciActive\Hook;
+use Respect\Validation\Validator as v;
 
 /**
  * Hook Nymph methods.
@@ -84,19 +85,23 @@ class HookMethods {
     $CheckPermissionsDeleteHook = function (&$array) {
       $entity = $array[0];
       if (is_int($entity)) {
-        $entity = \Nymph\Nymph::getEntity($array[0]);
+        $entity = \Nymph\Nymph::getEntity(
+          ['class' => $array[1] ?? '\Nymph\Entity'],
+          ['&', 'guid' => $array[0]]
+        );
       }
       if (!is_object($entity)) {
         $array = false;
         return;
       }
       // Test for permissions.
-      if (!Tilmeld::checkPermissions($entity, Tilmeld::DELETE_ACCESS)) {
+      if (!Tilmeld::checkPermissions($entity, Tilmeld::FULL_ACCESS)) {
         $array = false;
       }
     };
 
-    // TODO(hperrin): Is this necessary, after adding AC selectors?
+    // TODO(hperrin): This is unnecessary now with AC selectors. Should it be
+    // used for something else?
     // Filter entities being returned for user permissions.
     // $CheckPermissionsReturnHook = function (
     //     &$array,
@@ -124,8 +129,9 @@ class HookMethods {
     //   unset($curEntity);
     // };
 
-    // Filter entities being saved for user permissions.
-    $CheckPermissionsSaveHook = function (&$array) {
+    // Filter entities being saved for user permissions, and filter any
+    // disallowed changes to AC properties.
+    $CheckPermissionsSaveAndFilterAcChangesHook = function (&$array) {
       $entity = $array[0];
       if (!is_object($entity)) {
         $array = false;
@@ -136,6 +142,41 @@ class HookMethods {
         ) {
         return;
       }
+
+      if (isset($entity->guid)) {
+        // If the entity is not new, check that the user has full access before
+        // allowing a change to ac properties.
+
+        $originalAc = $entity->getOriginalAcValues();
+        $newAc = [
+          'user' => $entity->user,
+          'group' => $entity->group,
+          'acUser' => $entity->acUser,
+          'acGroup' => $entity->acGroup,
+          'acOther' => $entity->acOther,
+          'acRead' => $entity->acRead,
+          'acWrite' => $entity->acWrite,
+          'acFull' => $entity->acFull
+        ];
+
+        $setAcProperties = function ($acValues) use ($entity) {
+          foreach ($acValues as $name => $value) {
+            if (isset($value)) {
+              $entity->$name = $value;
+            } else {
+              unset($entity->$name);
+            }
+          }
+        };
+
+        // Restore original AC properties and check permissions.
+        $setAcProperties($originalAc);
+        if (Tilmeld::checkPermissions($entity, Tilmeld::FULL_ACCESS)) {
+          // Only allow changes to AC properties if the user has full access.
+          $setAcProperties($newAc);
+        }
+      }
+
       // Test for permissions.
       if (!Tilmeld::checkPermissions($entity, Tilmeld::WRITE_ACCESS)) {
         $array = false;
@@ -156,7 +197,7 @@ class HookMethods {
      * user/group, then save it again.
      *
      * Default access control is
-     * - acUser = Tilmeld::DELETE_ACCESS
+     * - acUser = Tilmeld::FULL_ACCESS
      * - acGroup = Tilmeld::READ_ACCESS
      * - acOther = Tilmeld::NO_ACCESS
      */
@@ -175,7 +216,7 @@ class HookMethods {
           $array[0]->group = $user->group;
         }
         if (!isset($array[0]->acUser)) {
-          $array[0]->acUser = Tilmeld::DELETE_ACCESS;
+          $array[0]->acUser = Tilmeld::FULL_ACCESS;
         }
         if (!isset($array[0]->acGroup)) {
           $array[0]->acGroup = Tilmeld::READ_ACCESS;
@@ -183,6 +224,48 @@ class HookMethods {
         if (!isset($array[0]->acOther)) {
           $array[0]->acOther = Tilmeld::NO_ACCESS;
         }
+        if (!isset($array[0]->acRead)) {
+          $array[0]->acRead = [];
+        }
+        if (!isset($array[0]->acWrite)) {
+          $array[0]->acWrite = [];
+        }
+        if (!isset($array[0]->acFull)) {
+          $array[0]->acFull = [];
+        }
+      }
+    };
+
+    $Validate = function (&$array) {
+      $ownershipAcPropertyValidator = v::intType()->between(
+          Tilmeld::NO_ACCESS,
+          Tilmeld::FULL_ACCESS,
+          true
+      );
+      $accessAcPropertyValidator = v::arrayType()->each(
+          v::oneOf(
+              v::instance('\Tilmeld\Entities\User'),
+              v::instance('\Tilmeld\Entities\Group')
+          )
+      );
+
+      try {
+        v::notEmpty()
+          ->attribute('user', v::instance('\Tilmeld\Entities\User'), false)
+          ->attribute('group', v::instance('\Tilmeld\Entities\Group'), false)
+          ->attribute('acUser', $ownershipAcPropertyValidator, false)
+          ->attribute('acGroup', $ownershipAcPropertyValidator, false)
+          ->attribute('acOther', $ownershipAcPropertyValidator, false)
+          ->attribute('acRead', $accessAcPropertyValidator, false)
+          ->attribute('acWrite', $accessAcPropertyValidator, false)
+          ->attribute('acFull', $accessAcPropertyValidator, false)
+          ->setName('entity')
+          ->assert($array[0]->getValidatable());
+      // phpcs:ignore Generic.Files.LineLength.TooLong
+      } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
+        throw new \Tilmeld\Exceptions\BadDataException(
+            $exception->getFullMessage()
+        );
       }
     };
 
@@ -192,7 +275,12 @@ class HookMethods {
     // Hook::addCallback('Nymph->getEntities', 10, $CheckPermissionsReturnHook);
 
     Hook::addCallback('Nymph->saveEntity', -100, $AddAccessHook);
-    Hook::addCallback('Nymph->saveEntity', -99, $CheckPermissionsSaveHook);
+    Hook::addCallback('Nymph->saveEntity', -90, $Validate);
+    Hook::addCallback(
+        'Nymph->saveEntity',
+        -80,
+        $CheckPermissionsSaveAndFilterAcChangesHook
+    );
 
     Hook::addCallback('Nymph->deleteEntity', -99, $CheckPermissionsDeleteHook);
     Hook::addCallback(
