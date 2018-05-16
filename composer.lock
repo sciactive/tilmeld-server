@@ -233,16 +233,16 @@
         },
         {
             "name": "sciactive/umailphp",
-            "version": "2.3.0",
+            "version": "2.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/umailphp.git",
-                "reference": "9e6a510b9614c0a479c7e1648d957a503803b188"
+                "reference": "4a2db7283e0f58e004a2261e818c3b08f45b5547"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/umailphp/zipball/9e6a510b9614c0a479c7e1648d957a503803b188",
-                "reference": "9e6a510b9614c0a479c7e1648d957a503803b188",
+                "url": "https://api.github.com/repos/sciactive/umailphp/zipball/4a2db7283e0f58e004a2261e818c3b08f45b5547",
+                "reference": "4a2db7283e0f58e004a2261e818c3b08f45b5547",
                 "shasum": ""
             },
             "require": {
@@ -269,13 +269,13 @@
                     "role": "Developer"
                 }
             ],
-            "description": "A PHP email templating system.",
+            "description": "An email templating system for Nymph.",
             "homepage": "http://umailphp.org/",
             "keywords": [
                 "email",
                 "templating"
             ],
-            "time": "2018-04-23T00:00:00+00:00"
+            "time": "2018-05-14T00:00:00+00:00"
         },
         {
             "name": "symfony/polyfill-mbstring",

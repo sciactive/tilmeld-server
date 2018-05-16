@@ -237,35 +237,41 @@ class HookMethods {
     };
 
     $Validate = function (&$array) {
-      $ownershipAcPropertyValidator = v::intType()->between(
-          Tilmeld::NO_ACCESS,
-          Tilmeld::FULL_ACCESS,
-          true
-      );
-      $accessAcPropertyValidator = v::arrayType()->each(
-          v::oneOf(
-              v::instance('\Tilmeld\Entities\User'),
-              v::instance('\Tilmeld\Entities\Group')
-          )
-      );
-
-      try {
-        v::notEmpty()
-          ->attribute('user', v::instance('\Tilmeld\Entities\User'), false)
-          ->attribute('group', v::instance('\Tilmeld\Entities\Group'), false)
-          ->attribute('acUser', $ownershipAcPropertyValidator, false)
-          ->attribute('acGroup', $ownershipAcPropertyValidator, false)
-          ->attribute('acOther', $ownershipAcPropertyValidator, false)
-          ->attribute('acRead', $accessAcPropertyValidator, false)
-          ->attribute('acWrite', $accessAcPropertyValidator, false)
-          ->attribute('acFull', $accessAcPropertyValidator, false)
-          ->setName('entity')
-          ->assert($array[0]->getValidatable());
-      // phpcs:ignore Generic.Files.LineLength.TooLong
-      } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
-        throw new \Tilmeld\Exceptions\BadDataException(
-            $exception->getFullMessage()
+      if (!is_a($array[0], '\Tilmeld\Entities\User')
+          && !is_a($array[0], '\Tilmeld\Entities\Group')
+          && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_User')
+          && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_Group')
+        ) {
+        $ownershipAcPropertyValidator = v::intType()->between(
+            Tilmeld::NO_ACCESS,
+            Tilmeld::FULL_ACCESS,
+            true
         );
+        $accessAcPropertyValidator = v::arrayType()->each(
+            v::oneOf(
+                v::instance('\Tilmeld\Entities\User'),
+                v::instance('\Tilmeld\Entities\Group')
+            )
+        );
+
+        try {
+          v::notEmpty()
+            ->attribute('user', v::instance('\Tilmeld\Entities\User'), false)
+            ->attribute('group', v::instance('\Tilmeld\Entities\Group'), false)
+            ->attribute('acUser', $ownershipAcPropertyValidator, false)
+            ->attribute('acGroup', $ownershipAcPropertyValidator, false)
+            ->attribute('acOther', $ownershipAcPropertyValidator, false)
+            ->attribute('acRead', $accessAcPropertyValidator, false)
+            ->attribute('acWrite', $accessAcPropertyValidator, false)
+            ->attribute('acFull', $accessAcPropertyValidator, false)
+            ->setName('entity')
+            ->assert($array[0]->getValidatable());
+        // phpcs:ignore Generic.Files.LineLength.TooLong
+        } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
+          throw new \Tilmeld\Exceptions\BadDataException(
+              $exception->getFullMessage()
+          );
+        }
       }
     };
 
