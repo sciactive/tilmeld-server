@@ -3,6 +3,8 @@
 use SciActive\Hook;
 use Respect\Validation\Validator as v;
 
+// phpcs:disable Squiz.WhiteSpace.ObjectOperatorSpacing.Before
+
 /**
  * Hook Nymph methods.
  *
@@ -86,8 +88,8 @@ class HookMethods {
       $entity = $array[0];
       if (is_int($entity)) {
         $entity = \Nymph\Nymph::getEntity(
-          ['class' => $array[1] ?? '\Nymph\Entity'],
-          ['&', 'guid' => $array[0]]
+            ['class' => $array[1] ?? '\Nymph\Entity'],
+            ['&', 'guid' => $array[0]]
         );
       }
       if (!is_object($entity)) {
