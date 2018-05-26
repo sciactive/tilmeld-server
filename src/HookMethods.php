@@ -292,7 +292,7 @@ class HookMethods {
 
     Hook::addCallback('Nymph->deleteEntity', -99, $CheckPermissionsDeleteHook);
     Hook::addCallback(
-        'Nymph->deleteEntityById',
+        'Nymph->deleteEntityByID',
         -99,
         $CheckPermissionsDeleteHook
     );
