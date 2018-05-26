@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "acb65615a95cf803ae90dc96e82606da",
+    "content-hash": "60e32ba5337cd600af40fa7c152b0514",
     "packages": [
         {
             "name": "lcobucci/jwt",
@@ -66,16 +66,16 @@
         },
         {
             "name": "respect/validation",
-            "version": "1.1.15",
+            "version": "1.1.16",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "ee9e69776a8e875ac1b5b00d8cf2d2c801c42181"
+                "reference": "020ea1ebb5dc626bb7f1958ff49f69172ff589cc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/ee9e69776a8e875ac1b5b00d8cf2d2c801c42181",
-                "reference": "ee9e69776a8e875ac1b5b00d8cf2d2c801c42181",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/020ea1ebb5dc626bb7f1958ff49f69172ff589cc",
+                "reference": "020ea1ebb5dc626bb7f1958ff49f69172ff589cc",
                 "shasum": ""
             },
             "require": {
@@ -125,7 +125,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2018-01-02T21:47:22+00:00"
+            "time": "2018-05-19T14:26:44+00:00"
         },
         {
             "name": "sciactive/hookphp",
@@ -179,16 +179,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.13",
+            "version": "3.0.0-beta.14",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "b98e9b07878eb976ad711fd3551217dfc7eb1270"
+                "reference": "8caf2469a0b061d7d6ace69ccad545b8422452a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/b98e9b07878eb976ad711fd3551217dfc7eb1270",
-                "reference": "b98e9b07878eb976ad711fd3551217dfc7eb1270",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/8caf2469a0b061d7d6ace69ccad545b8422452a8",
+                "reference": "8caf2469a0b061d7d6ace69ccad545b8422452a8",
                 "shasum": ""
             },
             "require-dev": {
@@ -229,7 +229,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-05-14T00:00:00+00:00"
+            "time": "2018-05-18T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
