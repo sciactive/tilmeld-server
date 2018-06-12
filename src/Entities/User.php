@@ -452,7 +452,7 @@ class User extends AbleObject {
     }
 
     // Authentication was successful, attempt to login.
-    if (!Tilmeld::login($this)) {
+    if (!Tilmeld::login($this, true)) {
       return ['result' => false, 'message' => 'Incorrect login/password.'];
     }
 
@@ -1255,14 +1255,14 @@ class User extends AbleObject {
       } elseif (Tilmeld::$config['verify_email']
           && Tilmeld::$config['unverified_access']
         ) {
-        Tilmeld::login($this);
+        Tilmeld::login($this, true);
         $this->updateDataProtection();
         $message .= "You're now logged in! An email has been sent to ".
           "{$this->email} with a verification link for you to finish ".
           "registration.";
         $loggedin = true;
       } else {
-        Tilmeld::login($this);
+        Tilmeld::login($this, true);
         $this->updateDataProtection();
         $message .= 'You\'re now registered and logged in!';
         $loggedin = true;

@@ -419,17 +419,25 @@ class Tilmeld {
    * @return bool True if a user was authenticated, false on any failure.
    */
   public static function authenticate() {
-    if (empty($_COOKIE['TILMELDAUTH'])) {
+    // If a client does't support cookies, they can use the X-TILMELDAUTH header
+    // to provide the auth token.
+    if (!empty($_SERVER['HTTP_X_TILMELDAUTH']) && empty($_COOKIE['TILMELDAUTH'])) {
+      $fromAuthHeader = true;
+      $authToken = $_SERVER['HTTP_X_TILMELDAUTH'];
+    } elseif (!empty($_COOKIE['TILMELDAUTH'])) {
+      $fromAuthHeader = false;
+      $authToken = $_COOKIE['TILMELDAUTH'];
+    } else {
       return false;
     }
     $setupUrlParts = parse_url(self::$config['setup_url']);
     $setupHost = $setupUrlParts['host'] .
-      ($setupUrlParts['port'] ? ':'.$setupUrlParts['port'] : '');
+      (array_key_exists('port', $setupUrlParts) ? ':'.$setupUrlParts['port'] : '');
     if ($_SERVER['HTTP_HOST'] === $setupHost
         && $_SERVER['REQUEST_URI'] === $setupUrlParts['path']
       ) {
       // The request is for the setup app, so don't check for the XSRF token.
-      $extract = self::$config['jwt_extract']($_COOKIE['TILMELDAUTH']);
+      $extract = self::$config['jwt_extract']($authToken);
     } else {
       // The request is for something else, so check for a valid XSRF token.
       if (empty($_SERVER['HTTP_X_XSRF_TOKEN'])) {
@@ -437,7 +445,7 @@ class Tilmeld {
       }
 
       $extract = self::$config['jwt_extract'](
-          $_COOKIE['TILMELDAUTH'],
+          $authToken,
           $_SERVER['HTTP_X_XSRF_TOKEN']
       );
     }
@@ -463,7 +471,7 @@ class Tilmeld {
     if ($expire < time() + self::$config['jwt_renew']) {
       // If the user is less than renew time from needing a new token, give them
       // a new one.
-      self::login($user);
+      self::login($user, $fromAuthHeader);
     } else {
       self::fillSession($user);
     }
@@ -474,9 +482,11 @@ class Tilmeld {
    * Logs the given user into the system.
    *
    * @param \Tilmeld\Entities\User $user The user.
+   * @param bool $alwaysSendAuthHeader When true, a custom header with the auth
+   *                                   token will be sent.
    * @return bool True on success, false on failure.
    */
-  public static function login($user) {
+  public static function login($user, $sendAuthHeader) {
     if (isset($user->guid) && $user->enabled) {
       $token = self::$config['jwt_builder']($user);
       $appUrlParts = parse_url(self::$config['app_url']);
@@ -489,6 +499,9 @@ class Tilmeld {
           $appUrlParts['scheme'] === 'https',
           false // Allow JS access (for CSRF protection).
       );
+      if ($sendAuthHeader) {
+        header("X-TILMELDAUTH: $token");
+      }
       self::fillSession($user);
       return true;
     }
