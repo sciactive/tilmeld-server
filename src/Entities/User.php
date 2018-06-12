@@ -1124,6 +1124,7 @@ class User extends AbleObject {
 
     // Add primary group.
     $primaryGroup = null;
+    $generatedPrimaryGroup = false;
     if (Tilmeld::$config['generate_primary']) {
       // Generate a new primary group for the user.
       $primaryGroup = Group::factory();
@@ -1147,6 +1148,7 @@ class User extends AbleObject {
         ];
       }
       $this->group = $primaryGroup;
+      $generatedPrimaryGroup = $primaryGroup;
     } else {
       // Add the default primary.
       $this->group = Nymph::getEntity(
@@ -1270,6 +1272,9 @@ class User extends AbleObject {
       }
       return ['result' => true, 'loggedin' => $loggedin, 'message' => $message];
     } else {
+      if ($generatedPrimaryGroup) {
+        $generatedPrimaryGroup->delete();
+      }
       return [
         'result' => false,
         'loggedin' => false,
