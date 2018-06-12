@@ -877,13 +877,14 @@ class User extends AbleObject {
     if (!isset($data['password']) || (string) $data['password'] === '') {
       return ['result' => false, 'message' => 'Please specify a password.'];
     }
-    if ($this->checkPassword($data['oldPassword'])) {
-      $this->passwordTemp = (string) $data['password'];
+    if (!$this->checkPassword($data['oldPassword'])) {
+      return ['result' => false, 'message' => 'Incorrect password.'];
     }
+    $this->passwordTemp = (string) $data['password'];
     if ($this->save()) {
       return ['result' => true, 'message' => 'Your password has been changed.'];
     } else {
-      return ['result' => false, 'message' => 'Couldn\'t save new password..'];
+      return ['result' => false, 'message' => 'Couldn\'t save new password.'];
     }
   }
 
