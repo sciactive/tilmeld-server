@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "60e32ba5337cd600af40fa7c152b0514",
+    "content-hash": "2182d98f3d6f98962c8f6de217301d74",
     "packages": [
         {
             "name": "lcobucci/jwt",
@@ -66,16 +66,16 @@
         },
         {
             "name": "respect/validation",
-            "version": "1.1.16",
+            "version": "1.1.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "020ea1ebb5dc626bb7f1958ff49f69172ff589cc"
+                "reference": "700e23777ff6954babf55eed72a286792f594648"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/020ea1ebb5dc626bb7f1958ff49f69172ff589cc",
-                "reference": "020ea1ebb5dc626bb7f1958ff49f69172ff589cc",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/700e23777ff6954babf55eed72a286792f594648",
+                "reference": "700e23777ff6954babf55eed72a286792f594648",
                 "shasum": ""
             },
             "require": {
@@ -125,7 +125,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2018-05-19T14:26:44+00:00"
+            "time": "2018-06-06T12:57:39+00:00"
         },
         {
             "name": "sciactive/hookphp",
@@ -179,16 +179,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.14",
+            "version": "3.0.0-beta.15",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "8caf2469a0b061d7d6ace69ccad545b8422452a8"
+                "reference": "12668e88327b7fbe4cc0f99db077ad63fd453f89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/8caf2469a0b061d7d6ace69ccad545b8422452a8",
-                "reference": "8caf2469a0b061d7d6ace69ccad545b8422452a8",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/12668e88327b7fbe4cc0f99db077ad63fd453f89",
+                "reference": "12668e88327b7fbe4cc0f99db077ad63fd453f89",
                 "shasum": ""
             },
             "require-dev": {
@@ -229,7 +229,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-05-18T00:00:00+00:00"
+            "time": "2018-06-08T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -340,16 +340,16 @@
     "packages-dev": [
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.2.3",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "4842476c434e375f9d3182ff7b89059583aa8b27"
+                "reference": "d86873af43b4aa9d1f39a3601cc0cfcf02b25266"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/4842476c434e375f9d3182ff7b89059583aa8b27",
-                "reference": "4842476c434e375f9d3182ff7b89059583aa8b27",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/d86873af43b4aa9d1f39a3601cc0cfcf02b25266",
+                "reference": "d86873af43b4aa9d1f39a3601cc0cfcf02b25266",
                 "shasum": ""
             },
             "require": {
@@ -387,7 +387,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2018-02-20T21:35:23+00:00"
+            "time": "2018-06-06T23:58:19+00:00"
         }
     ],
     "aliases": [],
