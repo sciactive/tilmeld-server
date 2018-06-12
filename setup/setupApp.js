@@ -84,9 +84,6 @@ angular.module('setupApp', ['ngRoute'])
       query += '%';
     }
     Nymph.getEntities({"class": User.class}, {
-      'type': '&',
-      'equal': ['enabled', true]
-    }, {
       'type': '|',
       'ilike': [
         ['name', query],
@@ -279,9 +276,6 @@ angular.module('setupApp', ['ngRoute'])
       query += '%';
     }
     Nymph.getEntities({"class": Group.class}, {
-      'type': '&',
-      'equal': ['enabled', true]
-    }, {
       'type': '|',
       'ilike': [
         ['name', query],
@@ -301,9 +295,6 @@ angular.module('setupApp', ['ngRoute'])
       query += '%';
     }
     Nymph.getEntities({"class": Group.class}, {
-      'type': '&',
-      'equal': ['enabled', true]
-    }, {
       'type': '|',
       'ilike': [
         ['name', query],
