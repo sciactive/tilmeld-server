@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2182d98f3d6f98962c8f6de217301d74",
+    "content-hash": "d99078548a27f483d99b0659119bafa7",
     "packages": [
         {
             "name": "lcobucci/jwt",
@@ -66,16 +66,16 @@
         },
         {
             "name": "respect/validation",
-            "version": "1.1.17",
+            "version": "1.1.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "700e23777ff6954babf55eed72a286792f594648"
+                "reference": "667ed36b4868e785d52d815181ff00c798a61be7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/700e23777ff6954babf55eed72a286792f594648",
-                "reference": "700e23777ff6954babf55eed72a286792f594648",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/667ed36b4868e785d52d815181ff00c798a61be7",
+                "reference": "667ed36b4868e785d52d815181ff00c798a61be7",
                 "shasum": ""
             },
             "require": {
@@ -93,7 +93,7 @@
                 "egulias/email-validator": "Strict (RFC compliant) email validation",
                 "ext-bcmath": "Arbitrary Precision Mathematics",
                 "ext-mbstring": "Multibyte String Functions",
-                "fabpot/php-cs-fixer": "Fix PSR2 and other coding style issues",
+                "friendsofphp/php-cs-fixer": "Fix PSR2 and other coding style issues",
                 "symfony/validator": "Use Symfony validator through Respect\\Validation",
                 "zendframework/zend-validator": "Use Zend Framework validator through Respect\\Validation"
             },
@@ -125,7 +125,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2018-06-06T12:57:39+00:00"
+            "time": "2018-07-02T06:22:41+00:00"
         },
         {
             "name": "sciactive/hookphp",
@@ -179,16 +179,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.15",
+            "version": "3.0.0-beta.17",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "12668e88327b7fbe4cc0f99db077ad63fd453f89"
+                "reference": "cab5e46d8bcd08f842d4061de9b40f3fd456892b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/12668e88327b7fbe4cc0f99db077ad63fd453f89",
-                "reference": "12668e88327b7fbe4cc0f99db077ad63fd453f89",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/cab5e46d8bcd08f842d4061de9b40f3fd456892b",
+                "reference": "cab5e46d8bcd08f842d4061de9b40f3fd456892b",
                 "shasum": ""
             },
             "require-dev": {
@@ -229,7 +229,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-06-08T00:00:00+00:00"
+            "time": "2018-06-22T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
