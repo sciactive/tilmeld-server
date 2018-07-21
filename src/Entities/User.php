@@ -20,6 +20,8 @@ use Nymph\Nymph;
  * @property string $email The user's email address.
  * @property string $originalEmail Used to save the current email to send
  *                                 verification if it changes.
+ * @property string $avatar The user's avatar URL. (Use getAvatar() to support
+ *                          Gravatar.)
  * @property string $phone The user's telephone number.
  * @property string $addressType The user's address type. "us" or
  *                               "international".
@@ -471,6 +473,9 @@ class User extends AbleObject {
   }
 
   public function getAvatar() {
+    if (isset($this->avatar)) {
+      return $this->avatar;
+    }
     $proto = isset($_SERVER['HTTPS']) ? 'https' : 'http';
     if (!isset($this->email) || empty($this->email)) {
       return $proto.'://secure.gravatar.com/avatar/?d=mm&s=40';

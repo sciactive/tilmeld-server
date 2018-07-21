@@ -18,6 +18,8 @@ use Nymph\Nymph;
  * @property string $groupname The group's groupname.
  * @property string $name The group's name.
  * @property string $email The group's email address.
+ * @property string $avatar The group's avatar URL. (Use getAvatar() to support
+ *                          Gravatar.)
  * @property string $phone The group's telephone number.
  * @property string $addressType The group's address type. "us" or
  *                               "international".
@@ -187,6 +189,9 @@ class Group extends AbleObject {
   }
 
   public function getAvatar() {
+    if (isset($this->avatar)) {
+      return $this->avatar;
+    }
     $proto = $_SERVER['HTTPS'] ? 'https' : 'http';
     if (!isset($this->email) || empty($this->email)) {
       return $proto.'://secure.gravatar.com/avatar/?d=mm&s=40';
