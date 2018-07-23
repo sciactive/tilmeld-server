@@ -589,6 +589,7 @@ class User extends AbleObject {
     } elseif ($isCurrentUser || $isNewUser) {
       // Users can see their own data, and edit some of it.
       $this->whitelistData[] = 'username';
+      $this->whitelistData[] = 'avatar';
       if (in_array('name', Tilmeld::$config['user_fields'])) {
         $this->whitelistData[] = 'nameFirst';
         $this->whitelistData[] = 'nameMiddle';
@@ -1134,6 +1135,7 @@ class User extends AbleObject {
       // Generate a new primary group for the user.
       $primaryGroup = Group::factory();
       $primaryGroup->groupname = $this->username;
+      $primaryGroup->avatar = $this->avatar;
       $primaryGroup->name = $this->name;
       $primaryGroup->email = $this->email;
       $primaryGroup->parent = Nymph::getEntity(
@@ -1413,6 +1415,7 @@ class User extends AbleObject {
     if (isset($this->group->user) && $this->is($this->group->user)) {
       // Update the user's generated primary group.
       $this->group->groupname = $this->username;
+      $this->group->avatar = $this->avatar;
       $this->group->email = $this->email;
       $this->group->name = $this->name;
       $this->group->saveSkipAC();
