@@ -431,7 +431,7 @@ class Tilmeld {
       return false;
     }
     $setupUrlParts = parse_url(self::$config['setup_url']);
-    $setupHost = $setupUrlParts['host'] .
+    $setupHost = $setupUrlParts['host'].
       (array_key_exists('port', $setupUrlParts) ? ':'.$setupUrlParts['port'] : '');
     if ($_SERVER['HTTP_HOST'] === $setupHost
         && $_SERVER['REQUEST_URI'] === $setupUrlParts['path']
