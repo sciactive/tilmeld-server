@@ -94,7 +94,12 @@ class Group extends AbleObject {
       } else {
         $entity = Nymph::getEntity(
             ['class' => get_class($this)],
-            ['&', 'strict' => ['groupname', $id]]
+            ['&',
+              'ilike' => [
+                'groupname',
+                str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $id)
+              ]
+            ]
         );
       }
       if (isset($entity)) {

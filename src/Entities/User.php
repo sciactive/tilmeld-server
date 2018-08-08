@@ -133,7 +133,12 @@ class User extends AbleObject {
       } else {
         $entity = Nymph::getEntity(
             ['class' => get_class($this)],
-            ['&', 'strict' => ['username', $id]]
+            ['&',
+              'ilike' => [
+                'username',
+                str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $id)
+              ]
+            ]
         );
       }
       if (isset($entity)) {
