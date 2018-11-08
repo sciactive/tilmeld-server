@@ -1174,124 +1174,131 @@ class User extends AbleObject {
       }
     }
 
-    // Add secondary groups.
-    if (Tilmeld::$config['verify_email']
-        && Tilmeld::$config['unverified_access']
-      ) {
-      // Add the default secondaries for unverified users.
-      $this->groups = (array) Nymph::getEntities(
-          ['class' => '\Tilmeld\Entities\Group'],
-          ['&',
-            'equal' => ['unverifiedSecondary', true]
-          ]
-      );
-    } else {
-      // Add the default secondaries.
-      $this->groups = (array) Nymph::getEntities(
-          ['class' => '\Tilmeld\Entities\Group'],
-          ['&',
-            'equal' => ['defaultSecondary', true]
-          ]
-      );
-    }
-
-    if (Tilmeld::$config['verify_email']) {
-      // The user will be enabled after verifying their e-mail address.
-      if (!Tilmeld::$config['unverified_access']) {
-        $this->enabled = false;
+    try {
+      // Add secondary groups.
+      if (Tilmeld::$config['verify_email']
+          && Tilmeld::$config['unverified_access']
+        ) {
+        // Add the default secondaries for unverified users.
+        $this->groups = (array) Nymph::getEntities(
+            ['class' => '\Tilmeld\Entities\Group'],
+            ['&',
+              'equal' => ['unverifiedSecondary', true]
+            ]
+        );
+      } else {
+        // Add the default secondaries.
+        $this->groups = (array) Nymph::getEntities(
+            ['class' => '\Tilmeld\Entities\Group'],
+            ['&',
+              'equal' => ['defaultSecondary', true]
+            ]
+        );
       }
-    } else {
-      $this->enabled = true;
-    }
 
-    // If create_admin is true and there are no other users, grant
-    // "system/admin".
-    if (Tilmeld::$config['create_admin']) {
-      $otherUsers = Nymph::getEntities(
-          ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true, 'limit' => 1]
-      );
-      // Make sure it's not just null, cause that means an error.
-      if ($otherUsers === []) {
-        $this->grant('system/admin');
+      if (Tilmeld::$config['verify_email']) {
+        // The user will be enabled after verifying their e-mail address.
+        if (!Tilmeld::$config['unverified_access']) {
+          $this->enabled = false;
+        }
+      } else {
         $this->enabled = true;
       }
-    }
 
-    if ($this->saveSkipAC()) {
-      // Send the new user registered email.
-      $macros = [
-        'user_username' => htmlspecialchars($this->username),
-        'user_name' => htmlspecialchars($this->name),
-        'user_first_name' => htmlspecialchars($this->nameFirst),
-        'user_last_name' => htmlspecialchars($this->nameLast),
-        'user_email' => htmlspecialchars($this->email),
-        'user_phone' => htmlspecialchars(
-            \uMailPHP\Mail::formatPhone($this->phone)
-        ),
-        'user_timezone' => htmlspecialchars($this->timezone),
-        'user_address' =>
-          $this->addressType == 'us'
-            ?
-              htmlspecialchars(
-                  "{$this->addressStreet} {$this->addressStreet2}"
-              ).'<br />'.
-              htmlspecialchars(
-                  "{$this->addressCity}, {$this->addressState} ".
-                    "{$this->addressZip}"
-              )
-            : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
-      ];
-      $mail = new \uMailPHP\Mail(
-          '\Tilmeld\Entities\Mail\UserRegistered',
-          null,
-          $macros
-      );
-      $mail->send();
-
-      $message = "";
-
-      // Save the primary group.
-      if ($primaryGroup) {
-        $primaryGroup->user = $this;
-        if (!$primaryGroup->saveSkipAC()) {
-          $message .= "Your account was created, but your primary group ".
-            "couldn't be assigned to you. You should ask an administrator to ".
-            "fix this. ";
+      // If create_admin is true and there are no other users, grant
+      // "system/admin".
+      if (Tilmeld::$config['create_admin']) {
+        $otherUsers = Nymph::getEntities(
+            ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true, 'limit' => 1]
+        );
+        // Make sure it's not just null, cause that means an error.
+        if ($otherUsers === []) {
+          $this->grant('system/admin');
+          $this->enabled = true;
         }
       }
 
-      // Finish up.
-      if (Tilmeld::$config['verify_email']
-          && !Tilmeld::$config['unverified_access']
-        ) {
-        $message .= "Almost there. An email has been sent to {$this->email} ".
-          "with a verification link for you to finish registration.";
-        $loggedin = false;
-      } elseif (Tilmeld::$config['verify_email']
-          && Tilmeld::$config['unverified_access']
-        ) {
-        Tilmeld::login($this, true);
-        $this->updateDataProtection();
-        $message .= "You're now logged in! An email has been sent to ".
-          "{$this->email} with a verification link for you to finish ".
-          "registration.";
-        $loggedin = true;
+      if ($this->saveSkipAC()) {
+        // Send the new user registered email.
+        $macros = [
+          'user_username' => htmlspecialchars($this->username),
+          'user_name' => htmlspecialchars($this->name),
+          'user_first_name' => htmlspecialchars($this->nameFirst),
+          'user_last_name' => htmlspecialchars($this->nameLast),
+          'user_email' => htmlspecialchars($this->email),
+          'user_phone' => htmlspecialchars(
+              \uMailPHP\Mail::formatPhone($this->phone)
+          ),
+          'user_timezone' => htmlspecialchars($this->timezone),
+          'user_address' =>
+            $this->addressType == 'us'
+              ?
+                htmlspecialchars(
+                    "{$this->addressStreet} {$this->addressStreet2}"
+                ).'<br />'.
+                htmlspecialchars(
+                    "{$this->addressCity}, {$this->addressState} ".
+                      "{$this->addressZip}"
+                )
+              : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
+        ];
+        $mail = new \uMailPHP\Mail(
+            '\Tilmeld\Entities\Mail\UserRegistered',
+            null,
+            $macros
+        );
+        $mail->send();
+
+        $message = "";
+
+        // Save the primary group.
+        if ($primaryGroup) {
+          $primaryGroup->user = $this;
+          if (!$primaryGroup->saveSkipAC()) {
+            $message .= "Your account was created, but your primary group ".
+              "couldn't be assigned to you. You should ask an administrator to ".
+              "fix this. ";
+          }
+        }
+
+        // Finish up.
+        if (Tilmeld::$config['verify_email']
+            && !Tilmeld::$config['unverified_access']
+          ) {
+          $message .= "Almost there. An email has been sent to {$this->email} ".
+            "with a verification link for you to finish registration.";
+          $loggedin = false;
+        } elseif (Tilmeld::$config['verify_email']
+            && Tilmeld::$config['unverified_access']
+          ) {
+          Tilmeld::login($this, true);
+          $this->updateDataProtection();
+          $message .= "You're now logged in! An email has been sent to ".
+            "{$this->email} with a verification link for you to finish ".
+            "registration.";
+          $loggedin = true;
+        } else {
+          Tilmeld::login($this, true);
+          $this->updateDataProtection();
+          $message .= 'You\'re now registered and logged in!';
+          $loggedin = true;
+        }
+        return ['result' => true, 'loggedin' => $loggedin, 'message' => $message];
       } else {
-        Tilmeld::login($this, true);
-        $this->updateDataProtection();
-        $message .= 'You\'re now registered and logged in!';
-        $loggedin = true;
+        if ($generatedPrimaryGroup) {
+          $generatedPrimaryGroup->delete();
+        }
+        return [
+          'result' => false,
+          'loggedin' => false,
+          'message' => 'Error registering user.'
+        ];
       }
-      return ['result' => true, 'loggedin' => $loggedin, 'message' => $message];
-    } else {
+    } catch (\Exception $e) {
       if ($generatedPrimaryGroup) {
         $generatedPrimaryGroup->delete();
       }
-      return [
-        'result' => false,
-        'loggedin' => false,
-        'message' => 'Error registering user.'
-      ];
+      throw $e;
     }
   }
 
