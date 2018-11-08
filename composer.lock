@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "376c0b2d1911826ea48b22f3f52ec86d",
+    "content-hash": "9e7de16f9072523b13fd9e77372bf432",
     "packages": [
         {
             "name": "lcobucci/jwt",
@@ -66,16 +66,16 @@
         },
         {
             "name": "respect/validation",
-            "version": "1.1.22",
+            "version": "1.1.29",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "19d6ec893994912d21b390c43d287816ab070772"
+                "reference": "f8c90fa36859ca41c766efcf0c476d58913a7767"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/19d6ec893994912d21b390c43d287816ab070772",
-                "reference": "19d6ec893994912d21b390c43d287816ab070772",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/f8c90fa36859ca41c766efcf0c476d58913a7767",
+                "reference": "f8c90fa36859ca41c766efcf0c476d58913a7767",
                 "shasum": ""
             },
             "require": {
@@ -83,7 +83,7 @@
                 "symfony/polyfill-mbstring": "^1.2"
             },
             "require-dev": {
-                "egulias/email-validator": "~1.2",
+                "egulias/email-validator": "~1.2 || ~2.1",
                 "mikey179/vfsstream": "^1.5",
                 "phpunit/phpunit": "~4.0",
                 "symfony/validator": "~2.6.9",
@@ -110,7 +110,7 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD Style"
+                "BSD-3-Clause"
             ],
             "authors": [
                 {
@@ -125,7 +125,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2018-08-01T13:06:54+00:00"
+            "time": "2018-11-04T21:58:45+00:00"
         },
         {
             "name": "sciactive/hookphp",
@@ -179,16 +179,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.18",
+            "version": "3.0.0-beta.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "9414fd7f754d4a4890f88ac4a66e9339d817d269"
+                "reference": "e9ad33eadc0e78e812d38a8588ebc5f19818a08f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/9414fd7f754d4a4890f88ac4a66e9339d817d269",
-                "reference": "9414fd7f754d4a4890f88ac4a66e9339d817d269",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/e9ad33eadc0e78e812d38a8588ebc5f19818a08f",
+                "reference": "e9ad33eadc0e78e812d38a8588ebc5f19818a08f",
                 "shasum": ""
             },
             "require-dev": {
@@ -229,7 +229,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-08-07T00:00:00+00:00"
+            "time": "2018-11-02T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -279,16 +279,16 @@
         },
         {
             "name": "symfony/polyfill-mbstring",
-            "version": "v1.9.0",
+            "version": "v1.10.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/polyfill-mbstring.git",
-                "reference": "d0cd638f4634c16d8df4508e847f14e9e43168b8"
+                "reference": "c79c051f5b3a46be09205c73b80b346e4153e494"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/d0cd638f4634c16d8df4508e847f14e9e43168b8",
-                "reference": "d0cd638f4634c16d8df4508e847f14e9e43168b8",
+                "url": "https://api.github.com/repos/symfony/polyfill-mbstring/zipball/c79c051f5b3a46be09205c73b80b346e4153e494",
+                "reference": "c79c051f5b3a46be09205c73b80b346e4153e494",
                 "shasum": ""
             },
             "require": {
@@ -334,22 +334,22 @@
                 "portable",
                 "shim"
             ],
-            "time": "2018-08-06T14:22:27+00:00"
+            "time": "2018-09-21T13:07:52+00:00"
         }
     ],
     "packages-dev": [
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.3.1",
+            "version": "3.3.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "628a481780561150481a9ec74709092b9759b3ec"
+                "reference": "6ad28354c04b364c3c71a34e4a18b629cc3b231e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/628a481780561150481a9ec74709092b9759b3ec",
-                "reference": "628a481780561150481a9ec74709092b9759b3ec",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/6ad28354c04b364c3c71a34e4a18b629cc3b231e",
+                "reference": "6ad28354c04b364c3c71a34e4a18b629cc3b231e",
                 "shasum": ""
             },
             "require": {
@@ -387,7 +387,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2018-07-26T23:47:18+00:00"
+            "time": "2018-09-23T23:08:17+00:00"
         }
     ],
     "aliases": [],
