@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9e7de16f9072523b13fd9e77372bf432",
+    "content-hash": "75b1b1ad56ce30beb41c1349cf2a2fc9",
     "packages": [
         {
             "name": "lcobucci/jwt",
-            "version": "3.2.4",
+            "version": "3.2.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lcobucci/jwt.git",
-                "reference": "c9704b751315d21735dc98d78d4f37bd73596da7"
+                "reference": "82be04b4753f8b7693b62852b7eab30f97524f9b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/c9704b751315d21735dc98d78d4f37bd73596da7",
-                "reference": "c9704b751315d21735dc98d78d4f37bd73596da7",
+                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/82be04b4753f8b7693b62852b7eab30f97524f9b",
+                "reference": "82be04b4753f8b7693b62852b7eab30f97524f9b",
                 "shasum": ""
             },
             "require": {
@@ -62,7 +62,7 @@
                 "JWS",
                 "jwt"
             ],
-            "time": "2018-08-03T11:23:50+00:00"
+            "time": "2018-11-11T12:22:26+00:00"
         },
         {
             "name": "respect/validation",
@@ -179,16 +179,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.19",
+            "version": "3.0.0-beta.21",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "e9ad33eadc0e78e812d38a8588ebc5f19818a08f"
+                "reference": "6dbc35ef293bfeb6c58c55b446bb303851ca721e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/e9ad33eadc0e78e812d38a8588ebc5f19818a08f",
-                "reference": "e9ad33eadc0e78e812d38a8588ebc5f19818a08f",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/6dbc35ef293bfeb6c58c55b446bb303851ca721e",
+                "reference": "6dbc35ef293bfeb6c58c55b446bb303851ca721e",
                 "shasum": ""
             },
             "require-dev": {
@@ -229,7 +229,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2018-11-02T00:00:00+00:00"
+            "time": "2018-11-15T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -340,16 +340,16 @@
     "packages-dev": [
         {
             "name": "squizlabs/php_codesniffer",
-            "version": "3.3.2",
+            "version": "3.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/squizlabs/PHP_CodeSniffer.git",
-                "reference": "6ad28354c04b364c3c71a34e4a18b629cc3b231e"
+                "reference": "379deb987e26c7cd103a7b387aea178baec96e48"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/6ad28354c04b364c3c71a34e4a18b629cc3b231e",
-                "reference": "6ad28354c04b364c3c71a34e4a18b629cc3b231e",
+                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/379deb987e26c7cd103a7b387aea178baec96e48",
+                "reference": "379deb987e26c7cd103a7b387aea178baec96e48",
                 "shasum": ""
             },
             "require": {
@@ -387,7 +387,7 @@
                 "phpcs",
                 "standards"
             ],
-            "time": "2018-09-23T23:08:17+00:00"
+            "time": "2018-12-19T23:57:18+00:00"
         }
     ],
     "aliases": [],
