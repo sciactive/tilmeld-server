@@ -40,6 +40,14 @@ class Tilmeld {
   public static $currentUser = null;
 
   /**
+   * The server's timezone.
+   *
+   * @var string|null
+   * @access private
+   */
+  private static $serverTimezone;
+
+  /**
    * Check to see if the current user has an ability.
    *
    * If $ability is null, it will check to see if a user is currently logged
@@ -82,20 +90,12 @@ class Tilmeld {
 
   /**
    * Add selectors to a list of options and selectors which will limit results
-   * to only entities the user has access to.
+   * to only entities the current user has access to.
    *
    * @param array &$optionsAndSelectors The options and selectors of the query.
-   * @param \Tilmeld\Entities\User|null $user The user to add access controls
-   *                                          for. If null, uses the current
-   *                                          user.
    */
-  public static function addAccessControlSelectors(
-      &$optionsAndSelectors,
-      $user = null
-  ) {
-    if (!isset($user)) {
-      $user = self::$currentUser;
-    }
+  public static function addAccessControlSelectors(&$optionsAndSelectors) {
+    $user = self::$currentUser;
 
     if (isset($user) && $user->gatekeeper('system/admin')) {
       // The user is a system admin, so they can see everything.
@@ -382,9 +382,28 @@ class Tilmeld {
    * @param \Tilmeld\Entities\User $user The user.
    */
   public static function fillSession($user) {
+    if (!isset(self::$serverTimezone)) {
+      self::$serverTimezone = date_default_timezone_get();
+    }
     self::$currentUser = $user;
     date_default_timezone_set($user->getTimezone());
     self::$currentUser->updateDataProtection();
+  }
+
+  /**
+   * Clear session user data.
+   *
+   * Also sets the default timezone to the server default.
+   */
+  public static function clearSession() {
+    $user = self::$currentUser;
+    self::$currentUser = null;
+    if (isset(self::$serverTimezone)) {
+      date_default_timezone_set(self::$serverTimezone);
+    }
+    if ($user) {
+      $user->updateDataProtection();
+    }
   }
 
   /**
@@ -512,7 +531,7 @@ class Tilmeld {
    * Logs the current user out of the system.
    */
   public static function logout() {
-    self::$currentUser = null;
+    self::clearSession();
     $appUrlParts = parse_url(self::$config['app_url']);
     setcookie(
         'TILMELDAUTH',

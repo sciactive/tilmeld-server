@@ -17,23 +17,13 @@ class HookMethods {
   public static function setup() {
     // Check for the skip access control option and add AC selectors.
     $GetEntitiesHook = function (&$array, $name, &$object, &$function, &$data) {
-      if (isset($array[0]['skip_ac']) && $array[0]['skip_ac']) {
+      if (isset($array[0]['skip_ac']) && $array[0]['skip_ac'] && (
+        !isset($array[0]['source']) || $array[0]['source'] !== 'client'
+      )) {
         $data['TilmeldSkipAc'] = true;
       } else {
         $user = Tilmeld::$currentUser;
-        if (isset($array[0]['source'])
-            && (
-              $array[0]['source'] === 'client' ||
-              $array[0]['source'] === 'pubsub'
-            )
-          ) {
-          if ($array[0]['source'] === 'pubsub') {
-            if (isset($array[0]['token'])) {
-              $user = Tilmeld::extractToken($array[0]['token']) ?: null;
-            } else {
-              $user = null;
-            }
-          }
+        if (isset($array[0]['source']) && $array[0]['source'] === 'client') {
           if ((!$user || !$user->gatekeeper('tilmeld/admin'))
               && (
                 (
@@ -79,7 +69,7 @@ class HookMethods {
           }
         }
         // Add access control selectors
-        Tilmeld::addAccessControlSelectors($array, $user);
+        Tilmeld::addAccessControlSelectors($array);
       }
     };
 
