@@ -3,10 +3,10 @@ angular.module('setupApp', ['ngRoute'])
   return NymphClient.Nymph;
 })
 .service('User', function() {
-  return User.default;
+  return TilmeldClient.Entities.User;
 })
 .service('Group', function() {
-  return Group.default;
+  return TilmeldClient.Entities.Group;
 })
 
 .config(['$locationProvider', '$routeProvider', function($locationProvider, $routeProvider) {
