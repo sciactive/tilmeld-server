@@ -16,7 +16,7 @@ use Tilmeld\Entities\Group;
  * @link http://tilmeld.org/
  */
 class Tilmeld {
-  const VERSION = '1.0.0-beta.1';
+  const VERSION = '1.0.0-beta.29';
 
   const NO_ACCESS = 0;
   const READ_ACCESS = 1;
