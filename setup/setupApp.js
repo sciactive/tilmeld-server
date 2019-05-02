@@ -1,12 +1,12 @@
 angular.module('setupApp', ['ngRoute'])
 .service('Nymph', function() {
-  return NymphClient.Nymph;
+  return window['nymph-client'].Nymph;
 })
 .service('User', function() {
-  return TilmeldClient.Entities.User;
+  return window['tilmeld-client'].User;
 })
 .service('Group', function() {
-  return TilmeldClient.Entities.Group;
+  return window['tilmeld-client'].Group;
 })
 
 .config(['$locationProvider', '$routeProvider', function($locationProvider, $routeProvider) {
@@ -131,9 +131,9 @@ angular.module('setupApp', ['ngRoute'])
         $scope.avatar = avatar;
         $scope.$apply();
       });
-      $scope.entity.readyAll(function() {
+      $scope.entity.readyAll(1).then(function() {
         $scope.$apply();
-      }, undefined, 1);
+      });
     }
   });
 
@@ -222,9 +222,9 @@ angular.module('setupApp', ['ngRoute'])
       } else {
         alert("Error saving user.");
       }
-      $scope.entity.readyAll(function() {
+      $scope.entity.readyAll(1).then(function() {
         $scope.$apply();
-      }, undefined, 1);
+      });
     }, function(errObj) {
       console.log("errObj:",errObj);
       alert("Error: "+errObj.message);
@@ -310,9 +310,9 @@ angular.module('setupApp', ['ngRoute'])
 
   $scope.$watch('entity.data.email', function() {
     if ($scope.entity) {
-      $scope.entity.readyAll(function() {
+      $scope.entity.readyAll(1).then(function() {
         $scope.$apply();
-      }, undefined, 1);
+      });
     }
   });
 
@@ -391,9 +391,9 @@ angular.module('setupApp', ['ngRoute'])
       } else {
         alert("Error saving group.");
       }
-      $scope.entity.readyAll(function() {
+      $scope.entity.readyAll(1).then(function() {
         $scope.$apply();
-      }, undefined, 1);
+      });
     }, function(errObj) {
       console.log("errObj:",errObj);
       alert("Error: "+errObj.message);

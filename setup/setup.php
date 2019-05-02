@@ -145,10 +145,10 @@ function is_secure() {
     </script>
     <?php if (isset($sciactiveDevClientURL)) { ?>
       <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>dist/NymphClient.js"></script>
-      <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>../tilmeld-client/dist/Entities.js"></script>
+      <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>../tilmeld-client/dist/TilmeldClient.js"></script>
     <?php } else { ?>
       <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>nymph-client/dist/NymphClient.js"></script>
-      <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>tilmeld-client/dist/Entities.js"></script>
+      <script src="<?php echo htmlspecialchars($nodeModulesURL); ?>tilmeld-client/dist/TilmeldClient.js"></script>
     <?php } ?>
 
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.9/angular.min.js"></script>
