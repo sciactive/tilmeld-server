@@ -17,14 +17,16 @@ class HookMethods {
   public static function setup() {
     // Check for the skip access control option and add AC selectors.
     $GetEntitiesHook = function (&$array, $name, &$object, &$function, &$data) {
-      if (isset($array[0]['skip_ac']) && $array[0]['skip_ac'] && (
-        !isset($array[0]['source']) || $array[0]['source'] !== 'client'
-      )) {
+      if (isset($array[0]['skip_ac'])
+          && $array[0]['skip_ac']
+          && (
+            !isset($array[0]['source']) || $array[0]['source'] !== 'client'
+          )
+      ) {
         $data['TilmeldSkipAc'] = true;
       } else {
-        $user = Tilmeld::$currentUser;
         if (isset($array[0]['source']) && $array[0]['source'] === 'client') {
-          if ((!$user || !$user->gatekeeper('tilmeld/admin'))
+          if (!Tilmeld::gatekeeper('tilmeld/admin')
               && (
                 (
                   !Tilmeld::$config['enable_user_search']
@@ -61,7 +63,7 @@ class HookMethods {
                   )
                 )
               )
-            ) {
+          ) {
             // If the user is not specifically searching for a GUID or username,
             // and they're not allowed to search, it should fail.
             $array = false;
@@ -131,7 +133,7 @@ class HookMethods {
       }
       if (is_callable([$array[0], 'tilmeldSaveSkipAC'])
           && $array[0]->tilmeldSaveSkipAC()
-        ) {
+      ) {
         return;
       }
 
@@ -141,14 +143,14 @@ class HookMethods {
 
         $originalAc = $entity->getOriginalAcValues();
         $newAc = [
-          'user' => $entity->user,
-          'group' => $entity->group,
-          'acUser' => $entity->acUser,
-          'acGroup' => $entity->acGroup,
-          'acOther' => $entity->acOther,
-          'acRead' => $entity->acRead,
-          'acWrite' => $entity->acWrite,
-          'acFull' => $entity->acFull
+          'user' => $entity->user ?? null,
+          'group' => $entity->group ?? null,
+          'acUser' => $entity->acUser ?? null,
+          'acGroup' => $entity->acGroup ?? null,
+          'acOther' => $entity->acOther ?? null,
+          'acRead' => $entity->acRead ?? null,
+          'acWrite' => $entity->acWrite ?? null,
+          'acFull' => $entity->acFull ?? null
         ];
 
         $setAcProperties = function ($acValues) use ($entity) {
@@ -184,10 +186,6 @@ class HookMethods {
      * - The entity is new (doesn't have a GUID.)
      * - The entity is not a user or group.
      *
-     * If you want a new entity to have a different user and/or group than the
-     * current user, you must first save it to the database, then change the
-     * user/group, then save it again.
-     *
      * Default access control is
      * - acUser = Tilmeld::FULL_ACCESS
      * - acGroup = Tilmeld::READ_ACCESS
@@ -201,10 +199,14 @@ class HookMethods {
           && !is_a($array[0], '\Tilmeld\Entities\Group')
           && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_User')
           && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_Group')
+      ) {
+        if (!isset($array[0]->user)) {
+          $array[0]->user = $user;
+        }
+        if (!isset($array[0]->group)
+            && isset($user->group)
+            && isset($user->group->guid)
         ) {
-        $array[0]->user = $user;
-        unset($array[0]->group);
-        if (isset($user->group) && isset($user->group->guid)) {
           $array[0]->group = $user->group;
         }
         if (!isset($array[0]->acUser)) {
@@ -233,7 +235,7 @@ class HookMethods {
           && !is_a($array[0], '\Tilmeld\Entities\Group')
           && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_User')
           && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_Group')
-        ) {
+      ) {
         $ownershipAcPropertyValidator = v::intType()->between(
             Tilmeld::NO_ACCESS,
             Tilmeld::FULL_ACCESS,
