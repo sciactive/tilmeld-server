@@ -346,27 +346,38 @@ class Group extends AbleObject {
    * Gets an array of users in the group.
    *
    * @param bool $descendants Include users in all descendant groups too.
+   * @param int|null $limit The limit for the query.
+   * @param int|null $offset The offset for the query.
    * @return array An array of users.
    */
-  public function getUsers($descendants = false) {
+  public function getUsers(
+      $descendants = false,
+      $limit = null,
+      $offset = null
+  ) {
+    $groups = [];
     if ($descendants) {
       $groups = $this->getDescendants();
-      $or = ['|',
+    }
+    $groups[] = $this;
+    $options = ['class' => '\Tilmeld\Entities\User'];
+    if (isset($limit)) {
+      $options['limit'] = $limit;
+    }
+    if (isset($offset)) {
+      $options['offset'] = $offset;
+    }
+    $return = Nymph::getEntities(
+        $options,
+        ['&',
+          'equal' => ['enabled', true]
+        ],
+        ['|',
           'ref' => [
             ['group', $groups],
             ['groups', $groups]
           ]
-        ];
-    } else {
-      $or = null;
-    }
-    $groups[] = $this;
-    $return = Nymph::getEntities(
-        ['class' => '\Tilmeld\Entities\User'],
-        ['&',
-          'equal' => ['enabled', true]
-        ],
-        $or
+        ]
     );
     return $return;
   }

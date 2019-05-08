@@ -540,24 +540,19 @@ class User extends AbleObject {
    *                             object.
    */
   public function getTimezone($returnDateTimeZoneObject = false) {
+    $timezone = date_default_timezone_get();
     if (!empty($this->timezone)) {
-      return $returnDateTimeZoneObject
-        ? new DateTimeZone($this->timezone)
-        : $this->timezone;
-    }
-    if (isset($this->group->guid) && !empty($this->group->timezone)) {
-      return $returnDateTimeZoneObject
-        ? new DateTimeZone($this->group->timezone)
-        : $this->group->timezone;
-    }
-    foreach ((array) $this->groups as $curGroup) {
-      if (!empty($curGroup->timezone)) {
-        return $returnDateTimeZoneObject
-          ? new DateTimeZone($curGroup->timezone)
-          : $curGroup->timezone;
+      $timezone = $this->timezone;
+    } elseif (isset($this->group->guid) && !empty($this->group->timezone)) {
+      $timezone =  $this->group->timezone;
+    } else if (count($this->groups)) {
+      foreach ((array) $this->groups as $curGroup) {
+        if (!empty($curGroup->timezone)) {
+          $timezone = $curGroup->timezone;
+          break;
+        }
       }
     }
-    $timezone = date_default_timezone_get();
     return $returnDateTimeZoneObject
       ? new DateTimeZone($timezone)
       : $timezone;
