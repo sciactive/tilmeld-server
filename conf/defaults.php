@@ -2,10 +2,9 @@
 /**
  * Tilmeld's configuration defaults.
  *
- * @license https://www.apache.org/licenses/LICENSE-2.0
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
- * @link http://tilmeld.org/
+ * @see http://tilmeld.org/
  */
 
 use Lcobucci\JWT\Builder;

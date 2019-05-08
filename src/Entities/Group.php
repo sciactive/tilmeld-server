@@ -4,36 +4,47 @@ use Tilmeld\Tilmeld;
 use Nymph\Nymph;
 
 /**
- * Group class.
+ * A group entity.
  *
  * Note: When delete() is called all descendants of this group will also be
  * deleted.
  *
- * @license https://www.apache.org/licenses/LICENSE-2.0
+ * Properties:
+ *
+ * - int $this->guid
+ *   The GUID of the group.
+ * - string $this->groupname
+ *   The group's groupname.
+ * - string $this->name
+ *   The group's name.
+ * - string $this->email
+ *   The group's email address.
+ * - string $this->avatar
+ *   The group's avatar URL. (Use getAvatar() to support Gravatar.)
+ * - string $this->phone
+ *   The group's telephone number.
+ * - string $this->addressType
+ *   The group's address type. "us" or "international".
+ * - string $this->addressStreet
+ *   The group's address line 1 for US addresses.
+ * - string $this->addressStreet2
+ *   The group's address line 2 for US addresses.
+ * - string $this->addressCity
+ *   The group's city for US addresses.
+ * - string $this->addressState
+ *   The group's state abbreviation for US addresses.
+ * - string $this->addressZip
+ *   The group's ZIP code for US addresses.
+ * - string $this->addressInternational
+ *   The group's full address for international addresses.
+ * - Group $this->parent
+ *   The group's parent.
+ * - User|null $this->user
+ *   If generate_primary is on, this will be the user who generated this group.
+ *
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
- * @link http://tilmeld.org/
- *
- * @property int $guid The GUID of the group.
- * @property string $groupname The group's groupname.
- * @property string $name The group's name.
- * @property string $email The group's email address.
- * @property string $avatar The group's avatar URL. (Use getAvatar() to support
- *                          Gravatar.)
- * @property string $phone The group's telephone number.
- * @property string $addressType The group's address type. "us" or
- *                               "international".
- * @property string $addressStreet The group's address line 1 for US addresses.
- * @property string $addressStreet2 The group's address line 2 for US addresses.
- * @property string $addressCity The group's city for US addresses.
- * @property string $addressState The group's state abbreviation for US
- *                                addresses.
- * @property string $addressZip The group's ZIP code for US addresses.
- * @property string $addressInternational The group's full address for
- *                                        international addresses.
- * @property Group $parent The group's parent.
- * @property User|null $user If generate_primary is on, this will be the user
- *                           who generated this group.
+ * @see http://tilmeld.org/
  */
 class Group extends AbleObject {
   const ETYPE = 'tilmeld_group';

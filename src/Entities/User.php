@@ -4,41 +4,57 @@ use Tilmeld\Tilmeld;
 use Nymph\Nymph;
 
 /**
- * User class.
+ * A user entity.
  *
- * @license https://www.apache.org/licenses/LICENSE-2.0
+ * Properties:
+ *
+ * - int $this->guid
+ *   The GUID of the user.
+ * - string $this->username
+ *   The user's username.
+ * - string $this->nameFirst
+ *   The user's first name.
+ * - string $this->nameMiddle
+ *   The user's middle name.
+ * - string $this->nameLast
+ *   The user's last name.
+ * - string $this->name
+ *   The user's full name.
+ * - string $this->email
+ *   The user's email address.
+ * - string $this->originalEmail
+ *   Used to save the current email to send verification if it changes.
+ * - string $this->avatar
+ *   The user's avatar URL. (Use getAvatar() to support Gravatar.)
+ * - string $this->phone
+ *   The user's telephone number.
+ * - string $this->addressType
+ *   The user's address type. "us" or "international".
+ * - string $this->addressStreet
+ *   The user's address line 1 for US addresses.
+ * - string $this->addressStreet2
+ *   The user's address line 2 for US addresses.
+ * - string $this->addressCity
+ *   The user's city for US addresses.
+ * - string $this->addressState
+ *   The user's state abbreviation for US addresses.
+ * - string $this->addressZip
+ *   The user's ZIP code for US addresses.
+ * - string $this->addressInternational
+ *   The user's full address for international addresses.
+ * - \Tilmeld\Entities\Group $this->group
+ *   The user's primary group.
+ * - array $this->groups
+ *   The user's secondary groups.
+ * - bool $this->inheritAbilities
+ *   Whether the user should inherit the abilities of his groups.
+ * - string $this->passwordTemp
+ *   Temporary storage for passwords. This will be hashed before going into the
+ *   database.
+ *
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
- * @link http://tilmeld.org/
- *
- * @property int $guid The GUID of the user.
- * @property string $username The user's username.
- * @property string $nameFirst The user's first name.
- * @property string $nameMiddle The user's middle name.
- * @property string $nameLast The user's last name.
- * @property string $name The user's full name.
- * @property string $email The user's email address.
- * @property string $originalEmail Used to save the current email to send
- *                                 verification if it changes.
- * @property string $avatar The user's avatar URL. (Use getAvatar() to support
- *                          Gravatar.)
- * @property string $phone The user's telephone number.
- * @property string $addressType The user's address type. "us" or
- *                               "international".
- * @property string $addressStreet The user's address line 1 for US addresses.
- * @property string $addressStreet2 The user's address line 2 for US addresses.
- * @property string $addressCity The user's city for US addresses.
- * @property string $addressState The user's state abbreviation for US
- *                                addresses.
- * @property string $addressZip The user's ZIP code for US addresses.
- * @property string $addressInternational The user's full address for
- *                                        international addresses.
- * @property \Tilmeld\Entities\Group $group The user's primary group.
- * @property array $groups The user's secondary groups.
- * @property bool $inheritAbilities Whether the user should inherit the
- *                                  abilities of his groups.
- * @property string $passwordTemp Temporary storage for passwords. This will be
- *                                hashed before going into the database.
+ * @see http://tilmeld.org/
  */
 class User extends AbleObject {
   const ETYPE = 'tilmeld_user';
