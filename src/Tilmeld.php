@@ -384,9 +384,20 @@ class Tilmeld {
     if (!isset(self::$serverTimezone)) {
       self::$serverTimezone = date_default_timezone_get();
     }
+    // Read groups right now, since gatekeeper needs them, so
+    // udpateDataProtection will fail to read them (since it runs gatekeeper).
+    isset($user->group);
+    isset($user->groups);
     self::$currentUser = $user;
-    date_default_timezone_set($user->getTimezone());
+    date_default_timezone_set(self::$currentUser->getTimezone());
+    // Now update the data protection on the user and all the groups.
     self::$currentUser->updateDataProtection();
+    if (isset(self::$currentUser->group)) {
+      self::$currentUser->group->updateDataProtection();
+    }
+    foreach (self::$currentUser->groups as $group) {
+      $group->updateDataProtection();
+    }
   }
 
   /**
@@ -475,12 +486,7 @@ class Tilmeld {
     $guid = $extract['guid'];
     $expire = $extract['expire'];
 
-    $user = Nymph::getEntity(
-        ['class' => '\Tilmeld\Entities\User'],
-        ['&',
-          'guid' => $guid
-        ]
-    );
+    $user = User::factory($guid);
     if (!$user || !$user->guid || !$user->enabled) {
       self::logout();
       return false;

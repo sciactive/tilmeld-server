@@ -170,7 +170,7 @@ class User extends AbleObject {
           ) {
           $this->originalEmail = $this->email;
         }
-        return;
+        return $this;
       }
     }
     // Defaults.
