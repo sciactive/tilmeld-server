@@ -160,6 +160,8 @@ class User extends AbleObject {
       if (isset($entity)) {
         $this->guid = $entity->guid;
         $this->tags = $entity->tags;
+        $this->cdate = $entity->cdate;
+        $this->mdate = $entity->mdate;
         $this->putData($entity->getData(), $entity->getSData());
         if (!isset($this->secret)
             && (
