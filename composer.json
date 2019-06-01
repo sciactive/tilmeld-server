@@ -1,17 +1,18 @@
 {
   "name": "sciactive/tilmeld-server",
   "description": "Nymph user and group management with access controls.",
-  "version": "1.0.0-beta.33",
-  "time": "2019-05-16",
+  "version": "1.0.0",
+  "time": "2019-05-31",
   "type": "library",
   "keywords": [
     "users",
-    "groups",
     "user management",
     "user manager",
+    "groups",
     "group management",
     "group manager",
     "acl",
+    "access control",
     "nymph"
   ],
   "homepage": "http://tilmeld.org/",
@@ -42,13 +43,12 @@
   },
   "require": {
     "sciactive/hookphp": "^2.0",
-    "sciactive/nymph-server": "~3.0@beta",
+    "sciactive/nymph-server": "3.0.*",
     "sciactive/umailphp": "^2.4",
     "respect/validation": "^1.1",
     "lcobucci/jwt": "^3.2"
   },
   "require-dev": {
     "squizlabs/php_codesniffer": "3.*"
-  },
-  "minimum-stability": "beta"
+  }
 }

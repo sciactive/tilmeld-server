@@ -4,36 +4,33 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "857418461dda2518a64b41ebf7850a10",
+    "content-hash": "ed5cc14fe015256de4b5adbe926d0a6e",
     "packages": [
         {
             "name": "lcobucci/jwt",
-            "version": "3.2.5",
+            "version": "3.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lcobucci/jwt.git",
-                "reference": "82be04b4753f8b7693b62852b7eab30f97524f9b"
+                "reference": "a11ec5f4b4d75d1fcd04e133dede4c317aac9e18"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/82be04b4753f8b7693b62852b7eab30f97524f9b",
-                "reference": "82be04b4753f8b7693b62852b7eab30f97524f9b",
+                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/a11ec5f4b4d75d1fcd04e133dede4c317aac9e18",
+                "reference": "a11ec5f4b4d75d1fcd04e133dede4c317aac9e18",
                 "shasum": ""
             },
             "require": {
+                "ext-mbstring": "*",
                 "ext-openssl": "*",
-                "php": ">=5.5"
+                "php": "^5.6 || ^7.0"
             },
             "require-dev": {
-                "mdanter/ecc": "~0.3.1",
                 "mikey179/vfsstream": "~1.5",
                 "phpmd/phpmd": "~2.2",
                 "phpunit/php-invoker": "~1.1",
-                "phpunit/phpunit": "~4.5",
+                "phpunit/phpunit": "^5.7 || ^7.3",
                 "squizlabs/php_codesniffer": "~2.3"
-            },
-            "suggest": {
-                "mdanter/ecc": "Required to use Elliptic Curves based algorithms."
             },
             "type": "library",
             "extra": {
@@ -62,20 +59,20 @@
                 "JWS",
                 "jwt"
             ],
-            "time": "2018-11-11T12:22:26+00:00"
+            "time": "2019-05-24T18:30:49+00:00"
         },
         {
             "name": "respect/validation",
-            "version": "1.1.30",
+            "version": "1.1.31",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Respect/Validation.git",
-                "reference": "9bafee191d9c560827105a849e2b29d8446f0f6f"
+                "reference": "45d109fc830644fecc1145200d6351ce4f2769d0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Respect/Validation/zipball/9bafee191d9c560827105a849e2b29d8446f0f6f",
-                "reference": "9bafee191d9c560827105a849e2b29d8446f0f6f",
+                "url": "https://api.github.com/repos/Respect/Validation/zipball/45d109fc830644fecc1145200d6351ce4f2769d0",
+                "reference": "45d109fc830644fecc1145200d6351ce4f2769d0",
                 "shasum": ""
             },
             "require": {
@@ -125,7 +122,7 @@
                 "validation",
                 "validator"
             ],
-            "time": "2019-03-31T13:27:49+00:00"
+            "time": "2019-05-28T06:10:06+00:00"
         },
         {
             "name": "sciactive/hookphp",
@@ -179,16 +176,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.0.0-beta.24",
+            "version": "3.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "900fed5bb328c21de7d599b6f45b57792b64cd7e"
+                "reference": "7ef466c675e3028d31e45a7e449b2dcfb1124a85"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/900fed5bb328c21de7d599b6f45b57792b64cd7e",
-                "reference": "900fed5bb328c21de7d599b6f45b57792b64cd7e",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/7ef466c675e3028d31e45a7e449b2dcfb1124a85",
+                "reference": "7ef466c675e3028d31e45a7e449b2dcfb1124a85",
                 "shasum": ""
             },
             "require-dev": {
@@ -229,7 +226,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2019-05-16T00:00:00+00:00"
+            "time": "2019-05-31T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
@@ -391,10 +388,8 @@
         }
     ],
     "aliases": [],
-    "minimum-stability": "beta",
-    "stability-flags": {
-        "sciactive/nymph-server": 10
-    },
+    "minimum-stability": "stable",
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
