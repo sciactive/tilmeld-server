@@ -445,9 +445,10 @@ class Tilmeld {
   /**
    * Check for a TILMELDAUTH cookie, and, if set, authenticate from it.
    *
+   * @param bool $skipXsrfToken Skip the XSRF token check.
    * @return bool True if a user was authenticated, false on any failure.
    */
-  public static function authenticate() {
+  public static function authenticate($skipXsrfToken = false) {
     // If a client does't support cookies, they can use the X-TILMELDAUTH header
     // to provide the auth token.
     if (!empty($_SERVER['HTTP_X_TILMELDAUTH']) && empty($_COOKIE['TILMELDAUTH'])) {
@@ -462,10 +463,11 @@ class Tilmeld {
     $setupUrlParts = parse_url(self::$config['setup_url']);
     $setupHost = $setupUrlParts['host'].
       (array_key_exists('port', $setupUrlParts) ? ':'.$setupUrlParts['port'] : '');
-    if ($_SERVER['HTTP_HOST'] === $setupHost
+    if ($skipXsrfToken || ($_SERVER['HTTP_HOST'] === $setupHost
         && $_SERVER['REQUEST_URI'] === $setupUrlParts['path']
-      ) {
-      // The request is for the setup app, so don't check for the XSRF token.
+      )) {
+      // The request is for the setup app, or we were told to skip the XSRF
+      // check, so don't check for the XSRF token.
       $extract = self::$config['jwt_extract']($authToken);
     } else {
       // The request is for something else, so check for a valid XSRF token.
