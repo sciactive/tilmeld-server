@@ -139,9 +139,6 @@ function is_secure() {
       NymphOptions = {
         restURL: <?php echo json_encode($restEndpoint); ?>
       };
-      TilmeldOptions = {
-        tilmeldURL: <?php echo json_encode($tilmeldURL); ?>
-      };
     </script>
     <?php if (isset($sciactiveDevClientURL)) { ?>
       <script src="<?php echo htmlspecialchars($sciactiveDevClientURL); ?>dist/NymphClient.js"></script>
@@ -159,7 +156,6 @@ function is_secure() {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.slim.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.3/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js"></script>
-    <script src="<?php echo htmlspecialchars($tilmeldURL); ?>setup/setupApp.js"></script>
   </head>
   <body>
     <div class="container" ng-controller="MainController">
@@ -185,5 +181,9 @@ function is_secure() {
         </div>
       </div>
     </div>
+    <script type="text/template" id="template-instructions"><?php echo file_get_contents(__DIR__ . '/instructions.html'); ?></script>
+    <script type="text/template" id="template-user"><?php echo file_get_contents(__DIR__ . '/user.html'); ?></script>
+    <script type="text/template" id="template-group"><?php echo file_get_contents(__DIR__ . '/group.html'); ?></script>
+    <script type="text/javascript"><?php echo file_get_contents(__DIR__ . '/setupApp.js'); ?></script>
   </body>
 </html>
