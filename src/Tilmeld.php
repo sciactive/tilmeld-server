@@ -1,9 +1,7 @@
 <?php namespace Tilmeld;
 
-use SciActive\Hook;
 use Nymph\Nymph;
 use Tilmeld\Entities\User;
-use Tilmeld\Entities\Group;
 
 /**
  * Tilmeld main class.
@@ -15,7 +13,7 @@ use Tilmeld\Entities\Group;
  * @see http://tilmeld.org/
  */
 class Tilmeld {
-  const VERSION = '1.0.0';
+  const VERSION = '1.0.1';
 
   const NO_ACCESS = 0;
   const READ_ACCESS = 1;
