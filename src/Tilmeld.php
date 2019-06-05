@@ -89,7 +89,7 @@ class Tilmeld {
    * Add selectors to a list of options and selectors which will limit results
    * to only entities the current user has access to.
    *
-   * @param array &$optionsAndSelectors The options and selectors of the query.
+   * @param array $optionsAndSelectors The options and selectors of the query.
    */
   public static function addAccessControlSelectors(&$optionsAndSelectors) {
     $user = self::$currentUser;
@@ -253,7 +253,7 @@ class Tilmeld {
    *   AC.)
    * - None of the above. (Check other AC.)
    *
-   * @param object &$entity The entity to check.
+   * @param object $entity The entity to check.
    * @param int $type The lowest level of permission to consider a pass. One of
    *                  Tilmeld::READ_ACCESS, Tilmeld::WRITE_ACCESS, or
    *                  Tilmeld::FULL_ACCESS.
@@ -264,9 +264,9 @@ class Tilmeld {
    *              entity.
    */
   public static function checkPermissions(
-      &$entity,
-      $type = Tilmeld::READ_ACCESS,
-      $user = null
+    &$entity,
+    $type = Tilmeld::READ_ACCESS,
+    $user = null
   ) {
     // Only works for entities.
     if (!is_object($entity) || !is_callable([$entity, 'is'])) {
@@ -428,10 +428,10 @@ class Tilmeld {
     $guid = $extract['guid'];
 
     $user = Nymph::getEntity(
-        ['class' => '\Tilmeld\Entities\User'],
-        ['&',
-          'guid' => $guid
-        ]
+      ['class' => '\Tilmeld\Entities\User'],
+      ['&',
+        'guid' => $guid
+      ]
     );
     if (!$user || !$user->guid || !$user->enabled) {
       return false;
@@ -449,7 +449,9 @@ class Tilmeld {
   public static function authenticate($skipXsrfToken = false) {
     // If a client does't support cookies, they can use the X-TILMELDAUTH header
     // to provide the auth token.
-    if (!empty($_SERVER['HTTP_X_TILMELDAUTH']) && empty($_COOKIE['TILMELDAUTH'])) {
+    if (!empty($_SERVER['HTTP_X_TILMELDAUTH'])
+      && empty($_COOKIE['TILMELDAUTH'])
+    ) {
       $fromAuthHeader = true;
       $authToken = $_SERVER['HTTP_X_TILMELDAUTH'];
     } elseif (!empty($_COOKIE['TILMELDAUTH'])) {
@@ -459,11 +461,20 @@ class Tilmeld {
       return false;
     }
     $setupUrlParts = parse_url(self::$config['setup_url']);
-    $setupHost = $setupUrlParts['host'].
-      (array_key_exists('port', $setupUrlParts) ? ':'.$setupUrlParts['port'] : '');
-    if ($skipXsrfToken || ($_SERVER['HTTP_HOST'] === $setupHost
+    $setupHost = (
+      $setupUrlParts['host'].
+        (
+          array_key_exists('port', $setupUrlParts)
+            ? ':'.$setupUrlParts['port']
+            : ''
+        )
+    );
+    if ($skipXsrfToken
+      || (
+        $_SERVER['HTTP_HOST'] === $setupHost
         && $_SERVER['REQUEST_URI'] === $setupUrlParts['path']
-      )) {
+      )
+    ) {
       // The request is for the setup app, or we were told to skip the XSRF
       // check, so don't check for the XSRF token.
       $extract = self::$config['jwt_extract']($authToken);
@@ -506,8 +517,8 @@ class Tilmeld {
    * Logs the given user into the system.
    *
    * @param \Tilmeld\Entities\User $user The user.
-   * @param bool $alwaysSendAuthHeader When true, a custom header with the auth
-   *                                   token will be sent.
+   * @param bool $sendAuthHeader When true, a custom header with the auth token
+   *                             will be sent.
    * @return bool True on success, false on failure.
    */
   public static function login($user, $sendAuthHeader) {
@@ -515,13 +526,13 @@ class Tilmeld {
       $token = self::$config['jwt_builder']($user);
       $appUrlParts = parse_url(self::$config['app_url']);
       setcookie(
-          'TILMELDAUTH',
-          $token,
-          time() + self::$config['jwt_expire'],
-          $appUrlParts['path'],
-          $appUrlParts['host'],
-          $appUrlParts['scheme'] === 'https',
-          false // Allow JS access (for CSRF protection).
+        'TILMELDAUTH',
+        $token,
+        time() + self::$config['jwt_expire'],
+        $appUrlParts['path'],
+        $appUrlParts['host'],
+        $appUrlParts['scheme'] === 'https',
+        false // Allow JS access (for CSRF protection).
       );
       if ($sendAuthHeader) {
         header("X-TILMELDAUTH: $token");
@@ -539,11 +550,11 @@ class Tilmeld {
     self::clearSession();
     $appUrlParts = parse_url(self::$config['app_url']);
     setcookie(
-        'TILMELDAUTH',
-        '',
-        null,
-        $appUrlParts['path'],
-        $appUrlParts['host']
+      'TILMELDAUTH',
+      '',
+      null,
+      $appUrlParts['path'],
+      $appUrlParts['host']
     );
   }
 
@@ -553,17 +564,17 @@ class Tilmeld {
    * An additional property of the groups can be used to sort them under their
    * parents.
    *
-   * @param array &$array The array of groups.
+   * @param array $array The array of groups.
    * @param string|null $property The name of the property to sort groups by.
    *                              Null for no additional sorting.
    * @param bool $caseSensitive Sort case sensitively.
    * @param bool $reverse Reverse the sort order.
    */
   public static function groupSort(
-      &$array,
-      $property = null,
-      $caseSensitive = false,
-      $reverse = false
+    &$array,
+    $property = null,
+    $caseSensitive = false,
+    $reverse = false
   ) {
     Nymph::hsort($array, $property, 'parent', $caseSensitive, $reverse);
   }

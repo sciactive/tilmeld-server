@@ -4,6 +4,10 @@
   "version": "1.0.2",
   "time": "2019-06-03",
   "type": "library",
+  "scripts": {
+    "lint": "phpcs -vs --extensions=php --ignore=vendor/* --runtime-set ignore_warnings_on_exit 1 .",
+    "format": "phpcbf -vs --extensions=php --ignore=vendor/* --runtime-set ignore_warnings_on_exit 1 ."
+  },
   "keywords": [
     "users",
     "user management",

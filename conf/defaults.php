@@ -182,12 +182,12 @@ return [
    * JWT Expire
    * How long from current time, in seconds, the JWT token expires.
    */
-  'jwt_expire' => 60*60*24*14, // Two weeks(ish)
+  'jwt_expire' => 60 * 60 * 24 * 14, // Two weeks(ish)
   /*
    * JWT Renew
    * How long before the JWT token expires to give the user a new one.
    */
-  'jwt_renew' => 60*60*24*8, // 8 days(ish)
+  'jwt_renew' => 60 * 60 * 24 * 8, // 8 days(ish)
   /*
    * JWT Builder
    * Function to build the JWT for user sessions.

@@ -38,10 +38,10 @@ if (isset($_REQUEST['action']) && \Tilmeld\Tilmeld::$config['verify_email']) {
 
       if (\Tilmeld\Tilmeld::$config['unverified_access']) {
         $user->groups = (array) \Nymph\Nymph::getEntities(
-            ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
-            ['&',
-              'equal' => ['defaultSecondary', true]
-            ]
+          ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
+          ['&',
+            'equal' => ['defaultSecondary', true]
+          ]
         );
       }
       $user->enabled = true;
@@ -65,11 +65,11 @@ if (isset($_REQUEST['action']) && \Tilmeld\Tilmeld::$config['verify_email']) {
       }
 
       $test = \Nymph\Nymph::getEntity(
-          ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
-          ['&',
-            'ilike' => ['email', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $user->newEmailAddress)],
-            '!guid' => $user->guid
-          ]
+        ['class' => '\Tilmeld\Entities\User', 'skip_ac' => true],
+        ['&',
+          'ilike' => ['email', str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $user->newEmailAddress)],
+          '!guid' => $user->guid
+        ]
       );
       if (isset($test)) {
         $printPage('There is already a user with that email address. Please use a different email.');
@@ -181,9 +181,9 @@ function is_secure() {
         </div>
       </div>
     </div>
-    <script type="text/template" id="template-instructions"><?php echo file_get_contents(__DIR__ . '/instructions.html'); ?></script>
-    <script type="text/template" id="template-user"><?php echo file_get_contents(__DIR__ . '/user.html'); ?></script>
-    <script type="text/template" id="template-group"><?php echo file_get_contents(__DIR__ . '/group.html'); ?></script>
-    <script type="text/javascript"><?php echo file_get_contents(__DIR__ . '/setupApp.js'); ?></script>
+    <script type="text/template" id="template-instructions"><?php echo file_get_contents(__DIR__.'/instructions.html'); ?></script>
+    <script type="text/template" id="template-user"><?php echo file_get_contents(__DIR__.'/user.html'); ?></script>
+    <script type="text/template" id="template-group"><?php echo file_get_contents(__DIR__.'/group.html'); ?></script>
+    <script type="text/javascript"><?php echo file_get_contents(__DIR__.'/setupApp.js'); ?></script>
   </body>
 </html>

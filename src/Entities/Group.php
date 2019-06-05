@@ -98,18 +98,18 @@ class Group extends AbleObject {
     if ((is_int($id) && $id > 0) || is_string($id)) {
       if (is_int($id)) {
         $entity = Nymph::getEntity(
-            ['class' => get_class($this)],
-            ['&', 'guid' => $id]
+          ['class' => get_class($this)],
+          ['&', 'guid' => $id]
         );
       } else {
         $entity = Nymph::getEntity(
-            ['class' => get_class($this)],
-            ['&',
-              'ilike' => [
-                'groupname',
-                str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $id)
-              ]
+          ['class' => get_class($this)],
+          ['&',
+            'ilike' => [
+              'groupname',
+              str_replace(['\\', '%', '_'], ['\\\\\\\\', '\%', '\_'], $id)
             ]
+          ]
         );
       }
       if (isset($entity)) {
@@ -136,8 +136,8 @@ class Group extends AbleObject {
    */
   public static function getPrimaryGroups($search = null) {
     return self::getAssignableGroups(
-        $search,
-        Tilmeld::$config['highest_primary']
+      $search,
+      Tilmeld::$config['highest_primary']
     );
   }
 
@@ -149,8 +149,8 @@ class Group extends AbleObject {
    */
   public static function getSecondaryGroups($search = null) {
     return self::getAssignableGroups(
-        $search,
-        Tilmeld::$config['highest_secondary']
+      $search,
+      Tilmeld::$config['highest_secondary']
     );
   }
 
@@ -158,40 +158,40 @@ class Group extends AbleObject {
     $assignableGroups = [];
     if ($search !== null) {
       $assignableGroups = Nymph::getEntities(
-          ['class' => '\Tilmeld\Entities\Group'],
-          ['&',
-            'equal' => ['enabled', true]
+        ['class' => '\Tilmeld\Entities\Group'],
+        ['&',
+          'equal' => ['enabled', true]
+        ],
+        ['|',
+          'ilike' => [
+            ['name', $search],
+            ['groupname', $search]
           ],
-          ['|',
-            'ilike' => [
-              ['name', $search],
-              ['groupname', $search]
-            ],
-          ]
+        ]
       );
       if ($highestParent != 0) {
         $assignableGroups = array_values(
-            array_filter(
-                $assignableGroups,
-                function ($curGroup) use ($highestParent) {
-                  while (isset($curGroup->parent) && $curGroup->parent->guid) {
-                    if ($curGroup->parent->guid === $highestParent) {
-                      return true;
-                    }
-                    $curGroup = $curGroup->parent;
-                  }
-                  return false;
+          array_filter(
+            $assignableGroups,
+            function ($curGroup) use ($highestParent) {
+              while (isset($curGroup->parent) && $curGroup->parent->guid) {
+                if ($curGroup->parent->guid === $highestParent) {
+                  return true;
                 }
-            )
+                $curGroup = $curGroup->parent;
+              }
+              return false;
+            }
+          )
         );
       }
     } else {
       if ($highestParent == 0) {
         $assignableGroups = Nymph::getEntities(
-            ['class' => '\Tilmeld\Entities\Group'],
-            ['&',
-              'equal' => ['enabled', true]
-            ]
+          ['class' => '\Tilmeld\Entities\Group'],
+          ['&',
+            'equal' => ['enabled', true]
+          ]
         );
       } else {
         if ($highestParent > 0) {
@@ -213,8 +213,9 @@ class Group extends AbleObject {
     if (!isset($this->email) || empty($this->email)) {
       return $proto.'://secure.gravatar.com/avatar/?d=mm&s=40';
     }
-    return $proto.'://secure.gravatar.com/avatar/'.
-      md5(strtolower(trim($this->email))).'?d=identicon&s=40';
+    return $proto.'://secure.gravatar.com/avatar/'.md5(
+      strtolower(trim($this->email))
+    ).'?d=identicon&s=40';
   }
 
   public function putData($data, $sdata = []) {
@@ -286,11 +287,11 @@ class Group extends AbleObject {
    */
   public function getChildren() {
     $return = (array) Nymph::getEntities(
-        ['class' => '\Tilmeld\Entities\Group'],
-        ['&',
-          'equal' => ['enabled', true],
-          'ref' => ['parent', $this]
-        ]
+      ['class' => '\Tilmeld\Entities\Group'],
+      ['&',
+        'equal' => ['enabled', true],
+        'ref' => ['parent', $this]
+      ]
     );
     return $return;
   }
@@ -304,11 +305,11 @@ class Group extends AbleObject {
   public function getDescendants($andSelf = false) {
     $return = [];
     $entities = Nymph::getEntities(
-        ['class' => '\Tilmeld\Entities\Group'],
-        ['&',
-          'equal' => ['enabled', true],
-          'ref' => ['parent', $this]
-        ]
+      ['class' => '\Tilmeld\Entities\Group'],
+      ['&',
+        'equal' => ['enabled', true],
+        'ref' => ['parent', $this]
+      ]
     );
     foreach ($entities as $entity) {
       $childArray = $entity->getDescendants(true);
@@ -353,9 +354,9 @@ class Group extends AbleObject {
    * @return array An array of users.
    */
   public function getUsers(
-      $descendants = false,
-      $limit = null,
-      $offset = null
+    $descendants = false,
+    $limit = null,
+    $offset = null
   ) {
     $groups = [];
     if ($descendants) {
@@ -370,16 +371,16 @@ class Group extends AbleObject {
       $options['offset'] = $offset;
     }
     $return = Nymph::getEntities(
-        $options,
-        ['&',
-          'equal' => ['enabled', true]
-        ],
-        ['|',
-          'ref' => [
-            ['group', $groups],
-            ['groups', $groups]
-          ]
+      $options,
+      ['&',
+        'equal' => ['enabled', true]
+      ],
+      ['|',
+        'ref' => [
+          ['group', $groups],
+          ['groups', $groups]
         ]
+      ]
     );
     return $return;
   }
@@ -411,9 +412,10 @@ class Group extends AbleObject {
       ];
     }
     if (array_diff(
-        str_split($this->groupname),
-        str_split(Tilmeld::$config['valid_chars'])
-    )) {
+      str_split($this->groupname),
+      str_split(Tilmeld::$config['valid_chars'])
+    )
+    ) {
       return [
         'result' => false,
         'message' => Tilmeld::$config['valid_chars_notice']
@@ -429,9 +431,9 @@ class Group extends AbleObject {
       'ilike' => [
         'groupname',
         str_replace(
-            ['\\', '%', '_'],
-            ['\\\\\\\\', '\%', '\_'],
-            $this->groupname
+          ['\\', '%', '_'],
+          ['\\\\\\\\', '\%', '\_'],
+          $this->groupname
         )
       ]
     ];
@@ -439,8 +441,8 @@ class Group extends AbleObject {
       $selector['!guid'] = $this->guid;
     }
     $test = Nymph::getEntity(
-        ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
-        $selector
+      ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
+      $selector
     );
     if (isset($test->guid)) {
       return ['result' => false, 'message' => 'That groupname is taken.'];
@@ -468,9 +470,10 @@ class Group extends AbleObject {
       return ['result' => false, 'message' => 'Please specify a valid email.'];
     }
     if (!preg_match(
-        '/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i',
-        $this->email
-    )) {
+      '/^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i',
+      $this->email
+    )
+    ) {
       return [
         'result' => false,
         'message' => 'Email must be a correctly formatted address.'
@@ -486,8 +489,8 @@ class Group extends AbleObject {
       $selector['!guid'] = $this->guid;
     }
     $test = Nymph::getEntity(
-        ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
-        $selector
+      ['class' => '\Tilmeld\Entities\Group', 'skip_ac' => true],
+      $selector
     );
     if (isset($test->guid)) {
       return [
@@ -538,7 +541,7 @@ class Group extends AbleObject {
         )
       ) {
       throw new \Tilmeld\Exceptions\BadDataException(
-          'Group parent can\'t be itself or descendant of itself.'
+        'Group parent can\'t be itself or descendant of itself.'
       );
     }
 
@@ -547,23 +550,23 @@ class Group extends AbleObject {
       // phpcs:ignore Generic.Files.LineLength.TooLong
     } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
       throw new \Tilmeld\Exceptions\BadDataException(
-          $exception->getFullMessage()
+        $exception->getFullMessage()
       );
     }
 
     // Only one default primary group is allowed.
     if ($this->defaultPrimary) {
       $currentPrimary = Nymph::getEntity(
-          ['class' => '\Tilmeld\Entities\Group'],
-          ['&', 'equal' => ['defaultPrimary', true]]
+        ['class' => '\Tilmeld\Entities\Group'],
+        ['&', 'equal' => ['defaultPrimary', true]]
       );
       if (isset($currentPrimary) && !$this->is($currentPrimary)) {
         $currentPrimary->defaultPrimary = false;
         if (!$currentPrimary->save()) {
           // phpcs:ignore Generic.Files.LineLength.TooLong
           throw new \Tilmeld\Exceptions\CouldNotChangeDefaultPrimaryGroupException(
-              "Could not change new user primary group from ".
-                "{$currentPrimary->groupname}."
+            "Could not change new user primary group from ".
+              "{$currentPrimary->groupname}."
           );
         }
       }
@@ -593,10 +596,10 @@ class Group extends AbleObject {
       return false;
     }
     $entities = Nymph::getEntities(
-        ['class' => '\Tilmeld\Entities\Group'],
-        ['&',
-          'ref' => ['parent', $this]
-        ]
+      ['class' => '\Tilmeld\Entities\Group'],
+      ['&',
+        'ref' => ['parent', $this]
+      ]
     );
     foreach ($entities as $curGroup) {
       if (!$curGroup->delete()) {

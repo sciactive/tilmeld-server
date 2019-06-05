@@ -3,8 +3,6 @@
 use SciActive\Hook;
 use Respect\Validation\Validator as v;
 
-// phpcs:disable Squiz.WhiteSpace.ObjectOperatorSpacing.Before
-
 /**
  * Hook Nymph methods.
  *
@@ -17,51 +15,51 @@ class HookMethods {
     // Check for the skip access control option and add AC selectors.
     $GetEntitiesHook = function (&$array, $name, &$object, &$function, &$data) {
       if (isset($array[0]['skip_ac'])
-          && $array[0]['skip_ac']
-          && (
-            !isset($array[0]['source']) || $array[0]['source'] !== 'client'
-          )
+        && $array[0]['skip_ac']
+        && (
+          !isset($array[0]['source']) || $array[0]['source'] !== 'client'
+        )
       ) {
         $data['TilmeldSkipAc'] = true;
       } else {
         if (isset($array[0]['source']) && $array[0]['source'] === 'client') {
           if (!Tilmeld::gatekeeper('tilmeld/admin')
-              && (
-                (
-                  !Tilmeld::$config['enable_user_search']
-                  && (
-                    $array[0]['class'] === '\Tilmeld\Entities\User'
-                    || $array[0]['class'] === 'Tilmeld\Entities\User'
-                  )
-                )
-                || (
-                  !Tilmeld::$config['enable_group_search']
-                  && (
-                    $array[0]['class'] === '\Tilmeld\Entities\Group'
-                    || $array[0]['class'] === 'Tilmeld\Entities\Group'
-                  )
+            && (
+              (
+                !Tilmeld::$config['enable_user_search']
+                && (
+                  $array[0]['class'] === '\Tilmeld\Entities\User'
+                  || $array[0]['class'] === 'Tilmeld\Entities\User'
                 )
               )
-              && (
-                !isset($array[1])
-                || !isset($array[1][0])
-                || $array[1][0] !== '&'
-                || (
-                  !isset($array[1]['guid'])
-                  && !isset($array[1]['strict'])
-                )
-                || (
-                  isset($array[1]['guid'])
-                  && !is_int($array[1]['guid'])
-                )
-                || (
-                  isset($array[1]['strict'])
-                  && (
-                    !isset($array[1]['strict'][0])
-                    || $array[1]['strict'][0] !== 'username'
-                  )
+              || (
+                !Tilmeld::$config['enable_group_search']
+                && (
+                  $array[0]['class'] === '\Tilmeld\Entities\Group'
+                  || $array[0]['class'] === 'Tilmeld\Entities\Group'
                 )
               )
+            )
+            && (
+              !isset($array[1])
+              || !isset($array[1][0])
+              || $array[1][0] !== '&'
+              || (
+                !isset($array[1]['guid'])
+                && !isset($array[1]['strict'])
+              )
+              || (
+                isset($array[1]['guid'])
+                && !is_int($array[1]['guid'])
+              )
+              || (
+                isset($array[1]['strict'])
+                && (
+                  !isset($array[1]['strict'][0])
+                  || $array[1]['strict'][0] !== 'username'
+                )
+              )
+            )
           ) {
             // If the user is not specifically searching for a GUID or username,
             // and they're not allowed to search, it should fail.
@@ -79,8 +77,8 @@ class HookMethods {
       $entity = $array[0];
       if (is_int($entity)) {
         $entity = \Nymph\Nymph::getEntity(
-            ['class' => $array[1] ?? '\Nymph\Entity'],
-            ['&', 'guid' => $array[0]]
+          ['class' => $array[1] ?? '\Nymph\Entity'],
+          ['&', 'guid' => $array[0]]
         );
       }
       if (!is_object($entity)) {
@@ -97,11 +95,11 @@ class HookMethods {
     // used for something else?
     // Filter entities being returned for user permissions.
     // $CheckPermissionsReturnHook = function (
-    //     &$array,
-    //     $name,
-    //     &$object,
-    //     &$function,
-    //     &$data
+    //   &$array,
+    //   $name,
+    //   &$object,
+    //   &$function,
+    //   &$data
     // ) {
     //   if (isset($data['TilmeldSkipAc']) && $data['TilmeldSkipAc']) {
     //     return;
@@ -131,7 +129,7 @@ class HookMethods {
         return;
       }
       if (is_callable([$array[0], 'tilmeldSaveSkipAC'])
-          && $array[0]->tilmeldSaveSkipAC()
+        && $array[0]->tilmeldSaveSkipAC()
       ) {
         return;
       }
@@ -193,18 +191,18 @@ class HookMethods {
     $AddAccessHook = function (&$array) {
       $user = Tilmeld::$currentUser;
       if ($user !== null
-          && !isset($array[0]->guid)
-          && !is_a($array[0], '\Tilmeld\Entities\User')
-          && !is_a($array[0], '\Tilmeld\Entities\Group')
-          && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_User')
-          && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_Group')
+        && !isset($array[0]->guid)
+        && !is_a($array[0], '\Tilmeld\Entities\User')
+        && !is_a($array[0], '\Tilmeld\Entities\Group')
+        && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_User')
+        && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_Group')
       ) {
         if (!isset($array[0]->user)) {
           $array[0]->user = $user;
         }
         if (!isset($array[0]->group)
-            && isset($user->group)
-            && isset($user->group->guid)
+          && isset($user->group)
+          && isset($user->group->guid)
         ) {
           $array[0]->group = $user->group;
         }
@@ -231,20 +229,20 @@ class HookMethods {
 
     $Validate = function (&$array) {
       if (!is_a($array[0], '\Tilmeld\Entities\User')
-          && !is_a($array[0], '\Tilmeld\Entities\Group')
-          && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_User')
-          && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_Group')
+        && !is_a($array[0], '\Tilmeld\Entities\Group')
+        && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_User')
+        && !is_a($array[0], '\SciActive\HookOverride_Tilmeld_Entities_Group')
       ) {
         $ownershipAcPropertyValidator = v::intType()->between(
-            Tilmeld::NO_ACCESS,
-            Tilmeld::FULL_ACCESS,
-            true
+          Tilmeld::NO_ACCESS,
+          Tilmeld::FULL_ACCESS,
+          true
         );
         $accessAcPropertyValidator = v::arrayType()->each(
-            v::oneOf(
-                v::instance('\Tilmeld\Entities\User'),
-                v::instance('\Tilmeld\Entities\Group')
-            )
+          v::oneOf(
+            v::instance('\Tilmeld\Entities\User'),
+            v::instance('\Tilmeld\Entities\Group')
+          )
         );
 
         try {
@@ -262,7 +260,7 @@ class HookMethods {
         // phpcs:ignore Generic.Files.LineLength.TooLong
         } catch (\Respect\Validation\Exceptions\NestedValidationException $exception) {
           throw new \Tilmeld\Exceptions\BadDataException(
-              $exception->getFullMessage()
+            $exception->getFullMessage()
           );
         }
       }
@@ -276,16 +274,16 @@ class HookMethods {
     Hook::addCallback('Nymph->saveEntity', -100, $AddAccessHook);
     Hook::addCallback('Nymph->saveEntity', -90, $Validate);
     Hook::addCallback(
-        'Nymph->saveEntity',
-        -80,
-        $CheckPermissionsSaveAndFilterAcChangesHook
+      'Nymph->saveEntity',
+      -80,
+      $CheckPermissionsSaveAndFilterAcChangesHook
     );
 
     Hook::addCallback('Nymph->deleteEntity', -99, $CheckPermissionsDeleteHook);
     Hook::addCallback(
-        'Nymph->deleteEntityByID',
-        -99,
-        $CheckPermissionsDeleteHook
+      'Nymph->deleteEntityByID',
+      -99,
+      $CheckPermissionsDeleteHook
     );
   }
 }
