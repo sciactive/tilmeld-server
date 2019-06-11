@@ -19,15 +19,15 @@
         <div class="dropdown-menu dropdown-menu-right">
           <button class="dropdown-item disabled" type="button" disabled ng-if="entities === null"><i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> Searching...</button>
           <button class="dropdown-item disabled" type="button" disabled ng-if="entities.length === 0">No results</button>
-          <button class="dropdown-item" type="button" ng-repeat="curEntity in entities track by curEntity.guid" ng-click="setEntity(curEntity)">{{curEntity.data.name+' ('+curEntity.data.groupname+')'}}</button>
+          <button class="dropdown-item" type="button" ng-repeat="curEntity in entities track by curEntity.guid" ng-click="setEntity(curEntity)">{{curEntity.name+' ('+curEntity.groupname+')'}}</button>
         </div>
       </div>
     </div>
   </div>
 </div>
 <div class="my-3 border border-top-0 border-right-0 border-left-0">
-  <h2>Editing {{entity.guid ? entity.data.name : 'New Group'}}</h2>
-  <p class="lead" ng-if="entity.data.user">Generated primary group for {{entity.data.user.data.name}} ({{entity.data.user.data.username}})</p>
+  <h2>Editing {{entity.guid ? entity.name : 'New Group'}}</h2>
+  <p class="lead" ng-if="entity.user">Generated primary group for {{entity.user.name}} ({{entity.user.username}})</p>
 </div>
 <form name="groupform" ng-submit="saveEntity()" autocomplete="off">
   <ul class="nav nav-tabs">
@@ -45,44 +45,44 @@
     <div class="tab-pane tab-pane-general active">
       <div class="form-check mb-2">
         <label class="form-check-label">
-          <input class="form-check-input" type="checkbox" name="enabled" ng-model="entity.data.enabled">
+          <input class="form-check-input" type="checkbox" name="enabled" ng-model="entity.enabled">
           Enabled
         </label>
       </div>
       <label class="d-block form-group">
         <span class="d-inline-block mb-2">Groupname</span>
-        <input class="form-control" type="text" name="groupname" ng-model="entity.data.groupname" ng-class="{'border-danger': uiState.groupnameVerified === false}" />
+        <input class="form-control" type="text" name="groupname" ng-model="entity.groupname" ng-class="{'border-danger': uiState.groupnameVerified === false}" />
         <small class="form-text" ng-class="{'text-success': uiState.groupnameVerified === true, 'text-danger': uiState.groupnameVerified === false}" ng-if="uiState.groupnameVerifiedMessage">{{uiState.groupnameVerifiedMessage}}</small>
       </label>
       <label class="d-block form-group">
         <span class="d-inline-block mb-2">Email</span>
-        <input class="form-control" type="email" name="email" ng-model="entity.data.email" ng-class="{'border-danger': uiState.emailVerified === false}" />
+        <input class="form-control" type="email" name="email" ng-model="entity.email" ng-class="{'border-danger': uiState.emailVerified === false}" />
         <small class="form-text" ng-class="{'text-success': uiState.emailVerified === true, 'text-danger': uiState.emailVerified === false}" ng-if="uiState.emailVerifiedMessage">{{uiState.emailVerifiedMessage}}</small>
       </label>
       <label class="d-block form-group">
         <span class="d-inline-block mb-2">Display Name</span>
-        <input class="form-control" type="text" name="name" ng-model="entity.data.name" />
+        <input class="form-control" type="text" name="name" ng-model="entity.name" />
       </label>
       <label class="d-block form-group">
         <span class="d-inline-block mb-2">Avatar</span>
-        <input class="form-control" type="text" name="avatar" ng-model="entity.data.avatar" />
+        <input class="form-control" type="text" name="avatar" ng-model="entity.avatar" />
       </label>
       <label class="d-block form-group">
         <span class="d-inline-block mb-2">Phone</span>
-        <input class="form-control" type="tel" name="phone" ng-model="entity.data.phone" />
+        <input class="form-control" type="tel" name="phone" ng-model="entity.phone" />
       </label>
       <label class="d-block form-group">
         <span class="d-inline-block mb-2">Timezone</span>
-        <select class="form-control" ng-options="timezone for timezone in clientConfig.timezones" name="timezone" ng-model="entity.data.timezone">
+        <select class="form-control" ng-options="timezone for timezone in clientConfig.timezones" name="timezone" ng-model="entity.timezone">
           <option value="">- System Default -</option>
         </select>
       </label>
       <div>
         <div class="mb-2">Parent</div>
         <div class="row">
-          <div class="col" ng-if="!entity.data.parent">No Parent</div>
-          <div class="col" ng-if="entity.data.parent">{{entity.data.parent.data.name+' ('+entity.data.parent.data.groupname+')'}}</div>
-          <div class="col text-right" ng-if="entity.data.parent"><button class="btn btn-danger btn-sm" type="button" ng-click="entity.data.parent = null"><i class="fa fa-minus" aria-hidden="true"></i></button></div>
+          <div class="col" ng-if="!entity.parent">No Parent</div>
+          <div class="col" ng-if="entity.parent">{{entity.parent.name+' ('+entity.parent.groupname+')'}}</div>
+          <div class="col text-right" ng-if="entity.parent"><button class="btn btn-danger btn-sm" type="button" ng-click="entity.parent = null"><i class="fa fa-minus" aria-hidden="true"></i></button></div>
         </div>
         <div class="text-right my-3">
           Change parent:
@@ -94,27 +94,27 @@
             <div class="dropdown-menu dropdown-menu-right">
               <button class="dropdown-item disabled" type="button" disabled ng-if="parents === null"><i class="fa fa-circle-o-notch fa-spin" aria-hidden="true"></i> Searching...</button>
               <button class="dropdown-item disabled" type="button" disabled ng-if="parents.length === 0">No results</button>
-              <button class="dropdown-item" type="button" ng-repeat="group in parents track by group.guid" ng-click="entity.data.parent = group">{{group.data.name+' ('+group.data.groupname+')'}}</button>
+              <button class="dropdown-item" type="button" ng-repeat="group in parents track by group.guid" ng-click="entity.parent = group">{{group.name+' ('+group.groupname+')'}}</button>
             </div>
           </div>
         </div>
       </div>
       <div class="form-check">
         <label class="form-check-label">
-          <input class="form-check-input" type="checkbox" name="defaultPrimary" ng-model="entity.data.defaultPrimary">
+          <input class="form-check-input" type="checkbox" name="defaultPrimary" ng-model="entity.defaultPrimary">
           Default primary group for newly registered users.
         </label>
         <small class="form-text text-muted">Setting this will unset any current default primary group.</small>
       </div>
       <div class="form-check">
         <label class="form-check-label">
-          <input class="form-check-input" type="checkbox" name="defaultSecondary" ng-model="entity.data.defaultSecondary">
+          <input class="form-check-input" type="checkbox" name="defaultSecondary" ng-model="entity.defaultSecondary">
           Default secondary group for newly registered{{(clientConfig.verify_email && clientConfig.unverified_access) ? ', verified' : ''}} users.
         </label>
       </div>
       <div class="form-check" ng-if="clientConfig.verify_email && clientConfig.unverified_access">
         <label class="form-check-label">
-          <input class="form-check-input" type="checkbox" name="unverifiedSecondary" ng-model="entity.data.unverifiedSecondary">
+          <input class="form-check-input" type="checkbox" name="unverifiedSecondary" ng-model="entity.unverifiedSecondary">
           Default secondary group for newly registered, unverified users.
         </label>
       </div>
@@ -124,34 +124,34 @@
         <span class="d-block mb-2">Address Type</span>
         <div class="form-check form-check-inline">
           <label class="form-check-label">
-            <input class="form-check-input" type="radio" name="addressType" value="us" ng-model="entity.data.addressType" />
+            <input class="form-check-input" type="radio" name="addressType" value="us" ng-model="entity.addressType" />
             US
           </label>
         </div>
         <div class="form-check form-check-inline">
           <label class="form-check-label">
-            <input class="form-check-input" type="radio" name="addressType" value="international" ng-model="entity.data.addressType" />
+            <input class="form-check-input" type="radio" name="addressType" value="international" ng-model="entity.addressType" />
             International
           </label>
         </div>
       </div>
-      <div ng-if="entity.data.addressType === 'us'">
+      <div ng-if="entity.addressType === 'us'">
         <label class="d-block form-group">
           <span class="d-inline-block mb-2">Address</span>
-          <input class="form-control" type="text" name="addressStreet" ng-model="entity.data.addressStreet" />
+          <input class="form-control" type="text" name="addressStreet" ng-model="entity.addressStreet" />
         </label>
         <label class="d-block form-group">
           <span class="d-inline-block mb-2">Address 2</span>
-          <input class="form-control" type="text" name="addressStreet2" ng-model="entity.data.addressStreet2" />
+          <input class="form-control" type="text" name="addressStreet2" ng-model="entity.addressStreet2" />
         </label>
         <div class="form-row">
           <label class="d-block form-group col-md-6">
             <span class="d-inline-block mb-2">City</span>
-            <input class="form-control" type="text" name="addressCity" ng-model="entity.data.addressCity" />
+            <input class="form-control" type="text" name="addressCity" ng-model="entity.addressCity" />
           </label>
           <label class="d-block form-group col-md-4">
             <span class="d-inline-block mb-2">State</span>
-            <select class="form-control" name="addressState" ng-model="entity.data.addressState">
+            <select class="form-control" name="addressState" ng-model="entity.addressState">
               <option value="">None</option>
               <option value="AL">Alabama</option>
               <option value="AK">Alaska</option>
@@ -211,14 +211,14 @@
           </label>
           <label class="d-block form-group col-md-2">
             <span class="d-inline-block mb-2">Zip</span>
-            <input class="form-control" type="text" name="addressZip" ng-model="entity.data.addressZip" />
+            <input class="form-control" type="text" name="addressZip" ng-model="entity.addressZip" />
           </label>
         </div>
       </div>
-      <div ng-if="entity.data.addressType === 'international'">
+      <div ng-if="entity.addressType === 'international'">
         <label class="d-block form-group">
           <span class="d-inline-block mb-2">Address</span>
-          <textarea class="form-control" style="width: 100%;" rows="3" cols="35" name="addressInternational" ng-model="entity.data.addressInternational"></textarea>
+          <textarea class="form-control" style="width: 100%;" rows="3" cols="35" name="addressInternational" ng-model="entity.addressInternational"></textarea>
         </label>
       </div>
     </div>
@@ -226,7 +226,7 @@
       <div>
         <div class="mb-2">Abilities</div>
         <div>
-          <table class="table table-striped" ng-if="entity.data.abilities.length">
+          <table class="table table-striped" ng-if="entity.abilities.length">
             <thead>
               <tr>
                 <th>#</th>
@@ -235,15 +235,16 @@
               </tr>
             </thead>
             <tbody>
-              <tr ng-repeat="ability in entity.data.abilities track by $index">
+              <tr ng-repeat="ability in entity.abilities track by $index">
                 <td class="align-middle">{{$index + 1}}</td>
                 <td class="align-middle">{{ability}}</td>
-                <td class="text-right"><button class="btn btn-danger btn-sm" type="button" ng-click="entity.data.abilities.splice($index, 1)"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
+                <td class="text-right"><button class="btn btn-danger btn-sm" type="button" ng-click="entity.abilities.splice($index, 1)"><i class="fa fa-minus" aria-hidden="true"></i></button></td>
               </tr>
             </tbody>
           </table>
           <div class="text-right my-3">
-            Add an ability: <input class="form-control d-inline align-bottom" style="width: auto;" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" type="button" ng-click="addAbility()"><i class="fa fa-plus" aria-hidden="true"></i></button> <button class="btn btn-warning" type="button" ng-click="addSysAdminAbility()">Make SysAdmin Group</button>
+            Add an ability: <input class="form-control d-inline align-bottom" style="width: auto;" type="text" name="ability" ng-model="uiState.ability" ng-keydown="$event.keyCode === 13 ? (addAbility() || $event.preventDefault() || $event.stopPropagation()) : void(0)" /> <button class="btn btn-primary" type="button" ng-click="addAbility()"><i class="fa fa-plus" aria-hidden="true"></i></button>
+            <button class="btn btn-warning" type="button" ng-click="addSysAdminAbility()" ng-if="sysAdmin">Make SysAdmin Group</button>
           </div>
         </div>
       </div>

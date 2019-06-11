@@ -1,3 +1,20 @@
+(function(User){
+  window.UserStatePromise = new Promise(function(resolve, reject) {
+    User.current().then(function(user) {
+      if (user) {
+        user.$gatekeeper('system/admin').then(function(sysAdmin) {
+          resolve({
+            user: user,
+            sysAdmin: sysAdmin
+          });
+        }, reject);
+      } else {
+        reject('No user.');
+      }
+    }, reject);
+  });
+})(window['tilmeld-client'].User);
+
 angular.module('setupApp', ['ngRoute'])
 .service('Nymph', function() {
   return window['nymph-client'].Nymph;
@@ -66,12 +83,12 @@ angular.module('setupApp', ['ngRoute'])
   function setup() {
     $scope.setEntity();
     $scope.currentUser = null;
+    $scope.sysAdmin = false;
     $scope.avatar = '//secure.gravatar.com/avatar/?d=mm&s=40';
-    User.current().then(function(user) {
-      if (user) {
-        $scope.currentUser = user;
-        $scope.$apply();
-      }
+    window.UserStatePromise.then(function(userState) {
+      $scope.currentUser = userState.user;
+      $scope.sysAdmin = userState.sysAdmin;
+      $scope.$apply();
     });
   }
   setup();
@@ -104,7 +121,7 @@ angular.module('setupApp', ['ngRoute'])
     }
     Group.getPrimaryGroups(query).then(function(groups) {
       $scope.primaryGroups = groups.filter(function(group) {
-        return !group.is($scope.entity.data.group);
+        return !group.$is($scope.entity.group);
       });
       $scope.$apply();
     });
@@ -119,19 +136,19 @@ angular.module('setupApp', ['ngRoute'])
     }
     Group.getSecondaryGroups(query).then(function(groups) {
       $scope.secondaryGroups = groups.filter(function(group) {
-        return !group.inArray($scope.entity.data.groups);
+        return !group.$inArray($scope.entity.groups);
       });
       $scope.$apply();
     });
   };
 
-  $scope.$watch('entity.data.email', function() {
+  $scope.$watch('entity.email', function() {
     if ($scope.entity) {
-      $scope.entity.getAvatar().then(function(avatar) {
+      $scope.entity.$getAvatar().then(function(avatar) {
         $scope.avatar = avatar;
         $scope.$apply();
       });
-      $scope.entity.readyAll(1).then(function() {
+      $scope.entity.$readyAll(1).then(function() {
         $scope.$apply();
       });
     }
@@ -145,7 +162,7 @@ angular.module('setupApp', ['ngRoute'])
   });
 
   var usernameTimer = null;
-  $scope.$watch('entity.data.username', function(newValue, oldValue) {
+  $scope.$watch('entity.username', function(newValue, oldValue) {
     if (newValue === oldValue) {
       return;
     }
@@ -158,7 +175,7 @@ angular.module('setupApp', ['ngRoute'])
         $scope.uiState.usernameVerifiedMessage = null;
         return;
       }
-      $scope.entity.checkUsername().then(function(data) {
+      $scope.entity.$checkUsername().then(function(data) {
         $scope.uiState.usernameVerified = data.result;
         $scope.uiState.usernameVerifiedMessage = data.message;
         $scope.$apply();
@@ -166,7 +183,7 @@ angular.module('setupApp', ['ngRoute'])
     }, 400);
   });
   var emailTimer = null;
-  $scope.$watch('entity.data.email', function(newValue, oldValue) {
+  $scope.$watch('entity.email', function(newValue, oldValue) {
     if (newValue === oldValue) {
       return;
     }
@@ -179,7 +196,7 @@ angular.module('setupApp', ['ngRoute'])
         $scope.uiState.emailVerifiedMessage = null;
         return;
       }
-      $scope.entity.checkEmail().then(function(data) {
+      $scope.entity.$checkEmail().then(function(data) {
         $scope.uiState.emailVerified = data.result;
         $scope.uiState.emailVerifiedMessage = data.message;
         $scope.$apply();
@@ -189,30 +206,30 @@ angular.module('setupApp', ['ngRoute'])
 
   $scope.verifyPassword = function() {
     if (
-        (typeof $scope.entity.data.passwordTemp === 'undefined' || $scope.entity.data.passwordTemp === '') &&
+        (typeof $scope.entity.passwordTemp === 'undefined' || $scope.entity.passwordTemp === '') &&
         (typeof $scope.uiState.verifyPassword === 'undefined' || $scope.uiState.verifyPassword === '')
       ) {
       $scope.uiState.passwordVerified = null;
     }
-    $scope.uiState.passwordVerified = $scope.entity.data.passwordTemp === $scope.uiState.verifyPassword;
+    $scope.uiState.passwordVerified = $scope.entity.passwordTemp === $scope.uiState.verifyPassword;
   };
 
   $scope.addAbility = function() {
     if ($scope.uiState.ability === '') {
       return;
     }
-    $scope.entity.data.abilities.push($scope.uiState.ability);
+    $scope.entity.abilities.push($scope.uiState.ability);
     $scope.uiState.ability = '';
   };
 
   $scope.addSysAdminAbility = function() {
-    if ($scope.entity.data.abilities.indexOf('system/admin') === -1) {
-      $scope.entity.data.abilities.push('system/admin');
+    if ($scope.entity.abilities.indexOf('system/admin') === -1) {
+      $scope.entity.abilities.push('system/admin');
     }
   };
 
   $scope.saveEntity = function() {
-    $scope.entity.save().then(function(success) {
+    $scope.entity.$save().then(function(success) {
       if (success) {
         $scope.success = true;
         $timeout(function() {
@@ -222,7 +239,7 @@ angular.module('setupApp', ['ngRoute'])
       } else {
         alert("Error saving user.");
       }
-      $scope.entity.readyAll(1).then(function() {
+      $scope.entity.$readyAll(1).then(function() {
         $scope.$apply();
       });
     }, function(errObj) {
@@ -233,7 +250,7 @@ angular.module('setupApp', ['ngRoute'])
 
   $scope.deleteEntity = function() {
     if (confirm('Are you sure you want to delete this?')) {
-      $scope.entity.delete().then(function() {
+      $scope.entity.$delete().then(function() {
         setup();
         $scope.$apply();
       }, function(err) {
@@ -265,6 +282,11 @@ angular.module('setupApp', ['ngRoute'])
 
   function setup() {
     $scope.setEntity();
+    $scope.sysAdmin = false;
+    window.UserStatePromise.then(function(userState) {
+      $scope.sysAdmin = userState.sysAdmin;
+      $scope.$apply();
+    });
   }
   setup();
 
@@ -302,15 +324,15 @@ angular.module('setupApp', ['ngRoute'])
       ],
     }).then(function(groups) {
       $scope.parents = groups.filter(function(group) {
-        return !group.is($scope.entity) && !group.is($scope.entity.data.parent);
+        return !group.$is($scope.entity) && !group.$is($scope.entity.parent);
       });
       $scope.$apply();
     });
   };
 
-  $scope.$watch('entity.data.email', function() {
+  $scope.$watch('entity.email', function() {
     if ($scope.entity) {
-      $scope.entity.readyAll(1).then(function() {
+      $scope.entity.$readyAll(1).then(function() {
         $scope.$apply();
       });
     }
@@ -324,7 +346,7 @@ angular.module('setupApp', ['ngRoute'])
   });
 
   var groupnameTimer = null;
-  $scope.$watch('entity.data.groupname', function(newValue, oldValue) {
+  $scope.$watch('entity.groupname', function(newValue, oldValue) {
     if (newValue === oldValue) {
       return;
     }
@@ -337,7 +359,7 @@ angular.module('setupApp', ['ngRoute'])
         $scope.uiState.groupnameVerifiedMessage = null;
         return;
       }
-      $scope.entity.checkGroupname().then(function(data) {
+      $scope.entity.$checkGroupname().then(function(data) {
         $scope.uiState.groupnameVerified = data.result;
         $scope.uiState.groupnameVerifiedMessage = data.message;
         $scope.$apply();
@@ -345,7 +367,7 @@ angular.module('setupApp', ['ngRoute'])
     }, 400);
   });
   var emailTimer = null;
-  $scope.$watch('entity.data.email', function(newValue, oldValue) {
+  $scope.$watch('entity.email', function(newValue, oldValue) {
     if (newValue === oldValue) {
       return;
     }
@@ -358,7 +380,7 @@ angular.module('setupApp', ['ngRoute'])
         $scope.uiState.emailVerifiedMessage = null;
         return;
       }
-      $scope.entity.checkEmail().then(function(data) {
+      $scope.entity.$checkEmail().then(function(data) {
         $scope.uiState.emailVerified = data.result;
         $scope.uiState.emailVerifiedMessage = data.message;
         $scope.$apply();
@@ -370,18 +392,18 @@ angular.module('setupApp', ['ngRoute'])
     if ($scope.uiState.ability === '') {
       return;
     }
-    $scope.entity.data.abilities.push($scope.uiState.ability);
+    $scope.entity.abilities.push($scope.uiState.ability);
     $scope.uiState.ability = '';
   };
 
   $scope.addSysAdminAbility = function() {
-    if ($scope.entity.data.abilities.indexOf('system/admin') === -1) {
-      $scope.entity.data.abilities.push('system/admin');
+    if ($scope.entity.abilities.indexOf('system/admin') === -1) {
+      $scope.entity.abilities.push('system/admin');
     }
   };
 
   $scope.saveEntity = function() {
-    $scope.entity.save().then(function(success) {
+    $scope.entity.$save().then(function(success) {
       if (success) {
         $scope.success = true;
         $timeout(function() {
@@ -391,7 +413,7 @@ angular.module('setupApp', ['ngRoute'])
       } else {
         alert("Error saving group.");
       }
-      $scope.entity.readyAll(1).then(function() {
+      $scope.entity.$readyAll(1).then(function() {
         $scope.$apply();
       });
     }, function(errObj) {
@@ -402,7 +424,7 @@ angular.module('setupApp', ['ngRoute'])
 
   $scope.deleteEntity = function() {
     if (confirm('Are you sure you want to delete this?')) {
-      $scope.entity.delete().then(function() {
+      $scope.entity.$delete().then(function() {
         setup();
         $scope.$apply();
       }, function(err) {
