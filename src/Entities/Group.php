@@ -218,6 +218,20 @@ class Group extends AbleObject {
     ).'?d=identicon&s=40';
   }
 
+  public function jsonAcceptData($data) {
+    if (Tilmeld::gatekeeper('tilmeld/admin')
+      && !Tilmeld::gatekeeper('system/admin')
+      && in_array('system/admin', $data['data']['abilities'])
+      && !in_array('system/admin', $this->abilities)
+    ) {
+      throw new \Tilmeld\Exceptions\BadDataException(
+        'You don\'t have the authority to make this group a system admin.'
+      );
+    }
+
+    parent::jsonAcceptData($data);
+  }
+
   public function putData($data, $sdata = []) {
     $return = parent::putData($data, $sdata);
     $this->updateDataProtection();
@@ -593,7 +607,9 @@ class Group extends AbleObject {
 
   public function delete() {
     if (!Tilmeld::gatekeeper('tilmeld/admin')) {
-      return false;
+      throw new \Tilmeld\Exceptions\BadDataException(
+        'You don\'t have the authority to delete groups.'
+      );
     }
     $entities = Nymph::getEntities(
       ['class' => '\Tilmeld\Entities\Group'],

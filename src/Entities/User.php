@@ -563,6 +563,20 @@ class User extends AbleObject {
     );
   }
 
+  public function jsonAcceptData($data) {
+    if (Tilmeld::gatekeeper('tilmeld/admin')
+      && !Tilmeld::gatekeeper('system/admin')
+      && in_array('system/admin', $data['data']['abilities'])
+      && !in_array('system/admin', $this->abilities)
+    ) {
+      throw new \Tilmeld\Exceptions\BadDataException(
+        'You don\'t have the authority to make this user a system admin.'
+      );
+    }
+
+    parent::jsonAcceptData($data);
+  }
+
   public function putData($data, $sdata = []) {
     $return = parent::putData($data, $sdata);
     $this->updateDataProtection();
@@ -1296,7 +1310,6 @@ class User extends AbleObject {
             && Tilmeld::$config['unverified_access']
           ) {
           Tilmeld::login($this, true);
-          $this->updateDataProtection();
           $message .= (
             "You're now logged in! An email has been sent to ".
               "{$this->email} with a verification link for you to finish ".
@@ -1305,7 +1318,6 @@ class User extends AbleObject {
           $loggedin = true;
         } else {
           Tilmeld::login($this, true);
-          $this->updateDataProtection();
           $message .= 'You\'re now registered and logged in!';
           $loggedin = true;
         }
@@ -1335,6 +1347,15 @@ class User extends AbleObject {
   public function save() {
     if (!isset($this->username)) {
       return false;
+    }
+
+    if (Tilmeld::gatekeeper('tilmeld/admin')
+      && !Tilmeld::gatekeeper('system/admin')
+      && $this->gatekeeper('system/admin')
+    ) {
+      throw new \Tilmeld\Exceptions\BadDataException(
+        'You don\'t have the authority to modify system admins.'
+      );
     }
 
     $sendVerification = false;
@@ -1499,7 +1520,16 @@ class User extends AbleObject {
 
   public function delete() {
     if (!Tilmeld::gatekeeper('tilmeld/admin')) {
-      return false;
+      throw new \Tilmeld\Exceptions\BadDataException(
+        'You don\'t have the authority to delete users.'
+      );
+    }
+    if (!Tilmeld::gatekeeper('system/admin')
+      && $this->gatekeeper('system/admin')
+    ) {
+      throw new \Tilmeld\Exceptions\BadDataException(
+        'You don\'t have the authority to delete system admins.'
+      );
     }
     if (self::current(true)->is($this)) {
       $this->logout();
