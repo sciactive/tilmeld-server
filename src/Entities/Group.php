@@ -232,6 +232,20 @@ class Group extends AbleObject {
     parent::jsonAcceptData($data);
   }
 
+  public function jsonAcceptPatch($patch) {
+    if (Tilmeld::gatekeeper('tilmeld/admin')
+      && !Tilmeld::gatekeeper('system/admin')
+      && in_array('system/admin', $patch['set']['abilities'])
+      && !in_array('system/admin', $this->abilities)
+    ) {
+      throw new \Tilmeld\Exceptions\BadDataException(
+        'You don\'t have the authority to make this group a system admin.'
+      );
+    }
+
+    parent::jsonAcceptPatch($patch);
+  }
+
   public function putData($data, $sdata = []) {
     $return = parent::putData($data, $sdata);
     $this->updateDataProtection();
