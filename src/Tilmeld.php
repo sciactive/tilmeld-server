@@ -441,7 +441,7 @@ class Tilmeld {
   }
 
   /**
-   * Check for a TILMELDAUTH cookie, and, if set, authenticate from it.
+   * Check for a TILMELDAUTH token, and, if set, authenticate from it.
    *
    * @param bool $skipXsrfToken Skip the XSRF token check.
    * @return bool True if a user was authenticated, false on any failure.
@@ -556,6 +556,7 @@ class Tilmeld {
       $appUrlParts['path'],
       $appUrlParts['host']
     );
+    header("X-TILMELDAUTH: ");
   }
 
   /**
