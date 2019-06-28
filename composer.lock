@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "e54191279537bc232afd761afa528bd2",
+    "content-hash": "382ead9ffdeb639e8dfbfdc33e2d6975",
     "packages": [
         {
             "name": "lcobucci/jwt",
