@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "96a82920154840cb9970bc325b9be77b",
+    "content-hash": "e54191279537bc232afd761afa528bd2",
     "packages": [
         {
             "name": "lcobucci/jwt",
@@ -176,16 +176,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.1.0",
+            "version": "3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "d027ed434f62b0cbfb0c90eabd1b191a968417bd"
+                "reference": "781d3a6831952051ff5e858c537c928e3ca87af3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/d027ed434f62b0cbfb0c90eabd1b191a968417bd",
-                "reference": "d027ed434f62b0cbfb0c90eabd1b191a968417bd",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/781d3a6831952051ff5e858c537c928e3ca87af3",
+                "reference": "781d3a6831952051ff5e858c537c928e3ca87af3",
                 "shasum": ""
             },
             "require-dev": {
@@ -226,7 +226,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2019-06-11T00:00:00+00:00"
+            "time": "2019-06-28T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
