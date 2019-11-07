@@ -85,6 +85,11 @@ class HookMethods {
         $array = false;
         return;
       }
+      if (is_callable([$entity, 'tilmeldDeleteSkipAC'])
+        && $entity->tilmeldDeleteSkipAC()
+      ) {
+        return;
+      }
       // Test for permissions.
       if (!Tilmeld::checkPermissions($entity, Tilmeld::FULL_ACCESS)) {
         $array = false;

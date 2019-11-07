@@ -23,20 +23,6 @@ use Nymph\Nymph;
  *   The group's avatar URL. (Use getAvatar() to support Gravatar.)
  * - string $this->phone
  *   The group's telephone number.
- * - string $this->addressType
- *   The group's address type. "us" or "international".
- * - string $this->addressStreet
- *   The group's address line 1 for US addresses.
- * - string $this->addressStreet2
- *   The group's address line 2 for US addresses.
- * - string $this->addressCity
- *   The group's city for US addresses.
- * - string $this->addressState
- *   The group's state abbreviation for US addresses.
- * - string $this->addressZip
- *   The group's ZIP code for US addresses.
- * - string $this->addressInternational
- *   The group's full address for international addresses.
  * - Group $this->parent
  *   The group's parent.
  * - User|null $this->user
@@ -46,18 +32,13 @@ use Nymph\Nymph;
  * @copyright SciActive.com
  * @see http://tilmeld.org/
  */
-class Group extends AbleObject {
+class Group extends \Nymph\Entity {
+  use AbleObject;
+
   const ETYPE = 'tilmeld_group';
   const DEFAULT_PRIVATE_DATA = [
     'email',
     'phone',
-    'addressType',
-    'addressStreet',
-    'addressStreet2',
-    'addressCity',
-    'addressState',
-    'addressZip',
-    'addressInternational',
     'abilities',
     'user',
   ];
@@ -88,6 +69,14 @@ class Group extends AbleObject {
    * @access private
    */
   private $skipAcWhenSaving = false;
+
+  /**
+   * This is explicitly used only during the registration proccess.
+   *
+   * @var bool
+   * @access private
+   */
+  private $skipAcWhenDeleting = false;
 
   /**
    * Load a group.
@@ -124,7 +113,6 @@ class Group extends AbleObject {
     // Defaults.
     $this->enabled = true;
     $this->abilities = [];
-    $this->addressType = 'us';
     $this->updateDataProtection();
   }
 
@@ -637,5 +625,29 @@ class Group extends AbleObject {
       }
     }
     return parent::delete();
+  }
+
+  public function deleteSkipAC() {
+    $entities = Nymph::getEntities(
+      ['class' => '\Tilmeld\Entities\Group'],
+      ['&',
+        'ref' => ['parent', $this]
+      ]
+    );
+    foreach ($entities as $curGroup) {
+      if (!$curGroup->deleteSkipAC()) {
+        return false;
+      }
+    }
+    $this->skipAcWhenDeleting = true;
+    return parent::delete();
+  }
+
+  public function tilmeldDeleteSkipAC() {
+    if ($this->skipAcWhenDeleting) {
+      $this->skipAcWhenDeleting = false;
+      return true;
+    }
+    return false;
   }
 }

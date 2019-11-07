@@ -69,7 +69,7 @@ return [
    * These will be the available fields for users. (Some fields, like username,
    * can't be excluded.)
    */
-  'user_fields' => ['name', 'email', 'phone', 'timezone', 'address'],
+  'user_fields' => ['name', 'email', 'phone', 'timezone'],
   /*
    * Visible Registration Fields
    * These fields will be available for the user to fill in when they register.
@@ -261,13 +261,6 @@ return [
     ->attribute('name', v::stringType()->notBlank()->prnt()->length(1, 256))
     ->attribute('avatar', v::optional(v::stringType()->url()->prnt()->length(1, 256)), false)
     ->attribute('phone', v::optional(v::phone()), false)
-    ->attribute('addressType', v::optional(v::stringType()->in(['us','international'])), false)
-    ->attribute('addressStreet', v::optional(v::stringType()->prnt()->length(1, 256)), false)
-    ->attribute('addressStreet2', v::optional(v::stringType()->prnt()->length(1, 256)), false)
-    ->attribute('addressCity', v::optional(v::stringType()->prnt()->length(1, 256)), false)
-    ->attribute('addressState', v::optional(v::stringType()->alpha()->uppercase()->length(2, 2)), false)
-    ->attribute('addressZip', v::optional(v::postalCode('US')), false)
-    ->attribute('addressInternational', v::optional(v::stringType()->prnt()->length(1, 1024)), false)
     ->attribute('parent', v::when(v::nullType(), v::alwaysValid(), v::instance('\Tilmeld\Entities\Group')), false)
     ->attribute('user', v::when(v::nullType(), v::alwaysValid(), v::instance('\Tilmeld\Entities\User')), false)
     ->attribute('abilities', v::arrayType()->each(v::stringType()->notBlank()->prnt()->length(1, 256)))
@@ -289,13 +282,6 @@ return [
     ->attribute('avatar', v::optional(v::stringType()->url()->prnt()->length(1, 256)), false)
     ->attribute('phone', v::optional(v::phone()), false)
     ->attribute('timezone', v::optional(v::in(\DateTimeZone::listIdentifiers())), false)
-    ->attribute('addressType', v::optional(v::stringType()->in(['us','international'])), false)
-    ->attribute('addressStreet', v::optional(v::stringType()->prnt()->length(1, 256)), false)
-    ->attribute('addressStreet2', v::optional(v::stringType()->prnt()->length(1, 256)), false)
-    ->attribute('addressCity', v::optional(v::stringType()->prnt()->length(1, 256)), false)
-    ->attribute('addressState', v::optional(v::stringType()->alpha()->uppercase()->length(2, 2)), false)
-    ->attribute('addressZip', v::optional(v::postalCode('US')), false)
-    ->attribute('addressInternational', v::optional(v::stringType()->prnt()->length(1, 1024)), false)
     ->attribute('group', v::when(v::nullType(), v::alwaysValid(), v::instance('\Tilmeld\Entities\Group')))
     ->attribute('groups', v::arrayType()->each(v::instance('\Tilmeld\Entities\Group')))
     ->attribute('abilities', v::arrayType()->each(v::stringType()->notBlank()->prnt()->length(1, 256)))

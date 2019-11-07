@@ -1,15 +1,15 @@
 <?php namespace Tilmeld\Entities;
 
 /**
- * AbleObject class.
+ * AbleObject trait.
  *
- * Entities which support abilities, such as users and groups.
+ * Used in entities which support abilities, such as users and groups.
  *
  * @author Hunter Perrin <hperrin@gmail.com>
  * @copyright SciActive.com
  * @see http://tilmeld.org/
  */
-class AbleObject extends \Nymph\Entity {
+trait AbleObject {
   /**
    * Grant an ability.
    *

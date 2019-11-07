@@ -17,7 +17,6 @@ class VerifyEmail extends \uMailPHP\Definition {
     'verify_link' => 'The URL to verify the email address, to be used in a link.',
     'to_phone' => 'The recipient\'s phone number.',
     'to_timezone' => 'The recipient\'s timezone.',
-    'to_address' => 'The recipient\'s address.',
   ];
 
   public static function getMacro($name) {

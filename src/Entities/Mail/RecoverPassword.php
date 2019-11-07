@@ -19,7 +19,6 @@ class RecoverPassword extends \uMailPHP\Definition {
     'to_phone' => 'The recipient\'s phone number.',
     'to_fax' => 'The recipient\'s fax number.',
     'to_timezone' => 'The recipient\'s timezone.',
-    'to_address' => 'The recipient\'s address.',
   ];
 
   public static function getMacro($name) {

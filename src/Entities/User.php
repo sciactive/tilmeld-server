@@ -28,20 +28,6 @@ use Nymph\Nymph;
  *   The user's avatar URL. (Use getAvatar() to support Gravatar.)
  * - string $this->phone
  *   The user's telephone number.
- * - string $this->addressType
- *   The user's address type. "us" or "international".
- * - string $this->addressStreet
- *   The user's address line 1 for US addresses.
- * - string $this->addressStreet2
- *   The user's address line 2 for US addresses.
- * - string $this->addressCity
- *   The user's city for US addresses.
- * - string $this->addressState
- *   The user's state abbreviation for US addresses.
- * - string $this->addressZip
- *   The user's ZIP code for US addresses.
- * - string $this->addressInternational
- *   The user's full address for international addresses.
  * - \Tilmeld\Entities\Group $this->group
  *   The user's primary group.
  * - array $this->groups
@@ -56,7 +42,9 @@ use Nymph\Nymph;
  * @copyright SciActive.com
  * @see http://tilmeld.org/
  */
-class User extends AbleObject {
+class User extends \Nymph\Entity {
+  use AbleObject;
+
   const ETYPE = 'tilmeld_user';
   const DEFAULT_CLIENT_ENABLED_METHODS = [
     'checkUsername',
@@ -69,13 +57,6 @@ class User extends AbleObject {
     'email',
     'originalEmail',
     'phone',
-    'addressType',
-    'addressStreet',
-    'addressStreet2',
-    'addressCity',
-    'addressState',
-    'addressZip',
-    'addressInternational',
     'group',
     'groups',
     'abilities',
@@ -180,7 +161,6 @@ class User extends AbleObject {
     $this->abilities = [];
     $this->groups = [];
     $this->inheritAbilities = true;
-    $this->addressType = 'us';
     $this->updateDataProtection();
   }
 
@@ -301,17 +281,6 @@ class User extends AbleObject {
           \uMailPHP\Mail::formatPhone($user->phone)
         ),
         'to_timezone' => htmlspecialchars($user->timezone),
-        'to_address' =>
-          $user->addressType == 'us'
-            ?
-              htmlspecialchars(
-                "{$user->addressStreet} {$user->addressStreet2}"
-              ).'<br />'.
-              htmlspecialchars(
-                "{$user->addressCity}, {$user->addressState} ".
-                  "{$user->addressZip}"
-              )
-            : '<pre>'.htmlspecialchars($user->addressInternational).'</pre>'
       ];
       $mail = new \uMailPHP\Mail(
         '\Tilmeld\Entities\Mail\RecoverUsername',
@@ -347,17 +316,6 @@ class User extends AbleObject {
           \uMailPHP\Mail::formatPhone($user->phone)
         ),
         'to_timezone' => htmlspecialchars($user->timezone),
-        'to_address' =>
-          $user->addressType == 'us'
-            ?
-              htmlspecialchars(
-                "{$user->addressStreet} {$user->addressStreet2}"
-              ).'<br />'.
-              htmlspecialchars(
-                "{$user->addressCity}, {$user->addressState} ".
-                  "{$user->addressZip}"
-              )
-            : '<pre>'.htmlspecialchars($user->addressInternational).'</pre>'
       ];
       $mail = new \uMailPHP\Mail(
         '\Tilmeld\Entities\Mail\RecoverPassword',
@@ -654,15 +612,6 @@ class User extends AbleObject {
       if (in_array('timezone', Tilmeld::$config['user_fields'])) {
         $this->whitelistData[] = 'timezone';
       }
-      if (in_array('address', Tilmeld::$config['user_fields'])) {
-        $this->whitelistData[] = 'addressType';
-        $this->whitelistData[] = 'addressStreet';
-        $this->whitelistData[] = 'addressStreet2';
-        $this->whitelistData[] = 'addressCity';
-        $this->whitelistData[] = 'addressState';
-        $this->whitelistData[] = 'addressZip';
-        $this->whitelistData[] = 'addressInternational';
-      }
       $this->privateData = [
         'originalEmail',
         'secret',
@@ -747,17 +696,6 @@ class User extends AbleObject {
           \uMailPHP\Mail::formatPhone($this->phone)
         ),
         'to_timezone' => htmlspecialchars($this->timezone),
-        'to_address' =>
-          $this->addressType == 'us'
-            ?
-              htmlspecialchars(
-                "{$this->addressStreet} {$this->addressStreet2}"
-              ).'<br />'.
-              htmlspecialchars(
-                "{$this->addressCity}, {$this->addressState} ".
-                  "{$this->addressZip}"
-              )
-            : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
       ];
       $mail = new \uMailPHP\Mail(
         '\Tilmeld\Entities\Mail\VerifyEmail',
@@ -777,17 +715,6 @@ class User extends AbleObject {
           \uMailPHP\Mail::formatPhone($this->phone)
         ),
         'to_timezone' => htmlspecialchars($this->timezone),
-        'to_address' =>
-          $this->addressType == 'us'
-            ?
-              htmlspecialchars(
-                "{$this->addressStreet} {$this->addressStreet2}"
-              ).'<br />'.
-              htmlspecialchars(
-                "{$this->addressCity}, {$this->addressState} ".
-                  "{$this->addressZip}"
-              )
-            : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
       ];
       $mail = new \uMailPHP\Mail(
         '\Tilmeld\Entities\Mail\VerifyEmailChange',
@@ -807,17 +734,6 @@ class User extends AbleObject {
           \uMailPHP\Mail::formatPhone($this->phone)
         ),
         'to_timezone' => htmlspecialchars($this->timezone),
-        'to_address' =>
-          $this->addressType == 'us'
-            ?
-              htmlspecialchars(
-                "{$this->addressStreet} {$this->addressStreet2}"
-              ).'<br />'.
-              htmlspecialchars(
-                "{$this->addressCity}, {$this->addressState} ".
-                  "{$this->addressZip}"
-              )
-            : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
       ];
       $mail = new \uMailPHP\Mail(
         '\Tilmeld\Entities\Mail\CancelEmailChange',
@@ -1278,17 +1194,6 @@ class User extends AbleObject {
             \uMailPHP\Mail::formatPhone($this->phone)
           ),
           'user_timezone' => htmlspecialchars($this->timezone),
-          'user_address' =>
-            $this->addressType == 'us'
-              ?
-                htmlspecialchars(
-                  "{$this->addressStreet} {$this->addressStreet2}"
-                ).'<br />'.
-                htmlspecialchars(
-                  "{$this->addressCity}, {$this->addressState} ".
-                    "{$this->addressZip}"
-                )
-              : '<pre>'.htmlspecialchars($this->addressInternational).'</pre>'
         ];
         $mail = new \uMailPHP\Mail(
           '\Tilmeld\Entities\Mail\UserRegistered',
@@ -1342,7 +1247,7 @@ class User extends AbleObject {
         ];
       } else {
         if ($generatedPrimaryGroup) {
-          $generatedPrimaryGroup->delete();
+          $generatedPrimaryGroup->deleteSkipAC();
         }
         return [
           'result' => false,
@@ -1352,7 +1257,7 @@ class User extends AbleObject {
       }
     } catch (\Exception $e) {
       if ($generatedPrimaryGroup) {
-        $generatedPrimaryGroup->delete();
+        $generatedPrimaryGroup->deleteSkipAC();
       }
       throw $e;
     }

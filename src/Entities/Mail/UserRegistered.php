@@ -21,7 +21,6 @@ class UserRegistered extends \uMailPHP\Definition {
     'user_email' => 'The user\'s email.',
     'user_phone' => 'The user\'s phone number.',
     'user_timezone' => 'The user\'s timezone.',
-    'user_address' => 'The user\'s address.',
   ];
 
   public static function getMacro($name) {

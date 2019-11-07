@@ -19,7 +19,6 @@ class CancelEmailChange extends \uMailPHP\Definition {
     'new_email' => 'The new email address.',
     'to_phone' => 'The recipient\'s phone number.',
     'to_timezone' => 'The recipient\'s timezone.',
-    'to_address' => 'The recipient\'s address.',
   ];
 
   public static function getMacro($name) {
