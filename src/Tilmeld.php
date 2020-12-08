@@ -479,8 +479,9 @@ class Tilmeld {
       // check, so don't check for the XSRF token.
       $extract = self::$config['jwt_extract']($authToken);
     } else {
-      // The request is for something else, so check for a valid XSRF token.
-      if (empty($_SERVER['HTTP_X_XSRF_TOKEN'])) {
+      // The request is for something else, so check for a valid XSRF token,
+      // unless the auth token is provided by a header (instead of a cookie).
+      if (empty($_SERVER['HTTP_X_XSRF_TOKEN']) && !$fromAuthHeader) {
         return false;
       }
 
