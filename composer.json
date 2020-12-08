@@ -1,8 +1,8 @@
 {
   "name": "sciactive/tilmeld-server",
   "description": "Nymph user and group management with access controls.",
-  "version": "1.1.2",
-  "time": "2019-06-28",
+  "version": "1.1.3",
+  "time": "2020-12-08",
   "type": "library",
   "scripts": {
     "lint": "phpcs -vs --extensions=php --ignore=vendor/* --runtime-set ignore_warnings_on_exit 1 .",
