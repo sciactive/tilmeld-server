@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cf9fc9f14c6de874402836c960c02147",
+    "content-hash": "365bb72d26b482f31c64412803ada415",
     "packages": [
         {
             "name": "lcobucci/jwt",
-            "version": "3.4.1",
+            "version": "3.4.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/lcobucci/jwt.git",
-                "reference": "958a9873a63b0244a72f6e354ccc86019ee674a5"
+                "reference": "17cb82dd625ccb17c74bf8f38563d3b260306483"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/958a9873a63b0244a72f6e354ccc86019ee674a5",
-                "reference": "958a9873a63b0244a72f6e354ccc86019ee674a5",
+                "url": "https://api.github.com/repos/lcobucci/jwt/zipball/17cb82dd625ccb17c74bf8f38563d3b260306483",
+                "reference": "17cb82dd625ccb17c74bf8f38563d3b260306483",
                 "shasum": ""
             },
             "require": {
@@ -77,7 +77,7 @@
                     "type": "patreon"
                 }
             ],
-            "time": "2020-11-27T01:17:14+00:00"
+            "time": "2020-12-03T13:43:45+00:00"
         },
         {
             "name": "respect/validation",
@@ -194,16 +194,16 @@
         },
         {
             "name": "sciactive/nymph-server",
-            "version": "3.2.2",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sciactive/nymph-server.git",
-                "reference": "461d0609c6b7f7a6592e78e3246f96b1cc50e861"
+                "reference": "52398b9717bd43ae9d7e5420b3956c6101e6b54b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/461d0609c6b7f7a6592e78e3246f96b1cc50e861",
-                "reference": "461d0609c6b7f7a6592e78e3246f96b1cc50e861",
+                "url": "https://api.github.com/repos/sciactive/nymph-server/zipball/52398b9717bd43ae9d7e5420b3956c6101e6b54b",
+                "reference": "52398b9717bd43ae9d7e5420b3956c6101e6b54b",
                 "shasum": ""
             },
             "require-dev": {
@@ -244,7 +244,7 @@
                 "postgres",
                 "postgresql"
             ],
-            "time": "2020-08-14T00:00:00+00:00"
+            "time": "2020-12-23T00:00:00+00:00"
         },
         {
             "name": "sciactive/umailphp",
