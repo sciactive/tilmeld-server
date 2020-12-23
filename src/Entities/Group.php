@@ -206,7 +206,7 @@ class Group extends \Nymph\Entity {
     ).'?d=identicon&s=40';
   }
 
-  public function jsonAcceptData($data) {
+  public function jsonAcceptData($data, $allowConflict = false) {
     if (Tilmeld::gatekeeper('tilmeld/admin')
       && !Tilmeld::gatekeeper('system/admin')
       && in_array('system/admin', $data['data']['abilities'])
@@ -217,10 +217,10 @@ class Group extends \Nymph\Entity {
       );
     }
 
-    parent::jsonAcceptData($data);
+    parent::jsonAcceptData($data, $allowConflict);
   }
 
-  public function jsonAcceptPatch($patch) {
+  public function jsonAcceptPatch($patch, $allowConflict = false) {
     if (Tilmeld::gatekeeper('tilmeld/admin')
       && !Tilmeld::gatekeeper('system/admin')
       && in_array('system/admin', $patch['set']['abilities'])
@@ -231,7 +231,7 @@ class Group extends \Nymph\Entity {
       );
     }
 
-    parent::jsonAcceptPatch($patch);
+    parent::jsonAcceptPatch($patch, $allowConflict);
   }
 
   public function putData($data, $sdata = []) {
