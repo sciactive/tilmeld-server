@@ -555,7 +555,9 @@ class Tilmeld {
       '',
       null,
       $appUrlParts['path'],
-      $appUrlParts['host']
+      $appUrlParts['host'],
+      $appUrlParts['scheme'] === 'https',
+      false // Allow JS access (for CSRF protection).
     );
     header("X-TILMELDAUTH: ");
   }
