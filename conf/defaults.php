@@ -195,7 +195,7 @@ return [
   'jwt_builder' => function ($user) {
     $erPrev = \error_reporting();
     // Workaround for a deprecated warning in Lcobucci\JWT.
-    \error_reporting($erPrev ^ E_DEPRECATED);
+    \error_reporting($erPrev & ~E_DEPRECATED & ~E_NOTICE);
     $secret = \Tilmeld\Tilmeld::$config['jwt_secret'];
     if (!isset($secret)) {
       throw new \Exception('JWT secret is not configured.');
@@ -226,7 +226,7 @@ return [
   'jwt_extract' => function ($token, $xsrfToken = null) {
     $erPrev = \error_reporting();
     // Workaround for a deprecated warning in Lcobucci\JWT.
-    \error_reporting($erPrev ^ E_DEPRECATED);
+    \error_reporting($erPrev & ~E_DEPRECATED & ~E_NOTICE);
     $secret = \Tilmeld\Tilmeld::$config['jwt_secret'];
     if (!isset($secret)) {
       throw new \Exception('JWT secret is not configured.');
