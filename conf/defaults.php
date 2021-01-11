@@ -193,6 +193,9 @@ return [
    * Function to build the JWT for user sessions.
    */
   'jwt_builder' => function ($user) {
+    $erPrev = \error_reporting();
+    // Workaround for a deprecated warning in Lcobucci\JWT.
+    \error_reporting($erPrev ^ E_DEPRECATED);
     $secret = \Tilmeld\Tilmeld::$config['jwt_secret'];
     if (!isset($secret)) {
       throw new \Exception('JWT secret is not configured.');
@@ -207,6 +210,7 @@ return [
       ->set('xsrfToken', uniqid('TILMELDXSRF-', true))
       ->sign($signer, $secret)
       ->getToken();
+    \error_reporting($erPrev);
     return $token;
   },
   /*
@@ -220,6 +224,9 @@ return [
    * timestamp otherwise.
    */
   'jwt_extract' => function ($token, $xsrfToken = null) {
+    $erPrev = \error_reporting();
+    // Workaround for a deprecated warning in Lcobucci\JWT.
+    \error_reporting($erPrev ^ E_DEPRECATED);
     $secret = \Tilmeld\Tilmeld::$config['jwt_secret'];
     if (!isset($secret)) {
       throw new \Exception('JWT secret is not configured.');
@@ -248,7 +255,9 @@ return [
       return false;
     }
 
-    return ['guid' => $guid, 'expire' => $token->getClaim('exp')];
+    $ret = ['guid' => $guid, 'expire' => $token->getClaim('exp')];
+    \error_reporting($erPrev);
+    return $ret;
   },
   /*
    * Group Validator
