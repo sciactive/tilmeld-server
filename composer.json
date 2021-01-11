@@ -1,7 +1,7 @@
 {
   "name": "sciactive/tilmeld-server",
   "description": "Nymph user and group management with access controls.",
-  "version": "1.1.5",
+  "version": "1.1.6",
   "time": "2021-01-11",
   "type": "library",
   "scripts": {
