@@ -7,10 +7,14 @@
  * @see http://tilmeld.org/
  */
 
-use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\Parser;
-use Lcobucci\JWT\ValidationData;
+use Lcobucci\JWT\Configuration;
+use Lcobucci\JWT\Token\Plain;
+use Lcobucci\JWT\Validation\Constraint\SignedWith;
+use Lcobucci\Clock\SystemClock;
+use Lcobucci\JWT\Validation\Constraint\ValidAt;
+use Lcobucci\JWT\Validation\RequiredConstraintsViolated;
 use Respect\Validation\Validator as v;
 
 // phpcs:disable Generic.Files.LineLength.TooLong,Squiz.WhiteSpace.ObjectOperatorSpacing.Before
@@ -182,36 +186,37 @@ return [
    * JWT Expire
    * How long from current time, in seconds, the JWT token expires.
    */
-  'jwt_expire' => 60 * 60 * 24 * 14, // Two weeks(ish)
+  'jwt_expire' => 60 * 60 * 24 * 7 * 8, // 8 weeks
   /*
    * JWT Renew
    * How long before the JWT token expires to give the user a new one.
    */
-  'jwt_renew' => 60 * 60 * 24 * 8, // 8 days(ish)
+  'jwt_renew' => 60 * 60 * 24 * 7 * 3, // 3 weeks
   /*
    * JWT Builder
    * Function to build the JWT for user sessions.
    */
   'jwt_builder' => function ($user) {
-    $erPrev = \error_reporting();
-    // Workaround for a deprecated warning in Lcobucci\JWT.
-    \error_reporting($erPrev & ~E_DEPRECATED & ~E_NOTICE);
     $secret = \Tilmeld\Tilmeld::$config['jwt_secret'];
     if (!isset($secret)) {
       throw new \Exception('JWT secret is not configured.');
     }
 
-    $signer = new Sha256();
-    $token = (new Builder())
-      ->setIssuedAt(time())
-      ->setNotBefore(time())
-      ->setExpiration(time() + \Tilmeld\Tilmeld::$config['jwt_expire'])
-      ->set('guid', $user->guid)
-      ->set('xsrfToken', uniqid('TILMELDXSRF-', true))
-      ->sign($signer, $secret)
-      ->getToken();
-    \error_reporting($erPrev);
-    return $token;
+    $key = InMemory::plainText($secret);
+    $config = Configuration::forSymmetricSigner(
+      new Sha256(),
+      $key
+    );
+
+    $now = new \DateTimeImmutable('now', new DateTimeZone('UTC'));
+    $token = $config->builder()
+      ->issuedAt($now)
+      ->canOnlyBeUsedAfter($now)
+      ->expiresAt($now->modify('+'.\Tilmeld\Tilmeld::$config['jwt_expire'].' seconds'))
+      ->relatedTo($user->guid)
+      ->withClaim('xsrfToken', uniqid('TILMELDXSRF-', true))
+      ->getToken($config->signer(), $config->signingKey());
+    return $token->toString();
   },
   /*
    * JWT Extract
@@ -223,41 +228,48 @@ return [
    * Return false if the JWT is not valid, or an array of GUID and expire
    * timestamp otherwise.
    */
-  'jwt_extract' => function ($token, $xsrfToken = null) {
-    $erPrev = \error_reporting();
-    // Workaround for a deprecated warning in Lcobucci\JWT.
-    \error_reporting($erPrev & ~E_DEPRECATED & ~E_NOTICE);
+  'jwt_extract' => function ($jwt, $xsrfToken = null) {
     $secret = \Tilmeld\Tilmeld::$config['jwt_secret'];
     if (!isset($secret)) {
       throw new \Exception('JWT secret is not configured.');
     }
 
-    $token = (new Parser())->parse($token);
-    $signer = new Sha256();
-    if (!$token->verify($signer, $secret)) {
+    $key = InMemory::plainText($secret);
+    $config = Configuration::forSymmetricSigner(
+      new Sha256(),
+      $key
+    );
+    $config->setValidationConstraints(
+      new SignedWith($config->signer(), $config->signingKey()),
+      new ValidAt(new SystemClock(new DateTimeZone('UTC')))
+    );
+
+    $token = $config->parser()->parse($jwt);
+    $constraints = $config->validationConstraints();
+    try {
+      !$config->validator()->assert($token, ...$constraints);
+    } catch (RequiredConstraintsViolated $e) {
       return false;
     }
 
-    $data = new ValidationData();
-    if (!$token->validate($data)) {
-      return false;
-    }
-
-    $token->getClaims();
-
-    $jwtXsrfToken = $token->getClaim('xsrfToken');
+    $jwtXsrfToken = $token->claims()->get('xsrfToken');
     if (isset($xsrfToken) && $xsrfToken !== $jwtXsrfToken) {
       return false;
     }
 
-    $guid = $token->getClaim('guid');
+    if ($token->claims()->has('guid')) {
+      // This check is only needed for as long as 'jwt_expire'.
+      $guid = intval($token->claims()->get('guid'));
+    } else {
+      $guid = intval($token->claims()->get('sub'));
+    }
     if (!is_numeric($guid) || $guid <= 0) {
       return false;
     }
 
-    $ret = ['guid' => $guid, 'expire' => $token->getClaim('exp')];
-    \error_reporting($erPrev);
-    return $ret;
+    $exp = $token->claims()->get('exp')->getTimestamp();
+
+    return ['guid' => $guid, 'expire' => $exp];
   },
   /*
    * Group Validator

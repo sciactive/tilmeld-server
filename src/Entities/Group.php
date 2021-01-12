@@ -530,9 +530,15 @@ class Group extends \Nymph\Entity {
 
     // Formatting.
     $this->groupname = trim($this->groupname);
-    $this->email = trim($this->email);
-    $this->name = trim($this->name);
-    $this->phone = trim($this->phone);
+    if (isset($this->email)) {
+      $this->email = trim($this->email);
+    }
+    if (isset($this->name)) {
+      $this->name = trim($this->name);
+    }
+    if (isset($this->phone)) {
+      $this->phone = trim($this->phone);
+    }
 
     // Verification.
     $unCheck = $this->checkGroupname();

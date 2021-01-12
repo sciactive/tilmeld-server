@@ -486,8 +486,8 @@ class Tilmeld {
       }
 
       $extract = self::$config['jwt_extract'](
-          $authToken,
-          $_SERVER['HTTP_X_XSRF_TOKEN']
+        $authToken,
+        $_SERVER['HTTP_X_XSRF_TOKEN']
       );
     }
 

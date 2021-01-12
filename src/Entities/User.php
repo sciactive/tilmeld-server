@@ -1104,9 +1104,15 @@ class User extends \Nymph\Entity {
       // Generate a new primary group for the user.
       $primaryGroup = Group::factory();
       $primaryGroup->groupname = $this->username;
-      $primaryGroup->avatar = $this->avatar;
-      $primaryGroup->name = $this->name;
-      $primaryGroup->email = $this->email;
+      if (isset($this->avatar)) {
+        $primaryGroup->avatar = $this->avatar;
+      }
+      if (isset($this->name)) {
+        $primaryGroup->name = $this->name;
+      }
+      if (isset($this->email)) {
+        $primaryGroup->email = $this->email;
+      }
       $primaryGroup->parent = Nymph::getEntity(
         ['class' => '\Tilmeld\Entities\Group'],
         ['&',
@@ -1282,14 +1288,24 @@ class User extends \Nymph\Entity {
     // Formatting.
     $this->username = trim($this->username);
     // Setting username sets both username and email if email_usernames is on.
-    if (!Tilmeld::$config['email_usernames']) {
+    if (!Tilmeld::$config['email_usernames'] && isset($this->email)) {
       $this->email = trim($this->email);
     }
-    $this->nameFirst = trim($this->nameFirst);
-    $this->nameMiddle = trim($this->nameMiddle);
-    $this->nameLast = trim($this->nameLast);
-    $this->phone = trim($this->phone);
-    $this->name = $this->nameFirst.(
+    if (isset($this->nameFirst)) {
+      $this->nameFirst = trim($this->nameFirst);
+    }
+    if (isset($this->nameMiddle)) {
+      $this->nameMiddle = trim($this->nameMiddle);
+    }
+    if (isset($this->nameLast)) {
+      $this->nameLast = trim($this->nameLast);
+    }
+    if (isset($this->phone)) {
+      $this->phone = trim($this->phone);
+    }
+    $this->name = (
+        !empty($this->nameFirst) ? $this->nameFirst : ''
+      ).(
         !empty($this->nameMiddle) ? ' '.$this->nameMiddle : ''
       ).(
         !empty($this->nameLast) ? ' '.$this->nameLast : ''
@@ -1398,9 +1414,21 @@ class User extends \Nymph\Entity {
     if (isset($this->group->user) && $this->is($this->group->user)) {
       // Update the user's generated primary group.
       $this->group->groupname = $this->username;
-      $this->group->avatar = $this->avatar;
-      $this->group->email = $this->email;
-      $this->group->name = $this->name;
+      if (isset($this->avatar)) {
+        $this->group->avatar = $this->avatar;
+      } else {
+        unset($this->group->avatar);
+      }
+      if (isset($this->email)) {
+        $this->group->email = $this->email;
+      } else {
+        unset($this->group->email);
+      }
+      if (isset($this->name)) {
+        $this->group->name = $this->name;
+      } else {
+        unset($this->group->name);
+      }
       $this->group->saveSkipAC();
     }
 
