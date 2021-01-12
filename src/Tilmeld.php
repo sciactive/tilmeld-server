@@ -13,7 +13,7 @@ use Tilmeld\Entities\User;
  * @see http://tilmeld.org/
  */
 class Tilmeld {
-  const VERSION = '1.1.6';
+  const VERSION = '1.2.0';
 
   const NO_ACCESS = 0;
   const READ_ACCESS = 1;
