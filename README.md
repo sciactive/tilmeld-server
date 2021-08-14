@@ -2,6 +2,10 @@
 
 Nymph user and group management with access controls.
 
+## Deprecation Notice
+
+The PHP implementation of Nymph/Tilmeld has been deprecated. It will no longer have any new features added. Instead, a new version of Nymph running on Node.js, written entirely in TypeScript will replace the PHP implementation. You can find it over at the [Nymph.js repo](https://github.com/sciactive/nymphjs).
+
 ## Installation
 
 ### Automatic Setup
@@ -44,21 +48,21 @@ Tilmeld filters all calls to Nymph to allow users to only see and modify the ent
 
 You can use these constants for access control:
 
-* `Tilmeld::FULL_ACCESS` - Read/Edit/Save/Change AC/Delete access.
-* `Tilmeld::WRITE_ACCESS` - Read/Edit/Save access.
-* `Tilmeld::READ_ACCESS` - Read access.
-* `Tilmeld::NO_ACCESS` - No access.
+- `Tilmeld::FULL_ACCESS` - Read/Edit/Save/Change AC/Delete access.
+- `Tilmeld::WRITE_ACCESS` - Read/Edit/Save access.
+- `Tilmeld::READ_ACCESS` - Read access.
+- `Tilmeld::NO_ACCESS` - No access.
 
 The following properties are used on entities to control who has access:
 
-* `$entity->user` - The `User` who owns the entity.
-* `$entity->group` - The `Group` who owns the entity.
-* `$entity->acUser` - What access control level the owner user has. Defaults to `Tilmeld::FULL_ACCESS`.
-* `$entity->acGroup` - What access control level the owner group has. Defaults to `Tilmeld::READ_ACCESS`.
-* `$entity->acOther` - What access control level everyone else has. Defaults to `Tilmeld::NO_ACCESS`.
-* `$entity->acRead` - An array of users/groups who are granted `Tilmeld::READ_ACCESS`.
-* `$entity->acWrite` - An array of users/groups who are granted `Tilmeld::WRITE_ACCESS`.
-* `$entity->acFull` - An array of users/groups who are granted `Tilmeld::FULL_ACCESS`.
+- `$entity->user` - The `User` who owns the entity.
+- `$entity->group` - The `Group` who owns the entity.
+- `$entity->acUser` - What access control level the owner user has. Defaults to `Tilmeld::FULL_ACCESS`.
+- `$entity->acGroup` - What access control level the owner group has. Defaults to `Tilmeld::READ_ACCESS`.
+- `$entity->acOther` - What access control level everyone else has. Defaults to `Tilmeld::NO_ACCESS`.
+- `$entity->acRead` - An array of users/groups who are granted `Tilmeld::READ_ACCESS`.
+- `$entity->acWrite` - An array of users/groups who are granted `Tilmeld::WRITE_ACCESS`.
+- `$entity->acFull` - An array of users/groups who are granted `Tilmeld::FULL_ACCESS`.
 
 ### Abilities
 
